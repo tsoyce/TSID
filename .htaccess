@@ -1,0 +1,20 @@
+# SSO — прокси-вариант из Приложения D: если DocumentRoot нельзя навести
+# на public/, этот файл закрывает служебные каталоги и переписывает всё в public/.
+# Если DocumentRoot = public/ — файл просто не читается сервером.
+#
+# ВАЖНО: /install здесь НЕ блокируется — это маршрут инсталлятора; запросы к нему
+# уходят через воронку в public/index.php, а прямой запуск исходников install/*
+# закрыт guard'ом в самих файлах.
+RewriteEngine On
+
+# Служебные каталоги — наглухо: ключи, конфиг, исходники
+RewriteRule ^(storage|config|app|migrations|lib|templates|tests)/ - [F]
+RewriteRule ^\.(git|claude) - [F]
+
+# Discovery — явно и первым: путь начинается с точки и на панельном хостинге
+# попадает под правило «резать всё скрытое». См. пояснение в public/.htaccess.
+RewriteRule ^\.well-known/ public/index.php [QSA,L]
+
+# Всё остальное — в public/. Первое правило гасит повторные круги переписывания.
+RewriteRule ^public/ - [L]
+RewriteRule ^(.*)$ public/$1 [L]

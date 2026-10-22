@@ -1,0 +1,3553 @@
+<?php
+/**
+ * English dictionary for the admin area.
+ *
+ * Keys here are the Russian source strings themselves (the gettext approach),
+ * not invented identifiers like `admin.users.title`. Two reasons:
+ *
+ *  1. `App\Core\Lang::t()` falls back to the key when a translation is missing,
+ *     so the Russian interface works with no dictionary at all — and a string
+ *     that nobody has translated yet shows up in Russian instead of leaking a
+ *     bare identifier onto the page.
+ *  2. Templates stay readable: `t('Сохранить изменения')` says what it renders,
+ *     while `t('admin.settings.save')` requires a lookup to know.
+ *
+ * The user-facing area (login, registration, recovery) keeps dot-keys in
+ * ru.php / en.php — it was translated first, its strings are short and stable,
+ * and rewriting it would be churn for its own sake.
+ *
+ * Adding a string: wrap it in `t()` in the template and add the pair here.
+ * Nothing breaks if you forget — it simply stays Russian.
+ */
+
+declare(strict_types=1);
+
+return [
+    /* --- Navigation and section titles --- */
+    'Ещё' => 'More',
+    'Меню' => 'Menu',
+    'Поиск по системе' => 'Search everything',
+    'Поиск · Ctrl+K' => 'Search · Ctrl+K',
+    'Меню профиля: :name' => 'Profile menu: :name',
+    'Мой профиль' => 'My profile',
+    'Админка' => 'Admin',
+    'Выйти' => 'Sign out',
+    'Безопасность' => 'Security',
+    'Устройства' => 'Devices',
+    'Сервисы' => 'Services',
+    'Вы смотрите как :who (вы — :real)' => 'You are viewing as :who (you are :real)',
+    'Вернуться к себе' => 'Back to my account',
+    'Дашборд' => 'Dashboard',
+    'Пользователи' => 'Users',
+    'Пользователь' => 'User',
+    'Пользователей' => 'Users',
+    'Порталы' => 'Portals',
+    'Портал' => 'Portal',
+    'Организации' => 'Organisations',
+    'Разделы' => 'Sections',
+    'Роли' => 'Roles',
+    'Роль' => 'Role',
+    'Логи' => 'Logs',
+    'Настройки' => 'Settings',
+    'Здоровье' => 'Health',
+    'Инструменты' => 'Tools',
+    'Аудит' => 'Audit log',
+    'Профиль' => 'Profile',
+    'Доступы' => 'Access',
+    'Действия' => 'Actions',
+    'События' => 'Events',
+    'Событие' => 'Event',
+    'Приглашения' => 'Invitations',
+    'Активность' => 'Activity',
+    'Основное' => 'General',
+    'Данные' => 'Details',
+    'Реквизиты' => 'Credentials',
+    'Права' => 'Permissions',
+
+    /* --- Onboarding checklist --- */
+    'Подключить первый портал' => 'Connect your first portal',
+    'Мастер за два клика выдаст реквизиты и готовый PHP-kit'
+        => 'A two-click wizard hands you the credentials and a ready-made PHP kit',
+    'Подключить' => 'Connect',
+    'Настроить отправку почты' => 'Set up outgoing mail',
+    'Без SMTP не уйдут письма подтверждения и сброса пароля'
+        => 'Without SMTP no confirmation or password reset emails will go out',
+    'Настроить' => 'Set up',
+    'Поставить cron' => 'Set up cron',
+    'Очередь писем, ретраи событий и чистки живут на планировщике'
+        => 'The mail queue, event retries and cleanups all run on the scheduler',
+    'Проверить' => 'Check',
+    'Удалить каталог /install' => 'Delete the /install directory',
+    'После установки он больше не нужен и лишний раз светится наружу'
+        => 'After setup it is no longer needed and only exposes surface area',
+    'Как удалить' => 'How to remove it',
+    'Включить 2FA или passkey' => 'Turn on 2FA or a passkey',
+    'Рекомендация, а не требование — вход останется рабочим и без них'
+        => 'A recommendation, not a requirement — sign-in keeps working without them',
+    'Включить' => 'Turn on',
+
+    /* --- Command palette (Ctrl+K) --- */
+    'Мои сервисы' => 'My services',
+    'Настройки аккаунта' => 'Account settings',
+    '2FA, passkeys, пароль' => '2FA, passkeys, password',
+    'мастер за два клика' => 'two-click wizard',
+    'Проверить SMTP' => 'Test SMTP',
+    'Экспорт аудита в CSV' => 'Export the audit log to CSV',
+    'Ротация ключей' => 'Key rotation',
+    'Применить миграции' => 'Apply migrations',
+
+    /* --- Dashboard --- */
+    'Входы сегодня' => 'Sign-ins today',
+    'Неудачные входы' => 'Failed sign-ins',
+    'Сейчас' => 'Right now',
+    'Регистрации за 30 дней' => 'Registrations over 30 days',
+    'Последние события' => 'Recent events',
+    'Быстрые действия' => 'Quick actions',
+    'Весь аудит →' => 'Full audit log →',
+    'Подробно →' => 'Details →',
+    'Открыть →' => 'Open →',
+    'Карточка →' => 'Open card →',
+    'Управлять ролями →' => 'Manage roles →',
+    'сегодня' => 'today',
+    'Скрыть' => 'Hide',
+    'Скрыть чеклист? Вернуть его можно, очистив настройку onboarding.hidden.'
+        => 'Hide the checklist? You can bring it back by clearing the onboarding.hidden setting.',
+    'Событий ещё не было' => 'No events yet',
+
+    /* --- Common controls --- */
+    'Сохранить изменения' => 'Save changes',
+    'Создать' => 'Create',
+    'Отмена' => 'Cancel',
+    'Закрыть' => 'Close',
+    'Удалить' => 'Delete',
+    'Убрать' => 'Remove',
+    'Обновить' => 'Refresh',
+    'Копировать' => 'Copy',
+    'Показать' => 'Show',
+    'Фильтровать' => 'Filter',
+    'Экспорт CSV' => 'Export CSV',
+    'Поиск' => 'Search',
+    'Найти пользователя' => 'Find a user',
+    'Название' => 'Name',
+    'Описание' => 'Description',
+    'Слаг' => 'Slug',
+    'Статус' => 'Status',
+    'Признак' => 'Flag',
+    'Заметка' => 'Note',
+    'Тема' => 'Subject',
+    'Уровень' => 'Level',
+    'Детали' => 'Details',
+    'Когда' => 'When',
+    'Кто' => 'Who',
+    'Кому' => 'To',
+    'Над кем' => 'Target',
+    'Кому / заметка' => 'To / note',
+    'контекст' => 'context',
+    'Все' => 'All',
+    'Нет' => 'None',
+    'Ошибка' => 'Error',
+    'Ссылка' => 'Link',
+    /* Прозвон: nginx перехватывает .well-known (v4.53). */
+    'HTTP :code, и отвечал :server, а не приложение: путь /.well-known/ перехвачен конфигом — обычно это блок для выпуска сертификата. Оставьте ему только /.well-known/acme-challenge/, остальное отдайте приложению.'
+        => 'HTTP :code, answered by :server rather than the app: the /.well-known/ prefix is captured by the server config — usually the certificate-issuance block. Leave it only /.well-known/acme-challenge/ and pass the rest to the app.',
+    /* Admin API уровня суперадмина (v4.51). */
+    /* Подключение сервиса без догадок (v4.58). */
+    /* Выход с портала и экран согласия (v4.60). */
+    '«:portal» работает через :app. Вы войдёте под своей учётной записью — заводить ещё одну не нужно.' => '«:portal» works through :app. You sign in with your own account — no need to create another one.',
+    'Больше ничего: пароль остаётся у :app и сервису не передаётся.' => 'Nothing else: your password stays with :app and is never passed to the service.',
+    'Выйти из всех сервисов' => 'Sign out of all services',
+    'Выйти только из «:portal»' => 'Sign out of «:portal» only',
+    'Отмена — вернуться в :portal' => 'Cancel — back to :portal',
+    'После выхода сервис просит вернуть на адрес, которого здесь нет' => 'After sign-out the service asks to return to an address that is not registered here',
+    'После выхода человека вернули на сам сервис, а не на этот адрес: адреса сравниваются байт-в-байт. Если адрес ваш — добавьте его.' => 'After sign-out the person was sent to the service itself rather than to this address: addresses are compared byte for byte. If the address is yours, add it.',
+    'и принимаю:' => 'and accept:',
+    'Не переключились: не прошла проверка «:what». Что ответила база — в списке проверок ниже.' => 'Did not switch: the «:what» check failed. What the database answered is in the list of checks below.',
+    'такой телефон уже есть у другого человека' => 'this phone number already belongs to someone else',
+    'такой адрес уже есть у другого человека' => 'this address already belongs to someone else',
+    'такой логин уже есть у другого человека' => 'this login already belongs to someone else',
+    'такой номер аккаунта уже есть у другого человека' => 'this account number already belongs to someone else',
+    'такое значение уже есть у другого человека' => 'this value already belongs to someone else',
+    'Заведены без телефона: номер уже был у другого человека (строки :rows). Сами люди на месте.' => 'Created without a phone number: it already belonged to someone else (rows :rows). The people themselves are in place.',
+    'строка :n: :why' => 'row :n: :why',
+    'база не приняла строку — подробности в журнале приложения' => 'the database rejected the row — details are in the application log',
+    ':n раз, последний — :at' => ':n times, last — :at',
+    'HTTP 200, но вместо JSON пришла страница сайта — адрес перехватил маршрут по умолчанию.' => 'HTTP 200, but a web page came back instead of JSON — the address was caught by the default route.',
+    'HTTP 403: сервер портала запрещает пути, начинающиеся с точки. На стороне портала нужно исключение для .well-known — в .htaccess: <FilesMatch "^\\.(?!well-known$)">, в nginx: location ~ /\\.(?!well-known/) { deny all; }.' => 'HTTP 403: the service’s server forbids paths that start with a dot. The service needs an exception for .well-known — in .htaccess: <FilesMatch "^\\.(?!well-known$)">, in nginx: location ~ /\\.(?!well-known/) { deny all; }.',
+    'HTTP 404 отдал сам nginx — до приложения портала запрос не дошёл. Обычно это правило «location ~ /.well-known { allow all; }», которое отдаёт такие пути с диска (так настраивают сайты шаблоны BrainyCP и других панелей). На стороне портала его нужно сузить до «location ^~ /.well-known/acme-challenge/ { allow all; }» — сертификаты выпускаются по-прежнему.' => 'The HTTP 404 came from nginx itself — the request never reached the service’s application. Usually it is the rule «location ~ /.well-known { allow all; }», which serves such paths from disk (this is how BrainyCP and other panels set sites up). On the service’s side narrow it to «location ^~ /.well-known/acme-challenge/ { allow all; }» — certificates keep being issued as before.',
+    'HTTP 404: манифеста по этому адресу нет. Если модуль портала его ещё не отдаёт — это нормально.' => 'HTTP 404: there is no manifest at this address. If the service’s module does not serve it yet, that is fine.',
+    'HTTP :code: приложение портала падает на этом адресе.' => 'HTTP :code: the service’s application crashes at this address.',
+    'HTTP :code — это не ответ манифеста.' => 'HTTP :code — this is not a manifest response.',
+    'SSO перестал отвечать по стандартным адресам. Чаще всего это панель хостинга перезаписала конфиг веб-сервера — например, вернула правило, которое отдаёт /.well-known с диска.' => 'SSO stopped answering at its standard addresses. Most often the hosting panel has overwritten the web server config — for example, restored a rule that serves /.well-known from disk.',
+    'Адрес возврата добавлен: :uri' => 'Redirect URI added: :uri',
+    'Адрес возврата не указан — угадывать его SSO не будет. Поставите наш набор — адрес запишется сам; у сервиса свой модуль — SSO запомнит адрес при первом входе и предложит добавить его в карточке одной кнопкой.' => 'No redirect URI given — SSO will not guess it. Install our kit and the address is recorded by itself; if the service has its own module, SSO will remember the address on the first sign-in and offer to add it in the card with one button.',
+    'Всё, кроме сторожа, выключено по умолчанию: письмо о каждой регистрации нужно не всякой установке, а той, где регистрируются сотнями, — точно нет. Сторож пишет, только когда SSO перестал отвечать по стандартным адресам, — такое письмо нужно всегда.' => 'Everything except the watchdog is off by default: not every installation needs a letter about each sign-up, and one where people sign up by the hundreds certainly does not. The watchdog writes only when SSO stops answering at its standard addresses — that letter is always needed.',
+    'Забыли. Если сервис пришлёт этот адрес снова, он появится здесь опять.' => 'Forgotten. If the service sends this address again, it will show up here again.',
+    'Забыть' => 'Forget',
+    'Ответ больше :n КБ — манифест таким не бывает.' => 'The response is larger than :n KB — a manifest is never that big.',
+    'Портал не ответил: :why' => 'The service did not respond: :why',
+    'Портал ответил редиректом (HTTP :code:to). За редиректами SSO не ходит — отдайте манифест по прямому адресу.' => 'The service answered with a redirect (HTTP :code:to). SSO does not follow redirects — serve the manifest at the direct address.',
+    'Последняя попытка — :at: :why' => 'Last attempt — :at: :why',
+    'Сервис просит вернуть на адрес, которого здесь нет' => 'The service asks to return to an address that is not registered here',
+    'Следующая попытка — сама, не позже чем через :h ч. Починили на стороне портала — нажмите «Спросить у портала», ждать не нужно.' => 'The next attempt happens by itself, within :h h. Fixed it on the service’s side? Press «Ask the portal» — no need to wait.',
+    'Такой вход не пропущен: адрес возврата сравнивается байт-в-байт. Если адрес ваш — добавьте его, и следующий вход пройдёт.' => 'This sign-in was not let through: the redirect URI is compared byte for byte. If the address is yours, add it and the next sign-in will pass.',
+    'Этот адрес сервис не присылал — добавить его можно только в поле «Redirect URI».' => 'The service never sent this address — it can only be added in the «Redirect URI» field.',
+    'нет соединения' => 'no connection',
+    'SSO перестал отвечать по стандартным адресам' => 'SSO stopped answering at its standard addresses',
+    'Discovery, ключи подписи или экран входа недоступны снаружи. Чаще всего панель хостинга перезаписала конфиг веб-сервера. Письмо приходит, когда ломается, а не каждый час.' => 'Discovery, signing keys or the sign-in screen are unreachable from outside. Most often the hosting panel has overwritten the web server config. The letter comes when it breaks, not every hour.',
+    'Всё сразу — уровень суперадмина, включая права, которые появятся позже' => 'Everything at once — superadmin level for programs, including rights added later',
+    'Заведение организаций, состав, доступы' => 'Create organisations, manage members and access',
+    'Заведение ролей, выдача и отзыв' => 'Create roles, grant and revoke them',
+    'Изменение настроек' => 'Change settings',
+    'Чтение настроек' => 'Read settings',
+    'Чтение ролей и выдач' => 'Read roles and grants',
+    'Чтение организаций и их состава' => 'Read organisations and their members',
+    'Открывать и закрывать людям доступ к порталам' => 'Open and close people’s access to services',
+    'Подключение, изменение и удаление порталов' => 'Connect, change and delete services',
+    'Он бессрочный: отзовите его, когда надобность отпадёт.' => 'It never expires: revoke it once you no longer need it.',
+    'Право «*» — это уровень суперадмина для программы: оно покрывает всё, включая права, которые появятся позже. Такому токену стоит задать срок.' => 'The “*” right is superadmin level for programs: it covers everything, including rights added later. Give such a token an expiry date.',
+    'Токен создан. Скопируйте его — второй раз не покажем.' => 'Token created. Copy it now — it will not be shown again.',
+    'Токен уровня суперадмина создан. Скопируйте его — второй раз не покажем.' => 'Superadmin-level token created. Copy it now — it will not be shown again.',
+    /* Систематизация выдачи ролей (v4.50). */
+    'Отозвать роль в этой организации?' => 'Revoke the role in this organisation?',
+    'Снять роль?' => 'Remove the role?',
+    'Показаны роли, которые действуют в этой области.' => 'Only roles that apply in this scope are listed.',
+    'Только роли этого сервиса: чужие метки портал всё равно не прочтёт.' => 'Only this service’s own roles: it would not read anyone else’s labels.',
+    'Портал называл роли, которых здесь ещё нет: :list. Завести — в разделе «Роли».' => 'The service reported roles that do not exist here yet: :list. Create them under “Roles”.',
+    'У сервиса пока нет своих ролей. Заведите их в разделе «Роли» или спросите портал о его ролях — тогда они появятся здесь.' => 'This service has no roles of its own yet. Create them under “Roles”, or ask the service for its roles — then they will show up here.',
+    'Эту роль в этом сервисе выдать нельзя: он её не знает.' => 'This role cannot be granted in this service: it does not know it.',
+    'Эту роль нельзя выдать на всю систему: её место — в области сервиса или организации.' => 'This role cannot be granted system-wide: it belongs to a service or an organisation.',
+    'Эту роль нельзя выдать на организацию: её место — система или отдельный сервис.' => 'This role cannot be granted to an organisation: it belongs to the system or to a single service.',
+    'Сразу к содержимому' => 'Skip to content',
+    /* Выдача роли из строки человека в разделе «Пользователи» портала. */
+    'Роли в сервисе' => 'Roles here',
+    'Выдать роль: :who' => 'Grant a role to :who',
+    'Роль для :who' => 'Role for :who',
+    'Отозвать роль «:role» в этом сервисе?' => 'Revoke the “:role” role in this service?',
+    'Найти человека' => 'Find a person',
+    'Никого не нашлось — попробуйте другое слово.' => 'No one matched — try a different word.',
+    'Ссылка в тёмной' => 'Link in dark theme',
+    'Файл' => 'File',
+    'Устройство' => 'Device',
+    'Участник' => 'Member',
+    'Аккаунт' => 'Account',
+    'Вход' => 'Sign in',
+    /* Экраны входа (v4.4): вкладки, ссылка на почту, пароль под раскрытием. */
+    'Способ входа' => 'How to sign in',
+    'Регистрация' => 'Sign up',
+    'Не помню' => 'Forgot?',
+    'Войти по паролю' => 'Sign in with a password',
+    'или через сервис' => 'or with a service',
+    'Ссылка живёт 15 минут и открывается один раз. Пароль не нужен.'
+        => 'The link lasts 15 minutes and opens once. No password needed.',
+    'Проверка появилась после нескольких неудачных попыток и снимется после успешного входа.'
+        => 'This check appeared after several failed attempts and goes away once you sign in.',
+    'Заявка' => 'Request',
+    'Скоуп' => 'Scope',
+    'День' => 'Day',
+    'Попыток' => 'Attempts',
+    'offline_access (refresh-токены)' => 'offline_access (refresh tokens)',
+    'Redirect URI (по одному на строку, сравнение байт-в-байт)'
+        => 'Redirect URIs (one per line, compared byte for byte)',
+    'Создана' => 'Created',
+    'Создано' => 'Created',
+    'Создано:' => 'Created:',
+    'Активный:' => 'Active:',
+    'Использован' => 'Used',
+    'Использовано' => 'Used',
+    'Использований' => 'Uses',
+    'Действует до' => 'Valid until',
+    'Срок, дней' => 'Lifetime, days',
+    'Первый вход' => 'First sign-in',
+    'Последний' => 'Last',
+    'Последний вход' => 'Last sign-in',
+    'С даты' => 'From date',
+    'По дату' => 'To date',
+    'Глобальная' => 'Global',
+    'Публичный' => 'Public',
+    'Редактор' => 'Editor',
+    'системная' => 'built-in',
+    'своя' => 'custom',
+    'активен' => 'active',
+    'выключен' => 'disabled',
+    'Активен' => 'Active',
+    'ждёт почту' => 'awaiting email',
+    'Ожидает почту' => 'Awaiting email',
+    'заблокирован' => 'blocked',
+    'Заблокирован' => 'Blocked',
+    'удалён' => 'deleted',
+    'Удалён' => 'Deleted',
+    'Фильтры' => 'Filters',
+    'Дата регистрации' => 'Registration date',
+    'Телефон' => 'Phone',
+    'Email' => 'Email',
+    'Сопоставьте хотя бы одно поле: email или логин. Люди без почты — обычное дело: их переносят из сервисов, где регистрация шла логином и паролём. Войти они смогут логином, но восстановить доступ сами — нет.'
+        => 'Map at least one field: email or username. People without email are ordinary: they come from services where sign-up went by username and password. They can sign in by username, but cannot recover access on their own.',
+    'Хэш пароля (bcrypt/argon2)' => 'Password hash (bcrypt/argon2)',
+    'истёк' => 'expired',
+    'отозван' => 'revoked',
+    'с 2FA' => 'with 2FA',
+    'email не подтверждён' => 'email not verified',
+    '— любой' => '— any',
+    '— любая' => '— any',
+    '— без роли' => '— no role',
+    '— не импортировать' => '— do not import',
+
+    /* --- Users --- */
+    'email, логин, ФИО или sub' => 'email, login, name or sub',
+    'Имя' => 'First name',
+    'Фамилия' => 'Last name',
+    'Отображаемое имя' => 'Display name',
+    'Логин' => 'Login',
+    'Пароль' => 'Password',
+    'Никого не нашлось — ослабьте фильтры.' => 'Nobody found — try relaxing the filters.',
+    'Галочка «подтверждённый аккаунт» экосистемы' => 'Verified account badge for the ecosystem',
+    'Назначить роль' => 'Assign role',
+    'Снять роль' => 'Remove role',
+    'Только базовая user' => 'Basic user role only',
+    'Одобрить' => 'Approve',
+    'Отклонить' => 'Decline',
+    'Отозвать' => 'Revoke',
+    'Вернуть доступ' => 'Restore access',
+    'Выдать доступ' => 'Grant access',
+    'Заблокировать' => 'Block',
+    'Разблокировать' => 'Unblock',
+    'Заблокировать? Порталы получат user.blocked, сессии закроются.'
+        => 'Block this account? Portals will receive user.blocked and all sessions will end.',
+    'Удалить аккаунт' => 'Delete account',
+    'Удалить аккаунт? Анонимизация через 14 дней, порталы получат user.deleted.'
+        => 'Delete this account? Anonymised after 14 days; portals will receive user.deleted.',
+    'Разлогинить везде' => 'Sign out everywhere',
+    'Разлогинить пользователя на всех устройствах и порталах?'
+        => 'Sign this user out on every device and portal?',
+    'Подтвердить email вручную' => 'Verify email manually',
+    'Отправить ссылку сброса пароля' => 'Send a password reset link',
+    'Пароль руками не задаётся никогда — только ссылка сброса на почту пользователя.'
+        => 'Passwords are never set by hand — only a reset link sent to the user’s email.',
+    'Имперсонизация' => 'Impersonation',
+    'Только superadmin. Каждый шаг пишется в аудит; смена пароля и почты в этом режиме запрещена.'
+        => 'Superadmin only. Every step is written to the audit log; changing the password or email is blocked while impersonating.',
+    'Активных сессий нет' => 'No active sessions',
+
+    /* --- Portals (clients) --- */
+    'Подключить сервис' => 'Connect a service',
+    'Порталов пока нет. Подключение — один адрес, остальное подставим сами.'
+        => 'No portals yet. Connecting takes one address — we fill in the rest.',
+    'Порталы не подключены.' => 'No portals connected.',
+    'Базовый URL' => 'Base URL',
+    'Иконка портала' => 'Portal icon',
+    'Убрать иконку' => 'Remove icon',
+    'Портал активен' => 'Portal is active',
+    'Политика доступа (§9.1)' => 'Access policy (§9.1)',
+    'Доверенный (без consent)' => 'Trusted (no consent screen)',
+    'Требовать 2FA' => 'Require 2FA',
+    /* Карточка портала на объявленных полях (v4.13): у каждого тумблера есть
+       пояснение, и переводится оно вместе с подписью. */
+    '(квадрат, до 2 МБ)' => '(square, up to 2 MB)',
+    'Его подставляют в конфиг на стороне портала' => 'Goes into the config on the portal side',
+    'Покажется на экране входа рядом с названием' => 'Shown on the sign-in screen next to the name',
+    'По одному на строку. Сравнение байт-в-байт: лишний слэш на конце — уже другой адрес'
+        => 'One per line. Compared byte for byte: a trailing slash makes it a different address',
+    'Куда вернуть после выхода' => 'Where to return after sign-out',
+    'Сюда придёт весть о выходе и блокировке' => 'Sign-out and lockout notices arrive here',
+    'Кого пускать' => 'Who may enter',
+    'Любой с аккаунтом' => 'Anyone with an account',
+    'По заявке' => 'On request',
+    'По приглашению' => 'By invitation',
+    'По заявке — человек просит, вы одобряете. По приглашению — только те, кого позвали вы.'
+        => 'On request — the person asks, you approve. By invitation — only those you invited.',
+    'сторонний' => 'third-party',
+    'вход :ago' => 'sign-in :ago',
+    'Портал включён' => 'Portal is on',
+    'Выключенный не пускает никого и не обновляет токены. Настройки сохраняются.'
+        => 'When off, it admits no one and refreshes no tokens. Settings are kept.',
+    'Для своих сервисов: на первом входе без перечня данных. Сам экран убирает настройка «Спрашивать при первом входе в каждый сервис».'
+        => 'For your own services: no data list on first entry. The screen itself is turned off by “Ask on the first entry to each service”.',
+    'Родственный домен' => 'Related domain',
+    'Тихий вход без формы (prompt=none) — для соседних доменов одной организации.'
+        => 'Silent sign-in without the form (prompt=none) — for neighbouring domains of one organization.',
+    'Требовать второй фактор' => 'Require a second factor',
+    'Без второго фактора не пустит; у кого его нет — предложим настроить на входе.'
+        => 'No entry without a second factor; those without one are offered to set it up on sign-in.',
+    'Долгие токены (offline_access)' => 'Long-lived tokens (offline_access)',
+    'Обновление доступа без участия человека — для фоновых задач.'
+        => 'Access refresh without the person present — for background jobs.',
+    'Появится в витрине на главной — её видит любой, кто набрал адрес, ещё до входа. Выключенный портал в витрину не попадает в любом случае.'
+        => 'Appears in the showcase on the home page, which anyone who types the address sees before signing in. A portal that is off never reaches the showcase anyway.',
+    'Перевыпустить секрет' => 'Reissue secret',
+    'Перевыпустить секрет? Старый будет работать ещё 24 часа.'
+        => 'Reissue the secret? The old one keeps working for 24 hours.',
+    'Секрет подписи — показывается один раз' => 'Signing secret — shown once',
+    'Сохраните сейчас: client_secret показывается ОДИН раз, в базе остаётся только хэш.'
+        => 'Save it now: the client_secret is shown ONCE, only its hash is stored.',
+    'Реквизиты — шаг 2 мастера (§6.1)' => 'Credentials — step 2 of the wizard (§6.1)',
+    'Создать и получить секрет' => 'Create and get the secret',
+    'Скачать integration.md' => 'Download integration.md',
+    'Скачать PHP-kit (.zip)' => 'Download the PHP kit (.zip)',
+    'Скопировать промпт для ИИ' => 'Copy the AI prompt',
+    'Спека для нейросети и референс-код (§6.3): спека говорит «что», кит показывает «как».'
+        => 'A spec for an AI and reference code (§6.3): the spec says what, the kit shows how.',
+    'client_secret в файлы не включается (плейсхолдер {{CLIENT_SECRET}}) — он доступен только в момент создания/перевыпуска.'
+        => 'The client_secret is not written into the files (placeholder {{CLIENT_SECRET}}) — it is available only at creation or reissue.',
+    'по умолчанию в файлах плейсхолдер {{CLIENT_SECRET}} — включайте осознанно (§6.1)'
+        => 'by default the files carry the {{CLIENT_SECRET}} placeholder — include the real one deliberately (§6.1)',
+    '…kit с client_secret внутри' => '…kit with the client_secret inside',
+    '…то же с client_secret внутри' => '…the same with the client_secret inside',
+    'Setup-ссылка для админа портала' => 'Setup link for the portal admin',
+    'Setup-ссылка для первого админа портала' => 'Setup link for the portal’s first admin',
+    '(одноразовая, 7 дней)' => '(single use, 7 days)',
+    'Скоуп-роль поедет в claim как' => 'The scoped role will appear in the claim as',
+    'слаг-портала:роль' => 'portal-slug:role',
+    'Скоуп-ролей нет — создайте на странице «Роли».'
+        => 'No scoped roles yet — create one on the Roles page.',
+    'CI деплоя' => 'deployment CI',
+    'Телеграм-бот администратора' => 'admin Telegram bot',
+
+    /* --- Organisations --- */
+    'Новая организация' => 'New organisation',
+    'ООО «Ромашка»' => 'Acme Ltd.',
+    'Отдел продаж и поддержки' => 'Sales and support department',
+    'Доступ для отдела продаж' => 'Access for the sales department',
+    'Организаций пока нет. Они пригодятся, когда SSO обслуживает не только ваши порталы, но и компанию с отделами.'
+        => 'No organisations yet. They help when the SSO serves not just your own portals but a company with departments.',
+    'Пока никого нет.' => 'Nobody here yet.',
+    'Доступ к порталам' => 'Portal access',
+    'Выдать доступ организации' => 'Grant access to the organisation',
+    'Выданный здесь доступ получают все участники — сразу, без заявок.'
+        => 'Access granted here goes to every member immediately, with no requests.',
+    'Роль при входе' => 'Role on sign-in',
+    'роль при входе:' => 'role on sign-in:',
+    'email участника' => 'member’s email',
+    ', но работают в любой — они сразу выдают доступ и роль.'
+        => ', but they work anywhere — they grant access and a role right away.',
+
+    /* --- Roles --- */
+    'Новая роль' => 'New role',
+    'Создать роль' => 'Create role',
+    '(пусто = для любого)' => '(empty = any portal)',
+
+    /* --- Invitations --- */
+    'Новое приглашение' => 'New invitation',
+    'Выданные приглашения' => 'Issued invitations',
+    'Приглашений пока нет.' => 'No invitations yet.',
+    'Отозвать приглашение? Ссылка перестанет работать.'
+        => 'Revoke this invitation? The link will stop working.',
+    'Ссылка создана — скопируйте её сейчас' => 'Link created — copy it now',
+    'Отправьте её человеку любым удобным способом. Принять — один клик, даже если аккаунта ещё нет: после регистрации доступ выдастся автоматически.'
+        => 'Send it however you like. Accepting takes one click even without an account: access is granted automatically after registration.',
+    'Роль при принятии' => 'Role on acceptance',
+    '(увидит приглашённый)' => '(the invited person will see it)',
+    '(необязательно)' => '(optional)',
+
+    /* --- Webhooks --- */
+    'Новый webhook' => 'New webhook',
+    'URL приёмника' => 'Receiver URL',
+    'Сохранить подписку' => 'Save subscription',
+    'Отправить пробное' => 'Send a test event',
+    'Последние доставки' => 'Recent deliveries',
+    'Подписчиков пока нет. Webhook пригодится, чтобы завести события SSO в CRM, аналитику или телеграм-бота администратора.'
+        => 'No subscribers yet. A webhook is useful for feeding SSO events into a CRM, analytics or an admin Telegram bot.',
+    'Приёмник должен проверять подпись так:' => 'The receiver must verify the signature like this:',
+    '. Расхождение больше пяти минут — отклоняйте запрос.'
+        => '. If the timestamps differ by more than five minutes, reject the request.',
+    '(§9.3). SSO ими не пользуется — просто доставляет.'
+        => '(§9.3). The SSO does not consume them itself — it only delivers.',
+    '— сравнить с заголовком' => '— compare with the header',
+    'Повторить' => 'Retry',
+    'Повторить все неотправленные' => 'Retry everything undelivered',
+    '(через запятую)' => '(comma separated)',
+
+    /* --- Settings: branding --- */
+    'Брендинг' => 'Branding',
+    'Название инсталляции' => 'Installation name',
+    'Акцентный цвет' => 'Accent colour',
+    '(hex; пусто = чернильный синий по умолчанию)' => '(hex; empty = the default ink blue)',
+    'Выбрать цвет пипеткой' => 'Pick a colour',
+    'Кнопка' => 'Button',
+    'Тёмная тема' => 'Dark theme',
+    'Цвет текста на кнопке и оттенок ссылки подбираются автоматически по контрасту: светлый акцент получит тёмную надпись, тёмный — светлую. Сейчас'
+        => 'The button label colour and the link shade are chosen automatically by contrast: a light accent gets dark text, a dark one gets light text. Currently',
+    'на кнопке и' => 'on the button and',
+    'Логотип' => 'Logo',
+    '(png, jpeg или webp, до 2 МБ; впишется в высоту шапки, прозрачность сохраняется)'
+        => '(png / rasterised svg / webp, up to 2 MB; fitted to the header height, transparency preserved)',
+    'Убрать логотип (вернётся «● Название»)' => 'Remove the logo (back to “● Name”)',
+    '(квадрат, до 1 МБ — обрежем в 64×64)' => '(square, up to 1 MB — cropped to 64×64)',
+    '(квадрат, до 2 МБ — покажется на экране входа)'
+        => '(square, up to 2 MB — shown on the sign-in screen)',
+    'Убрать favicon (вернётся дефолтный)' => 'Remove the favicon (back to the default)',
+    'Текст в подвале' => 'Footer text',
+    'Цвет пишется в CSS-переменную --ink — весь интерфейс перекрашивается одной строкой (§10.3).'
+        => 'The colour goes into the --ink CSS variable — the whole interface is recoloured by one line (§10.3).',
+
+    /* --- Settings: SMTP --- */
+    'Транспорт' => 'Transport',
+    'Файл-лог (разработка)' => 'File log (development)',
+    'Хост' => 'Host',
+    'Порт' => 'Port',
+    'Шифрование' => 'Encryption',
+    'From-адрес' => 'From address',
+    'From-имя' => 'From name',
+    '(пусто = не менять)' => '(empty = leave unchanged)',
+    'Отправить тест' => 'Send a test',
+    'Тест уйдёт на ваш email.' => 'The test will be sent to your email.',
+
+    /* --- Settings: policies --- */
+    'Политики' => 'Policies',
+    'Пароли пользователей' => 'User passwords',
+    'Минимальная длина' => 'Minimum length',
+    '(1 = фактически без требования)' => '(1 = effectively no requirement)',
+    'Требовать цифру' => 'Require a digit',
+    'Требовать букву' => 'Require a letter',
+    'Требовать оба регистра' => 'Require both letter cases',
+    'Требовать спецсимвол' => 'Require a special character',
+    'Неудач до блокировки' => 'Failures before lockout',
+    'Блокировка, минут' => 'Lockout, minutes',
+    'Обязательная 2FA для админ-ролей' => 'Mandatory 2FA for admin roles',
+    '(выключено — каждый решает сам)' => '(off — everyone decides for themselves)',
+    'Хранение данных' => 'Data retention',
+    'Аудит, дней' => 'Audit log, days',
+    'Логи приложения, дней' => 'Application logs, days',
+    'Отправленные письма в очереди, дней' => 'Sent mail kept in the queue, days',
+    '(0 — бессрочно)' => '(0 — forever)',
+    '(0 — хранить вечно)' => '(0 — keep forever)',
+
+    /* --- Settings: social sign-in --- */
+    'Вход через сервисы' => 'Sign in with services',
+    'Вход через внешние сервисы' => 'Sign in with external services',
+    'Все провайдеры выключены по умолчанию. Включайте только те, что нужны: каждому нужна пара «идентификатор + секрет» из кабинета разработчика соответствующего сервиса.'
+        => 'Every provider is off by default. Turn on only what you need: each one requires an “id + secret” pair from that service’s developer console.',
+    'Redirect URI — впишите его в кабинете провайдера'
+        => 'Redirect URI — paste it into the provider’s console',
+    'В BotFather выполните' => 'In BotFather run',
+    'и укажите' => 'and set',
+    '— иначе виджет не появится.' => '— otherwise the widget will not appear.',
+    'Совет: у входа через сервис нет пароля, поэтому он не заменяет второй фактор — это просто ещё один способ подтвердить, что вы — это вы.'
+        => 'Note: social sign-in has no password, so it does not replace a second factor — it is just another way to prove it is you.',
+    'Только для email' => 'Email only',
+
+    /* --- Settings: keys and maintenance --- */
+    'Ключи' => 'Keys',
+    'Ключи подписи RS256 (§3.4)' => 'RS256 signing keys (§3.4)',
+    'Ротировать ключи' => 'Rotate keys',
+    'Ротировать ключи? Новый начнёт подписывать сразу; старый останется в JWKS 48 часов для валидации хвостов.'
+        => 'Rotate the keys? The new one starts signing immediately; the old one stays in the JWKS for 48 hours so tokens already issued still validate.',
+    'Рекомендация — раз в год. «Здоровье» напомнит после 180 дней.'
+        => 'Once a year is a good rhythm. Health will remind you after 180 days.',
+    'Обслуживание' => 'Maintenance',
+    'Режим обслуживания (503 для всех, кроме allowlist)'
+        => 'Maintenance mode (503 for everyone outside the allowlist)',
+    'Ваш текущий IP:' => 'Your current IP:',
+    '— не забудьте его в allowlist, если включаете.'
+        => '— remember to add it to the allowlist before turning this on.',
+
+    /* --- Tools --- */
+    'Импорт пользователей' => 'Import users',
+    'Импорт пользователей (§13)' => 'Import users (§13)',
+    'Файл со списком пользователей (CSV или JSON)' => 'File with the list of users (CSV or JSON)',
+    'Загрузить и разобрать' => 'Upload and parse',
+    'CSV (заголовки в первой строке, разделитель , или ;) или JSON-массив объектов. Чужие bcrypt-хэши принимаются как есть — при первом входе перехэшируются в argon2id.'
+        => 'CSV (headers on the first line, separated by , or ;) or a JSON array of objects. Foreign bcrypt hashes are accepted as they are and re-hashed to argon2id on first sign-in.',
+    'Пользователям без хэша пароля — сразу отправить письмо «Задайте пароль»'
+        => 'Send a “Set your password” email to users who come without a password hash',
+    '· Ошибок:' => '· Errors:',
+    '· Пропущено (уже есть):' => '· Skipped (already present):',
+    'Бэкап' => 'Backup',
+    'Ключи подписи, конфиг с APP_KEY и полный дамп базы — одним архивом. Потеря ключей означает, что все порталы перестанут доверять выданным токенам.'
+        => 'Signing keys, the config with APP_KEY and a full database dump in one archive. Losing the keys means every portal stops trusting the tokens you issued.',
+    'Внутри — приватные ключи. Храните архив как пароль от всего и не кладите в общедоступные папки.'
+        => 'It contains private keys. Guard the archive like a master password and never put it in a public folder.',
+    'Артефакты' => 'Artefacts',
+    'Очистить кэши' => 'Clear caches',
+    'После обновления кода зайдите сюда и примените pending-миграции (§5.2).'
+        => 'After updating the code, come here and apply the pending migrations (§5.2).',
+    'Токены Admin API' => 'Admin API tokens',
+    'Токенов пока нет.' => 'No tokens yet.',
+    'Токен показывается один раз — скопируйте его сейчас.'
+        => 'The token is shown once — copy it now.',
+    'Программное управление пользователями и порталами из скриптов и CI. Схема —'
+        => 'Managing users and portals from scripts and CI. The schema is',
+    ', её можно скормить Postman или нейросети. Лимит: 120 запросов в минуту на токен, все изменения попадают в аудит с именем токена.'
+        => ', which you can feed to Postman or an AI. Limit: 120 requests per minute per token; every change is written to the audit log under the token’s name.',
+    'взять из' => 'take it from',
+    '(после' => '(after',
+    '), а' => '), and',
+    'и Приложении D) .' => 'and Appendix D).',
+
+    /* --- Relative time (fmt_ago) --- */
+    'только что' => 'just now',
+    ':n мин назад' => ':n min ago',
+    ':n ч назад' => ':n h ago',
+    'вчера' => 'yesterday',
+    ':n :days назад' => ':n :days ago',
+
+    /* --- Remaining fragments --- */
+    'Первые шаги · :done из :total' => 'First steps · :done of :total',
+    'активных сессий · порталов: :n' => 'active sessions · portals: :n',
+    'Создать организацию' => 'Create organisation',
+    'Добавить' => 'Add',
+    'Добавить webhook' => 'Add webhook',
+    'Выключить' => 'Disable',
+    'Выдать токен' => 'Issue token',
+    'Скачать бэкап' => 'Download backup',
+    'глобальная' => 'global',
+    'при норме 4.5.' => 'against a 4.5 minimum.',
+    'Все требования опциональны. Текущая подсказка пользователям: «:hint».'
+        => 'Every requirement is optional. Current hint shown to users: “:hint”.',
+    'Доступ, выданный организации, автоматически получают все её участники — при первом входе в портал, независимо от политики доступа. Роли внутри организации (владелец/админ/участник) отвечают за управление составом, а не за права в сервисах.'
+        => 'Access granted to an organisation is inherited by every member on their first sign-in to the portal, whatever the access policy says. Roles inside an organisation (owner / admin / member) govern who manages the membership, not what people can do in the services.',
+
+    /* --- Account merge --- */
+    'Объединение аккаунтов' => 'Merge accounts',
+    'Этот :provider-аккаунт уже привязан к другой учётной записи. Похоже, соцвход когда-то завёл её автоматически — и это ваш дубль.'
+        => 'This :provider account is already linked to another profile. Most likely social sign-in created it automatically — it is your duplicate.',
+    'Останется' => 'Stays',
+    'Вольётся и закроется' => 'Merges in and closes',
+    'создан :when' => 'created :when',
+    'Вместе с ним сюда переедут:' => 'Along with it, this account receives:',
+    ':n доступ(ов) к порталам' => ':n portal access grant(s)',
+    ':n привязанных сервисов' => ':n linked service(s)',
+    ':n passkey' => ':n passkey(s)',
+    'Пароль второго аккаунта' => 'Password of the second account',
+    'Пароль второго аккаунта не подошёл.' => 'The second account’s password did not match.',
+    'Вы уже подтвердили владение вторым аккаунтом, войдя через :provider.'
+        => 'You have already proved you own the second account by signing in with :provider.',
+    'Да, это я — объединить' => 'Yes, that’s me — merge',
+    'Нет, это не я' => 'No, that’s not me',
+    'Объединение необратимо: второй аккаунт закроется, а его способы входа, доступы и данные переедут в этот.'
+        => 'Merging is irreversible: the second account closes, and its sign-in methods, access grants and data move here.',
+    'Аккаунты объединены: способы входа, доступы и данные перенесены сюда.'
+        => 'Accounts merged: sign-in methods, access grants and data have been moved here.',
+    'Второй аккаунт недоступен — объединять нечего.'
+        => 'The second account is unavailable — nothing to merge.',
+    'Сессия объединения истекла. Начните привязку заново.'
+        => 'The merge session has expired. Start linking again.',
+
+    /* --- Profile data policy --- */
+    'Данные профиля' => 'Profile data',
+    'Требовать номер телефона' => 'Require a phone number',
+    'Требовать указания пола' => 'Require gender',
+    'Выключено — поля в профиле остаются необязательными. Вход через сервисы заполняет их сам, если провайдер отдаёт данные.'
+        => 'Off — the profile fields stay optional. Social sign-in fills them in automatically when the provider shares the data.',
+
+    /* --- About page --- */
+    'О сервисе' => 'About',
+    'Инсталляция' => 'This installation',
+    'Адрес' => 'Address',
+    'Версия движка' => 'Engine version',
+    'Движок' => 'Engine',
+    'Исходный код' => 'Source code',
+    'Что изменилось' => 'Release history',
+    'Список изменений недоступен — файл CHANGELOG.md не найден.'
+        => 'The changelog is unavailable — CHANGELOG.md was not found.',
+    'Название, логотип, цвет и текст подвала настраиваются в разделе «Настройки» — движок не навязывает своего имени.'
+        => 'The name, logo, colour and footer text are all set under Settings — the engine does not impose its own branding.',
+    'SSO — открытый OpenID-провайдер на PHP: один аккаунт на сеть сайтов, без Composer и Node. Лицензия MIT: можно использовать, дорабатывать и разворачивать у себя.'
+        => 'SSO is an open OpenID provider written in PHP: one account across a network of sites, with no Composer and no Node. MIT licensed — use it, modify it, run it yourself.',
+
+    /* --- Connecting a service --- */
+    'Адрес сервиса' => 'Service address',
+    'Нужен адрес сервиса — например, site.com' => 'A service address is required — for example, site.com',
+    'Название, адреса возврата и права подставим сами — всё это можно поменять в карточке.'
+        => 'The name, redirect URIs and permissions are filled in automatically — all of it can be changed on the card.',
+    'Родственный домен (prompt=none)' => 'Related domain (prompt=none)',
+    'родственный' => 'related',
+
+    /* --- Logs --- */
+    'Скачать журнал' => 'Download log',
+    'Файл журнала не найден.' => 'Log file not found.',
+
+    /* --- Migrations --- */
+    'Миграции' => 'Migrations',
+    'Не применено' => 'Not applied',
+    'Уже применены' => 'Already applied',
+    'ожидает' => 'pending',
+    'Применить сейчас' => 'Apply now',
+    'Все миграции уже применены.' => 'All migrations are already applied.',
+    'Применены: :list' => 'Applied: :list',
+    'Миграция :v не применилась: :err' => 'Migration :v failed: :err',
+    'Схема базы совпадает с кодом — применять нечего.'
+        => 'The database schema matches the code — nothing to apply.',
+    'Схема базы отстаёт от кода: не применено миграций — :n. Часть разделов будет недоступна.'
+        => 'The database schema is behind the code: :n migration(s) not applied. Some sections will be unavailable.',
+    'Код обновлён, а схема базы отстаёт. Пока миграции не применены, разделы, которым нужны новые таблицы, будут отдавать ошибку. Применение безопасно: каждая миграция выполняется один раз и записывается в журнал.'
+        => 'The code has been updated but the database schema has not. Until the migrations are applied, sections that need the new tables will return an error. Applying is safe: each migration runs once and is recorded in the log.',
+    'Если админка недоступна целиком, те же миграции применяются из консоли:'
+        => 'If the admin panel is unreachable altogether, the same migrations can be applied from the console:',
+    'Раздел появится после применения миграций базы.'
+        => 'This section appears once the database migrations are applied.',
+
+    /* --- Health checks --- */
+    'База данных' => 'Database',
+    'Ключи подписи' => 'Signing keys',
+    'Гигиена' => 'Hygiene',
+    'Не применены миграции: :list — запустите в /admin/tools.'
+        => 'Migrations not applied: :list — run them in /admin/tools.',
+    ' — медленно' => ' — slow',
+    'storage/ не доступен на запись' => 'storage/ is not writable',
+    'Свободно меньше 500 МБ: :n МБ' => 'Less than 500 MB free: :n MB',
+    'свободно :n ГБ' => ':n GB free',
+    'kid=:kid, возраст :age дн.' => 'kid=:kid, age :age days',
+    ' — пора ротировать (§3.4)' => ' — time to rotate (§3.4)',
+    ' (кэш)' => ' (cached)',
+    'Heartbeat ещё не появлялся — планировщик не настроен (Приложение D).'
+        => 'No heartbeat yet — the scheduler is not set up (Appendix D).',
+    'Heartbeat старше 10 минут: :when' => 'Heartbeat older than 10 minutes: :when',
+    'последний :when' => 'last one :when',
+    'все расширения на месте' => 'all extensions present',
+    'без sodium (шифрование через openssl)' => 'without sodium (encryption via openssl)',
+    'нет расширений: :list' => 'missing extensions: :list',
+    'каталог /install ещё на сервере — удалите его'
+        => 'the /install directory is still on the server — remove it',
+    'display_errors включён' => 'display_errors is on',
+    'запрос пришёл без HTTPS' => 'the request arrived without HTTPS',
+    'транспорт: файл-лог (разработка)' => 'transport: file log (development)',
+    'SMTP не настроен — письма копятся в очереди'
+        => 'SMTP is not configured — messages are piling up in the queue',
+
+    /* --- Webhook event catalogue --- */
+    'Регистрация пользователя' => 'User registered',
+    'Пользователь заблокирован' => 'User blocked',
+    'Пользователь удалён' => 'User deleted',
+    'Успешный вход' => 'Successful sign-in',
+    'Неудачная попытка входа' => 'Failed sign-in attempt',
+    'Выдан доступ к порталу' => 'Portal access granted',
+    'Отозван доступ к порталу' => 'Portal access revoked',
+    'Подключён новый портал' => 'New portal connected',
+
+    /* --- Admin API scopes --- */
+    'Чтение пользователей' => 'Read users',
+    'Создание, изменение, блокировка пользователей' => 'Create, modify and block users',
+    'Чтение порталов' => 'Read portals',
+    'Подключение и изменение порталов' => 'Connect and modify portals',
+    'Чтение журнала аудита' => 'Read the audit log',
+
+    /* --- Logs --- */
+    'Журнал приложения' => 'Application log',
+    'Почта' => 'Mail',
+    'Почтовая очередь' => 'Mail queue',
+    'Записей нет — либо тишина, либо фильтр слишком строгий.'
+        => 'Nothing here — either it is quiet or the filter is too strict.',
+    'По этим фильтрам событий нет.' => 'No events match these filters.',
+    'Писем нет.' => 'No messages.',
+    'лог пуст' => 'the log is empty',
+    'детали ошибок' => 'error details',
+    '«Здоровье»' => 'Health',
+    'отдаёт только ok/degraded — деталями наружу не светим (§11.3).'
+        => 'returns only ok/degraded — no details are exposed publicly (§11.3).',
+
+    /* --- Разведённые смыслы: одно русское слово значило разное (v4.0) --- */
+    'Сейчас в сети' => 'Right now',
+    'с телефона' => 'from a phone',
+    'Владелец' => 'Holder',
+
+    /* --- Вход, регистрация, выход (v4.0) --- */
+    'Аккаунт для входа в' => 'An account to sign in to',
+    'Создать аккаунт' => 'Create account',
+    'Создавая аккаунт, вы принимаете политику обработки персональных данных.'
+        => 'By creating an account you accept the personal data processing policy.',
+    'Уже есть аккаунт?' => 'Already have an account?',
+    'Войти' => 'Sign in',
+    'Сохранить пароль' => 'Save the password',
+    'После сохранения все активные сессии будут завершены.'
+        => 'Once saved, every active session will be ended.',
+    'Введите один из одноразовых кодов восстановления.' => 'Enter one of your one-time recovery codes.',
+    'Аккаунт помечен на удаление' => 'The account is marked for deletion',
+    'Всё будет окончательно удалено через 14 дней. Передумаете — в письме, которое мы отправили, есть кнопка отмены.'
+        => 'Everything will be deleted for good in 14 days. Change your mind — the email we sent has a cancel button.',
+    'На страницу входа' => 'To the sign-in page',
+    'Вход через Telegram' => 'Sign in with Telegram',
+    'Нажмите кнопку ниже — Telegram подтвердит вашу личность и вернёт вас сюда. Пароль не потребуется.'
+        => 'Press the button below — Telegram confirms who you are and brings you back. No password needed.',
+    '← Другие способы входа' => '← Other ways to sign in',
+    'Вы вышли из :portal.' => 'You have signed out of :portal.',
+    'Выйти и из остальных сервисов :app?' => 'Sign out of the other :app services too?',
+    'Завершить только эту сессию или выйти на всех устройствах и сервисах?'
+        => 'End only this session, or sign out on every device and service?',
+    'Отмена — вернуться в профиль' => 'Cancel — back to the profile',
+    'Вы вошли как :email.' => 'You are signed in as :email.',
+    'Примите приглашение — и портал сразу станет доступен.'
+        => 'Accept the invitation and the portal becomes available right away.',
+    'Войдите или создайте аккаунт — приглашение примется автоматически.'
+        => 'Sign in or create an account — the invitation is accepted automatically.',
+    'Нет аккаунта?' => 'No account?',
+    'Создать за полминуты' => 'Create one in half a minute',
+    'Не удалось собрать архив' => 'The archive could not be built',
+    'Закажите выгрузку заново в настройках аккаунта. Если повторится — покажите администратору эту причину:'
+        => 'Request the export again in the account settings. If it happens again, show the administrator this reason:',
+    'Архив ещё готовится' => 'The archive is still being built',
+    'Сборка идёт в фоне и занимает до минуты. Обновите страницу чуть позже — ссылка останется рабочей сутки.'
+        => 'It is built in the background and takes up to a minute. Refresh the page a little later — the link stays valid for a day.',
+    'Обновить страницу' => 'Refresh the page',
+    '← В настройки аккаунта' => '← To the account settings',
+
+    /* --- Профиль: настройки аккаунта (v4.0) --- */
+    'необязательно' => 'optional',
+    'Можно входить по логину вместо email.' => 'You can sign in with a login instead of an email.',
+    'Часовой пояс' => 'Time zone',
+    'сейчас' => 'now',
+    'Язык' => 'Language',
+    'Смена email' => 'Change email',
+    'Новый email' => 'New email',
+    'Отправить подтверждение' => 'Send confirmation',
+    'Подтверждение уйдёт на новый адрес; на старый — уведомление с кнопкой «это не я» (она откатит смену и заморозит сессии).'
+        => 'The confirmation goes to the new address; the old one gets a notice with a “this was not me” button that reverts the change and freezes the sessions.',
+    'Уведомления безопасности' => 'Security notifications',
+    'Письма о важных событиях. Любое можно выключить — ничего не навязываем.'
+        => 'Emails about important events. Every one can be switched off — nothing is forced on you.',
+    'Мои данные' => 'My data',
+    'Архив со всем, что о вас хранится: профиль, устройства, сервисы, журнал событий, аватар. Пароль и ключи в выгрузку не входят — они хранятся только в виде хэшей.'
+        => 'An archive of everything stored about you: profile, devices, services, event log, avatar. Passwords and keys are not included — they are stored only as hashes.',
+    'архив готов' => 'archive ready',
+    'собран :when, :size КБ · ссылка в письме действует сутки'
+        => 'built :when, :size KB · the link in the email is valid for a day',
+    'в очереди' => 'queued',
+    'соберётся ближайшей фоновой задачей' => 'will be built by the next background task',
+    'планировщик не настроен — задача не выполнится, см. «Здоровье»'
+        => 'the scheduler is not set up — the task will not run, see Health',
+    'Собрать сейчас' => 'Build it now',
+    'Заказать выгрузку' => 'Request an export',
+    'Приложение' => 'App',
+    'Иконка на домашнем экране, запуск без адресной строки.'
+        => 'An icon on the home screen, launching without the address bar.',
+    'Установить' => 'Install',
+    '«Поделиться» → «На экран «Домой»».' => '“Share” → “Add to Home Screen”.',
+    'Опасная зона' => 'Danger zone',
+    'Удаление помечает аккаунт на 14 дней (в письме будет кнопка отмены), затем данные анонимизируются безвозвратно: email превратится в хэш, имя и аватар исчезнут. Порталы получат событие удаления.'
+        => 'Deletion marks the account for 14 days (the email has a cancel button), then the data is anonymised irreversibly: the email becomes a hash, the name and avatar disappear. The portals receive a deletion event.',
+    'Точно удалить аккаунт? Через 14 дней восстановить будет невозможно.'
+        => 'Delete the account for sure? After 14 days it cannot be restored.',
+    'Пароль для подтверждения удаления' => 'Password to confirm deletion',
+
+    /* --- Профиль: безопасность (v4.0) --- */
+    'Оценка защищённости' => 'Security score',
+    'Смена пароля' => 'Change password',
+    'Установка пароля' => 'Set a password',
+    'У аккаунта нет пароля — вы входите через привязанные сервисы или по ссылке из письма. Пароль добавит ещё один способ входа.'
+        => 'The account has no password — you sign in through linked services or a link from an email. A password adds one more way in.',
+    'Текущий пароль' => 'Current password',
+    'Новый пароль' => 'New password',
+    'Придумайте пароль' => 'Choose a password',
+    'показать' => 'show',
+    'скрыть' => 'hide',
+    'Сменить пароль' => 'Change the password',
+    'Установить пароль' => 'Set the password',
+    'Остальные сессии будут завершены.' => 'The other sessions will be ended.',
+    'Двухфакторная защита (TOTP)' => 'Two-factor protection (TOTP)',
+    'Включена' => 'On',
+    'Осталось recovery-кодов: :n' => 'Recovery codes left: :n',
+    'Выключить 2FA? Вход станет менее защищённым, а админка — недоступной.'
+        => 'Turn 2FA off? Sign-in becomes less protected and the admin area unavailable.',
+    'Пароль для подтверждения' => 'Password to confirm',
+    '1. Отсканируйте QR в приложении-аутентификаторе (Google Authenticator, Aegis, 1Password…):'
+        => '1. Scan the QR code in an authenticator app (Google Authenticator, Aegis, 1Password…):',
+    'Не сканируется? Введите секрет вручную:' => 'Not scanning? Enter the secret by hand:',
+    '2. Введите код из приложения:' => '2. Enter the code from the app:',
+    'Цифра :n' => 'Digit :n',
+    'Подтвердить и включить' => 'Confirm and turn on',
+    'Одноразовые коды из приложения — самый надёжный второй фактор. Включается и выключается когда угодно.'
+        => 'One-time codes from an app are the most reliable second factor. Turn it on and off whenever you like.',
+    'Включить 2FA' => 'Turn on 2FA',
+    'Passkeys — вход без пароля' => 'Passkeys — sign in without a password',
+    'Ключ в iCloud Keychain, Google Password Manager или на аппаратном токене. На чужом компьютере — выберите «войти с телефона» и отсканируйте QR-код.'
+        => 'The key lives in iCloud Keychain, Google Password Manager or on a hardware token. On someone else’s computer pick “sign in from a phone” and scan the QR code.',
+    'Добавить passkey' => 'Add a passkey',
+    'Добавлен' => 'Added',
+    'Ключ' => 'Key',
+    'телефон' => 'phone',
+    'Удалить этот passkey? Вход по нему перестанет работать.'
+        => 'Delete this passkey? Signing in with it will stop working.',
+    'Привязанным аккаунтом можно входить без пароля. Отвязать можно в любой момент — кроме случая, когда это ваш единственный способ войти.'
+        => 'A linked account lets you sign in without a password. You can unlink at any time — unless it is your only way in.',
+    'Отвязать :name от аккаунта?' => 'Unlink :name from the account?',
+    ':name — отвязать' => ':name — unlink',
+    'Привязать :name' => 'Link :name',
+    'Коды восстановления — показываются один раз' => 'Recovery codes — shown once',
+    'Сохраните сейчас: каждый код одноразовый, потом мы их не покажем.'
+        => 'Save them now: each code works once, and we will not show them again.',
+    'Скачать .txt' => 'Download .txt',
+
+    /* --- Профиль: редактирование (v4.0) --- */
+    'Редактирование профиля' => 'Edit profile',
+    'Личные данные' => 'Personal details',
+    'ФИО на латинице' => 'Name in Latin script',
+    'Пол' => 'Gender',
+    'Мужской' => 'Male',
+    'Женский' => 'Female',
+    '(если пусто — Имя Фамилия)' => '(if empty — first name and surname)',
+    'Дополнительные адреса' => 'Additional addresses',
+    'Их оставили привязанные сервисы. По любому из них ваш аккаунт находится при входе — новый дубль не заведётся.'
+        => 'They were left by the linked services. Your account is found by any of them at sign-in, so no new duplicate appears.',
+    'Убрать адрес? Вход через сервис с этой почтой может завести новый аккаунт.'
+        => 'Remove the address? Signing in through a service with this email may create a new account.',
+    'Аватар' => 'Avatar',
+    'Выбрать файл' => 'Choose a file',
+    'Убрать фото' => 'Remove the photo',
+    'До 5 МБ. Обрежем в квадрат и переконвертируем в webp — EXIF и лишние байты не выживут.'
+        => 'Up to 5 MB. It is cropped to a square and re-encoded as webp — EXIF and stray bytes do not survive.',
+    'Мои фотографии' => 'My photos',
+    'Нажмите на фото, чтобы поставить его аватаркой.' => 'Tap a photo to make it your avatar.',
+    'Это текущая аватарка' => 'This is the current avatar',
+    'Сделать аватаркой' => 'Make it the avatar',
+    'Удалить эту фотографию?' => 'Delete this photo?',
+    'Удалить фотографию' => 'Delete the photo',
+
+    /* --- Профиль: карточка (v4.0) --- */
+    'Редактировать' => 'Edit',
+    'пол' => 'gender',
+    ' и ' => ' and ',
+    'Заполните, пожалуйста: :list' => 'Please fill in: :list',
+    'Открыть редактирование →' => 'Open the editor →',
+    'Удостоверение' => 'Identity card',
+    'Подтверждённый аккаунт' => 'Verified account',
+    'Номер аккаунта' => 'Account number',
+    'Сменить номер' => 'Change number',
+
+    /* Раздел «Сроки». Подписи собираются из массива в шаблоне, поэтому
+       сборщик покрытия их не видит — переводы держим здесь руками. */
+    'Сроки' => 'Lifetimes',
+    '(в секундах)' => '(in seconds)',
+    'Сессия SSO' => 'SSO session',
+    'Сколько живёт вход без «запомнить меня»' => 'How long a sign-in lasts without “remember me”',
+    '«Запомнить меня»' => '“Remember me”',
+    'Срок долгой сессии' => 'Lifetime of the long session',
+    'Access-токен' => 'Access token',
+    'Короче — быстрее подействует блокировка на порталах'
+        => 'Shorter means a block takes effect on portals sooner',
+    'Ссылка подтверждения почты' => 'Email confirmation link',
+    'Из письма о регистрации' => 'From the registration email',
+    'Ссылка сброса пароля' => 'Password reset link',
+    'Из письма о восстановлении' => 'From the recovery email',
+    'Дата рождения' => 'Date of birth',
+    'В системе с' => 'Member since',
+    'подтверждён' => 'verified',
+    'не подтверждён' => 'not verified',
+    'Настроить →' => 'Configure →',
+    'Пока ни одного входа в порталы' => 'No portal sign-ins yet',
+    'Все сервисы →' => 'All services →',
+    'текущее' => 'current',
+    'Управлять →' => 'Manage →',
+    'Последние входы' => 'Recent sign-ins',
+    'История пока пуста' => 'No history yet',
+
+    /* --- Профиль: сервисы и устройства (v4.0) --- */
+    'подключён' => 'connected',
+    'заявка на рассмотрении' => 'request under review',
+    'доступ закрыт' => 'access closed',
+    'ещё не подключён' => 'not connected yet',
+    'Перейти' => 'Open',
+    'Открыть портал' => 'Open the portal',
+    'Отозвать доступ' => 'Revoke access',
+    'Отозвать доступ «:name»?' => 'Revoke access for “:name”?',
+    'Порталы ещё не зарегистрированы в SSO.' => 'No portals are registered with the SSO yet.',
+    'Появилась' => 'First seen',
+    'текущая' => 'current',
+    '30 дней' => '30 days',
+    'Завершить' => 'End',
+    'Завершить все остальные' => 'End all the others',
+    'Завершить все сессии, кроме этой? Порталы получат событие выхода.'
+        => 'End every session except this one? The portals will receive a sign-out event.',
+    'Завершение сессии разошлёт порталам событие выхода — локальные сессии там тоже закроются.'
+        => 'Ending a session sends a sign-out event to the portals — their local sessions close too.',
+
+    /* --- Место и чистка (v4.0) --- */
+    'Место и чистка' => 'Storage and cleanup',
+    'Логи приложения' => 'Application logs',
+    'Выгрузки данных' => 'Data exports',
+    'Аватары и фотографии' => 'Avatars and photos',
+    'Журнал аудита' => 'Audit log',
+    'Срок хранения — в политиках' => 'Retention is set in the policies',
+    'Живут сутки после сборки' => 'Kept for a day after they are built',
+    'Удаляются вместе с аккаунтом' => 'Removed together with the account',
+    'По умолчанию хранится вечно' => 'Kept forever by default',
+    'Отправленные убираются по сроку' => 'Sent messages are removed on schedule',
+    'Почистить сейчас' => 'Clean up now',
+    'Убрать сирот' => 'Remove orphans',
+    'Чистка выполнена: :log' => 'Cleanup done: :log',
+    'Сироты убраны: аватаров — :a, фотографий — :p, выгрузок — :e.'
+        => 'Orphans removed: :a avatars, :p photos, :e exports.',
+    'Удалить файлы, которым не соответствует ни одна запись в базе? Отменить нельзя.'
+        => 'Delete files that have no matching record in the database? This cannot be undone.',
+    'Планировщик не подаёт признаков жизни: автоматическая чистка не идёт. Кнопки ниже делают то же самое вручную.'
+        => 'The scheduler shows no sign of life, so automatic cleanup is not running. The buttons below do the same thing by hand.',
+    '«Почистить сейчас» выполняет ровно те же задачи, что планировщик: истёкшие сессии и токены, ротация логов, протухшие выгрузки. Сроки хранения — в настройках, раздел «Политики».'
+        => '“Clean up now” runs exactly the same tasks as the scheduler: expired sessions and tokens, log rotation, stale exports. Retention periods live in Settings under Policies.',
+    'Сироты — файлы без записей в базе: остаются после обрывов и ручных правок. Журнал аудита не трогаем: это журнал безопасности, его срок задаётся отдельно.'
+        => 'Orphans are files with no record in the database: they are left behind by interrupted operations and manual edits. The audit log is left alone — it is a security journal with its own retention.',
+
+    /* --- Капча (v4.0) --- */
+    'Капча' => 'Captcha',
+    'Включить капчу' => 'Enable the captcha',
+    'Показывать после N неудач' => 'Show after N failures',
+    'Требовать при регистрации' => 'Require on sign-up',
+    'Требовать при восстановлении' => 'Require on password recovery',
+    'Капча своя, без внешних сервисов: чужой скрипт на экране входа SSO неуместен, и CSP пришлось бы открывать.'
+        => 'The captcha is ours, with no external service: a third-party script on the SSO sign-in screen has no place there, and the CSP would have to be opened up.',
+    'Проверка: сколько получится?' => 'Check: what is the answer?',
+    'Арифметическая задача' => 'An arithmetic problem',
+    'Проверка не пройдена. Попробуйте ещё раз.' => 'The check did not pass. Please try again.',
+
+    /* --- «Мост» с порталом (v4.1) --- */
+    'Подставить предложенное (:n)' => 'Fill in the suggestions (:n)',
+    'Спросить у портала' => 'Ask the portal',
+    'SSO запросит :url — портал сам расскажет о своих ролях и оформлении.'
+        => 'The SSO will request :url — the portal tells it about its own roles and branding.',
+    'Портал сообщает о своих ролях:' => 'The portal reports these roles:',
+    'Портал ответил: ролей — :n, оформление — :b.' => 'The portal answered: :n roles, branding :b.',
+    'Портал пока не отвечает манифестом: :why' => 'The portal has no manifest yet: :why',
+    'Портал не ответил или отдал не то.' => 'The portal did not answer, or answered with something else.',
+    'Это не манифест портала: нет поля sso_portal.'
+        => 'This is not a portal manifest: the sso_portal field is missing.',
+    'У портала не задан адрес по https.' => 'The portal has no https address set.',
+    'Схема базы отстаёт от кода.' => 'The database schema is behind the code.',
+    'принято' => 'accepted',
+    'не прислано' => 'not sent',
+
+    /* --- Карта ролей (v4.0) --- */
+    'Карта ролей' => 'Role map',
+    'Слева роль в :app, справа — как её увидит портал в claim roles. Пусто — роль не передаётся. Если карта пуста целиком, портал получает слаги как есть.'
+        => 'On the left is the role in :app, on the right is what the portal will see in the roles claim. Empty means the role is not passed on. If the whole map is empty, the portal gets the raw slugs.',
+    'не передавать' => 'do not pass on',
+    'Сохранить карту' => 'Save the map',
+    'Выгрузить JSON' => 'Export JSON',
+    'Загрузить карту из JSON' => 'Import a map from JSON',
+    'Загрузить' => 'Import',
+    'Неизвестные роли пропускаются со списком, а не роняют импорт целиком.'
+        => 'Unknown roles are skipped and listed rather than failing the whole import.',
+    'Карта сохранена: сопоставлено ролей — :n.' => 'Map saved: :n roles mapped.',
+    'Карта загружена: сопоставлено ролей — :n.' => 'Map imported: :n roles mapped.',
+    'Пропущены неизвестные роли: :list' => 'Skipped unknown roles: :list',
+    'Это не карта ролей: в файле нет объекта roles.'
+        => 'This is not a role map: the file has no roles object.',
+    'Файл не загрузился.' => 'The file did not upload.',
+
+    /* --- Экран входа (v3.9) --- */
+    'Один аккаунт на все сервисы.' => 'One account for every service.',
+
+    /* --- «Создать аккаунт?» при соцвходе (v3.9) --- */
+    'Создать аккаунт?' => 'Create an account?',
+    ':provider подтвердил вашу личность.' => ':provider has confirmed who you are.',
+    'Аккаунта в :app ещё нет.' => 'You do not have an :app account yet.',
+    'Что приедет от :provider' => 'What :provider will pass on',
+    'Принимаю' => 'I accept',
+    'Чтобы создать аккаунт, нужно принять все документы.'
+        => 'To create an account you need to accept every document.',
+    'Аккаунт не создан.' => 'No account was created.',
+    'Сессия входа устарела. Начните заново.' => 'The sign-in session has expired. Please start again.',
+    'номер телефона' => 'phone number',
+    'фотография профиля' => 'profile photo',
+
+    /* --- Правовые документы (v3.9) --- */
+    'Документы' => 'Documents',
+    'Правовые документы этой инсталляции. Редакция и дата изменения — на странице каждого.'
+        => 'The legal documents of this installation. Revision and change date are on each page.',
+    'Тема оформления' => 'Colour theme',
+    'Язык интерфейса' => 'Interface language',
+    'Владелец сервиса' => 'Service owner',
+    'Владелец (юрлицо или ФИО)' => 'Owner (legal entity or full name)',
+    'Контакт для обращений' => 'Contact for enquiries',
+    'ООО «Компания»' => 'Acme Ltd',
+    'Подставляется в документы вместо {{ Владелец }} и {{ Контакт }} — править их в трёх текстах руками не нужно.'
+        => 'Substituted into the documents in place of {{ Владелец }} and {{ Контакт }} — no need to edit three texts by hand.',
+    'Шаблоны ниже — заготовки. Их нужно прочитать и поправить под себя: за содержание документов отвечает владелец установки.'
+        => 'The templates below are drafts. Read them and adapt them: the owner of the installation is responsible for what the documents say.',
+    'Показывать и требовать согласия при регистрации' => 'Show and require consent on sign-up',
+    'Показывать в подвале и на странице «О сервисе»' => 'Show in the footer and on the About page',
+    'Пусто — документ не показывается' => 'Empty means the document is not shown',
+    'Разметка: ## заголовок, - список, **жирный**, [текст](ссылка). HTML не поддерживается намеренно.'
+        => 'Markup: ## heading, - list, **bold**, [text](link). HTML is deliberately unsupported.',
+    'Взять шаблон' => 'Use the template',
+    'Заменить текст заготовкой? Введённое сейчас потеряется.'
+        => 'Replace the text with the draft? What you typed will be lost.',
+    'Изменение текста поднимает редакцию. Согласия, данные раньше, сохраняют номер той редакции, с которой соглашались.'
+        => 'Editing the text bumps the revision. Consents given earlier keep the number of the revision they were given for.',
+    'Политика конфиденциальности' => 'Privacy policy',
+    'Согласие на обработку персональных данных' => 'Consent to personal data processing',
+    'Пользовательское соглашение' => 'Terms of use',
+    'Реквизиты владельца' => 'Owner details',
+    /* Винительный падеж для строки «Принимаю …»: в русском заголовок в
+       именительном давал «Принимаю политика конфиденциальности». */
+    'политику конфиденциальности' => 'the privacy policy',
+    'согласие на обработку персональных данных' => 'consent to personal data processing',
+    'пользовательское соглашение' => 'the terms of use',
+    'реквизиты владельца' => 'owner details',
+    'редакция :n' => 'revision :n',
+    'Редакция :n от :date' => 'Revision :n of :date',
+    'изменён :date' => 'changed :date',
+    'открыть' => 'open',
+
+    /* --- Галерея фотографий --- */
+    'загружено' => 'uploaded',
+
+    /* --- PWA: офлайн-заглушка --- */
+    'Нет сети' => 'No connection',
+    'Страница откроется, когда появится соединение.'
+        => 'The page will open once the connection is back.',
+
+    /* --- Системный раздел владельца (SYSTEM_LIFECYCLE.md) --- */
+    'Система' => 'System',
+    'Раздел владельца инсталляции. Операции здесь не отменяются кнопкой «назад».'
+        => 'The installation owner’s section. Nothing here is undone by the back button.',
+    'База не отвечает: ' => 'The database is not responding: ',
+    'Префикс таблиц' => 'Table prefix',
+    'Таблиц' => 'Tables',
+    'Размер' => 'Size',
+    'Отклик' => 'Response',
+    'меньше 0,1 мс' => 'under 0.1 ms',
+    'мс' => 'ms',
+    'Строк в таблицах' => 'Rows per table',
+    'Проверить другое подключение' => 'Test another connection',
+    'Переключиться' => 'Switch',
+    'Переключиться на эту базу? Приложение начнёт работать с ней немедленно.'
+        => 'Switch to this database? The application starts using it immediately.',
+    'Переключение проходит только когда все проверки зелёные. Прежний конфиг сохраняется копией рядом.'
+        => 'Switching happens only when every check is green. The previous config is kept as a copy next to it.',
+    'Проверка ничего не переключает: SSO подключается вторым соединением, спрашивает и отключается. Сначала убедитесь, что новая база отвечает и схема на месте, — и только потом переключайтесь.'
+        => 'Testing switches nothing: the SSO opens a second connection, asks, and closes it. First make sure the new database answers and the schema is there — switch only after that.',
+    'Реквизиты нигде не сохраняются: живой конфиг один, и он в файле. Пароль от второй базы, лежащий «на всякий случай» в настройках, — это утечка.'
+        => 'Credentials are stored nowhere: there is one live config and it lives in a file. A second database’s password kept in settings “just in case” is a leak.',
+    'Драйвер' => 'Driver',
+    'База' => 'Database',
+    'Для SQLite — путь к файлу' => 'For SQLite — path to the file',
+    'Владелец инсталляции' => 'Installation owner',
+    'Суперадминов может быть много: роль выдаётся в два клика, чтобы человек завёл портал. Владелец один, и только ему доступен этот раздел.'
+        => 'There can be many superadmins: the role is granted in two clicks so someone can add a portal. There is exactly one owner, and this section is theirs alone.',
+    'Владелец сейчас' => 'Current owner',
+    'Кому передать' => 'Transfer to',
+    'Передать владение' => 'Transfer ownership',
+    'Передача владения' => 'Ownership transfer',
+    'Владение переходит только после подтверждения получателем по ссылке из письма: отдать проект человеку, который в отпуске, не получится.'
+        => 'Ownership moves only after the recipient confirms via the emailed link — you cannot hand the project to someone who is on holiday.',
+    'Передавать некому: суперадмин в системе один.'
+        => 'Nobody to transfer to: there is only one superadmin.',
+    'Принять владение инсталляцией?' => 'Accept ownership of this installation?',
+    'Вам станут доступны смена домена, управление базой и сброс проекта.'
+        => 'You will be able to change the domain, manage the database and reset the project.',
+    'Принять' => 'Accept',
+
+    /* --- Полномочия админов (v4.3) --- */
+    'Ссылка для входа' => 'Sign-in link',
+    'Ссылка входа' => 'The sign-in link',
+    '(одноразовая, 15 минут)' => '(single use, 15 minutes)',
+    'Создать одноразовую ссылку для входа в этот аккаунт? Владелец получит уведомление.'
+        => 'Create a single-use sign-in link for this account? The owner will be notified.',
+    'Окончательное удаление' => 'Permanent deletion',
+    'Удалить окончательно' => 'Delete permanently',
+    'Удалить аккаунт окончательно? Это необратимо.'
+        => 'Delete the account permanently? This is irreversible.',
+    'Обычное удаление помечает аккаунт и держит 14 дней — на случай, если нажали не туда. Здесь строк не останется вовсе: сессии, устройства, привязки соцсетей, фото, согласия. Записи аудита сохраняются: журнал безопасности должен переживать своих фигурантов.'
+        => 'Ordinary deletion flags the account and holds it for 14 days, in case of a misclick. Here no rows remain at all: sessions, devices, social links, photos, consents. Audit records are kept: a security log must outlive the people it describes.',
+    'Наберите имя аккаунта — :email — чтобы подтвердить.'
+        => 'Type the account name — :email — to confirm.',
+    'нет — вход только по логину' => 'none — sign-in by username only',
+    'Это суперадмин. Сначала снимите роль — иначе удаление отрежет систему от последнего, кто мог ею управлять.'
+        => 'This is a superadmin. Remove the role first — otherwise deletion cuts the system off from the last person able to run it.',
+    'Скрывать часть IP в своём профиле' => 'Hide part of the IP in one’s own profile',
+    '(в админке IP всегда виден целиком)' => '(in the admin area the IP is always shown in full)',
+
+    /* --- Права и уровень доступа (v4.3) --- */
+    'Что можно' => 'What is allowed',
+    'Область' => 'Area',
+    'Логи и аудит' => 'Logs and audit',
+    'Смотреть' => 'View', 'Изменять' => 'Change', 'Удалять' => 'Delete',
+    'Строки — области, столбцы — действия. Изменение и удаление без чтения не имеют смысла, поэтому чтение проставляется само.'
+        => 'Rows are areas, columns are actions. Change and delete make no sense without view, so view is ticked automatically.',
+    'Особые права' => 'Special permissions',
+    /* Шаблон объекта (v4.4): шапка, вкладки, связи, история. */
+    'Обзор' => 'Overview',
+    /* Строки, которые до v4.4.7 шли мимо словаря напрямую в разметке. */
+    'Активность:' => 'Last activity:',
+    'за 7 дней' => 'in 7 days',
+    'Имя:' => 'Name:',
+    'Смотреть как' => 'View as',
+    'Создать ссылку' => 'Create a link',
+    'Импортировать :n' => 'Import :n',
+    'строк — :n. Сопоставьте колонки с полями:' => 'rows — :n. Map the columns to fields:',
+    'В очереди' => 'Queued',
+    'Отправлено' => 'Sent',
+    'Провалено' => 'Failed',
+    'Письмо №:n' => 'Message #:n',
+    'старый секрет активен до :when' => 'the old secret works until :when',
+    'Политика доступа портала — «:policy»: люди и так смогут войти сами. Приглашения нужны прежде всего для политики invite, но работают в любой — они сразу выдают доступ и роль.'
+        => 'The portal access policy is “:policy”: people can sign in on their own anyway. Invitations matter most for the invite policy, but work with any — they grant access and a role right away.',
+    'Backchannel URI не задан — logout и блокировки не доедут до портала, пока его не настроят.'
+        => 'No backchannel URI: logout and blocks will not reach the portal until it is set.',
+    'Крон не отчитывался больше 10 минут — очередь писем некому разгребать. Немедленная отправка делает одну попытку; всё, что не ушло с первого раза, ждёт крон. Проверьте планировщик — строка есть в разделе'
+        => 'Cron has not reported for over 10 minutes — nobody is draining the mail queue. Immediate sending makes one attempt; everything that fails waits for cron. Check the scheduler — the line is in',
+    'Для текста акцент затемнён до' => 'For text the accent is darkened to',
+    'в исходном виде ссылки были бы нечитаемы.' => 'in the original shade the links would be unreadable.',
+    'у ссылки' => 'for links',
+    'возраст :n дн.' => 'age :n days',
+    /* Экран согласия и шлюзы портала (v4.4.7): их видит каждый человек на
+       каждом недоверенном портале, а через t() они не шли вовсе. */
+    'Запрос от' => 'Request from',
+    'Сервис получит:' => 'The service will receive:',
+    'Разрешить' => 'Allow',
+    'Пароль сервису не передаётся — только перечисленные данные.'
+        => 'Your password is never shared — only the data listed above.',
+    'Идентификатор вашей учётной записи' => 'Your account identifier',
+    'Имя, фамилия, аватар, дата рождения' => 'First name, last name, avatar, date of birth',
+    'Адрес электронной почты' => 'Email address',
+    'Номер телефона' => 'Phone number',
+    'Ваши роли в этом сервисе' => 'Your roles in this service',
+    'Доступ без вашего присутствия (обновление данных в фоне)'
+        => 'Access while you are away (background data refresh)',
+    'Нужна двухфакторная защита' => 'Two-factor protection required',
+    'Портал «:name» пускает только с включённой 2FA. Настройте её — это пара минут, — и вход продолжится автоматически.'
+        => '“:name” only admits people with 2FA enabled. Set it up — it takes a couple of minutes — and the sign-in will continue on its own.',
+    'Вернуться на :name' => 'Back to :name',
+    'Заявки' => 'Requests',
+    'Сессии' => 'Sessions',
+    'ID инцидента:' => 'Incident ID:',
+    '— назовите его администратору, событие найдётся в логах.'
+        => '— give it to your administrator, the event will be found in the logs.',
+    'Попробуйте через :n :unit.' => 'Try again in :n :unit.',
+    'Мы не перенаправили вас обратно, потому что не смогли удостовериться в адресе возврата. Сообщите администратору портала, с которого вы пришли.'
+        => 'We did not send you back because we could not verify the return address. Tell the administrator of the portal you came from.',
+    /* Страница ошибки: присланный адрес возврата (v4.58). */
+    'Сервис попросил вернуть вас сюда:' => 'The service asked to send you back here:',
+    'Администратору портала: этот адрес уже ждёт в карточке портала, в разделе «Реквизиты», — добавляется одной кнопкой.' => 'For the service’s administrator: this address is already waiting in the service card, under «Credentials», — it can be added with one button.',
+    /* Панель на экране входа (v4.4.4). */
+    'Панель на экране входа' => 'Sign-in screen panel',
+    'Снимок' => 'Image',
+    '(до 6 МБ; уложим в 1600×1400 — экран входа не должен весить как галерея)'
+        => '(up to 6 MB; resized to 1600×1400 — a sign-in screen should not weigh like a gallery)',
+    'Убрать снимок (вернётся заставка со знаком)' => 'Remove the image (the mark screen returns)',
+    'Заголовок панели' => 'Panel heading',
+    'Строка под заголовком' => 'Line under the heading',
+    'Подпись рисуется под снимком — так она читается на любом кадре.'
+        => 'The caption sits under the image, so it stays readable on any shot.',
+    /* Капча: выбор провайдера (v4.4.3). */
+    'Чем проверять' => 'How to verify',
+    'Другая картинка' => 'Another image',
+    'Своя картинка' => 'Our own image',
+    'Работает без интернета наружу, не рассказывает о посетителях никому'
+        => 'Works without outbound internet and tells nobody about your visitors',
+    'Обычно без задач: проверяет поведение, а не «найдите светофоры»'
+        => 'Usually no puzzles: it checks behaviour, not “find the traffic lights”',
+    'Задачи с картинками, работает в большинстве сетей'
+        => 'Image puzzles, works on most networks',
+    'Виджет выбран, но ключей нет — проверка пока идёт своей картинкой.'
+        => 'A widget is selected but its keys are missing — our own image is used for now.',
+    'Если проверка у провайдера не отвечает, попытка считается непройденной: «сервис молчит, поэтому пускаем» отменяет ровно ту защиту, ради которой капчу включили.'
+        => 'If the provider does not answer, the attempt counts as failed: “the service is silent, so let them in” cancels exactly the protection the captcha was turned on for.',
+    'Показывать на главной' => 'Show on the home page',
+    '(гостям, до входа)' => '(to guests, before sign-in)',
+    'Доставка' => 'Delivery',
+    'Открыть сайт' => 'Open the site',
+    'Роли портала' => 'Portal roles',
+    'Своих ролей нет' => 'No portal roles',
+    'Доступ организациям не выдан' => 'No organisation has access',
+    'Связи' => 'Relations',
+    'Связей нет' => 'No relations',
+    'История' => 'History',
+    'Событий пока нет' => 'No events yet',
+    'Состав' => 'Members',
+    'Никого нет' => 'Nobody yet',
+    'Ролей нет' => 'No roles',
+    'Доступов нет' => 'No access granted',
+    'Добавить участника' => 'Add a member',
+    'Человек уже должен быть зарегистрирован.' => 'The person must already have an account.',
+    'Удалить :name из организации?' => 'Remove :name from the organisation?',
+    'и ещё :n' => 'and :n more',
+    /* Матрица прав (v4.3.6). Буквы r/w/d в строке режима не переводятся
+       намеренно: это цитата прав доступа rwx, а не слово. */
+    'Строки — области, столбцы — действия' => 'Rows are areas, columns are actions',
+    'Права одной строкой' => 'Permissions on one line',
+    'Точка — действие к области неприменимо.' => 'A dot means the action does not apply to that area.',
+    'Проставлено само: изменять или удалять, не видя, нельзя'
+        => 'Set automatically: you cannot change or delete what you cannot see',
+    'Вернуть как было' => 'Undo changes',
+    'изменено' => 'changed',
+    'Что увидит портал' => 'What the portal will see',
+    'уезжает порталам в claim' => 'sent to portals in claim',
+    'Внутри SSO уровень не решает ничего — здесь решает таблица слева.'
+        => 'Inside SSO the level decides nothing — the table on the left does.',
+    'Аудит не правят и не удаляют поштучно: смысл журнала в том, что его нельзя подчистить'
+        => 'Audit records are not edited or deleted one by one: a log you can tidy up is not a log',
+    '«Удалить настройку» не значит ничего: у каждой есть значение по умолчанию'
+        => '“Delete a setting” means nothing: each one has a default',
+    'Права суперадмина не редактируются: ему разрешено всё. Галочки позволили бы снять их с себя и запереть систему.'
+        => 'Superadmin permissions are not editable: everything is allowed. Checkboxes would let you clear your own and lock yourself out.',
+    'Уровень доступа' => 'Access level',
+    'Это не право, а сводка для сервисов: одно число, по которому портал ветвится, не изучая наши роли. Внутри SSO уровень не решает ничего — здесь решает таблица выше.'
+        => 'This is not a permission but a summary for services: one number a portal branches on without learning our roles. Inside the SSO it decides nothing — the table above does.',
+    'Уезжает порталам в claim access_level и access_tier.'
+        => 'Sent to portals in the access_level and access_tier claims.',
+    'роль портала' => 'portal role',
+    'Карточки людей, блокировка, доступы' => 'People’s cards, blocking, access',
+    'Подключение сервисов, реквизиты, карта ролей' => 'Connecting services, credentials, role map',
+    'Состав и групповые доступы' => 'Membership and group access',
+    'Справочник ролей и эта самая таблица прав' => 'The role list and this very permissions table',
+    'Журнал событий и безопасности' => 'The event and security log',
+    'Брендинг, SMTP, политики, документы' => 'Branding, SMTP, policies, documents',
+    'Входить от имени' => 'Sign in as someone',
+    'Смотреть систему глазами человека. Действия пишутся в аудит от вашего имени'
+        => 'See the system through a person’s eyes. Actions are logged under your name',
+    'Перевыпуск ключей подписи: порталы обязаны перечитать JWKS'
+        => 'Reissuing signing keys: portals must refetch JWKS',
+    'Скачивание архива с ключами и дампом базы' => 'Downloading the archive with keys and a database dump',
+    'Чистка' => 'Cleanup',
+    'Удаление логов, выгрузок и файлов-сирот' => 'Deleting logs, exports and orphaned files',
+    /* Ступени уровня */
+    'Архивный' => 'Archived', 'Гость' => 'Guest',
+    'Доверенный' => 'Trusted', 'Наблюдатель' => 'Observer', 'Модератор' => 'Moderator',
+    'Выпускающий' => 'Publisher', 'Администратор сервиса' => 'Service admin',
+    'Администратор с управлением людьми' => 'Admin with people management',
+    'Администратор организации' => 'Organisation admin',
+    'Наблюдатель SSO' => 'SSO observer', 'Суперадмин' => 'Superadmin',
+    'Суперадмин без системного раздела' => 'Superadmin without the system section',
+    /* Реквизиты удостоверения */
+    'Реквизиты удостоверения' => 'ID details',
+    '(его называют в поддержке)' => '(this is what support asks for)',
+    'В коде только номер аккаунта — ничего, что даёт доступ.'
+        => 'The code holds only the account number — nothing that grants access.',
+
+    /* --- Организации: правка, роли, опасная зона --- */
+    'Владелец организации' => 'Organisation owner',
+    'активна' => 'active',
+    'выключена' => 'disabled',
+    'Участники' => 'Members',
+    'Роль в организации' => 'Role in the organisation',
+    'Сохранить роль' => 'Save the role',
+    'Убрать участника из организации? Доступы, полученные через неё, останутся — снимите их отдельно.'
+        => 'Remove the member from the organisation? Access granted through it stays — revoke it separately.',
+    'Сначала подключите хотя бы один портал — выдавать доступ пока не к чему.'
+        => 'Connect at least one portal first — there is nothing to grant access to yet.',
+    'К порталам →' => 'To portals →',
+    'Слаг :slug не меняется: он уходит порталам в claim orgs.'
+        => 'The slug :slug does not change: it goes to portals in the orgs claim.',
+    'Удаление организации' => 'Deleting the organisation',
+    'Удалить организацию' => 'Delete the organisation',
+    'Удалить организацию? Это необратимо.' => 'Delete the organisation? This is irreversible.',
+    'Уйдут состав и выданные организации доступы к порталам. Люди и сами порталы останутся — исчезнет только групповая связь между ними. Персональные доступы, выданные отдельно, не затрагиваются.'
+        => 'The membership and the portal access granted to the organisation go. People and the portals themselves stay — only the group link between them disappears. Individually granted access is untouched.',
+    'Участников' => 'Members',
+    'Порталов с доступом через организацию' => 'Portals reachable through the organisation',
+    'Наберите слаг организации — :slug — чтобы подтвердить.'
+        => 'Type the organisation slug — :slug — to confirm.',
+
+    /* --- Опасная зона и удаление портала --- */
+    'Ваш пароль' => 'Your password',
+    'Открыть опасную зону' => 'Open the danger zone',
+    'Пароль спрашиваем именно здесь: от чужой открытой вкладки CSRF-токен не защищает. Зона откроется на 10 минут.'
+        => 'The password is asked right here: a CSRF token is no protection against someone else’s open tab. The zone stays open for 10 minutes.',
+    'Вернуться к порталу' => 'Back to the portal',
+    'Удаление портала' => 'Deleting the portal',
+    'Удалить портал' => 'Delete the portal',
+    'Удалить портал? Это необратимо.' => 'Delete the portal? This is irreversible.',
+    'Уйдут реквизиты, выданные токены, доступы людей, приглашения и карта ролей. Восстановить нельзя: client_secret хранится хэшем, и прежний уже не воспроизвести. Люди останутся — исчезнет только их доступ к этому порталу.'
+        => 'Credentials, issued tokens, people’s access, invitations and the role map all go. There is no restoring it: client_secret is stored as a hash and the old one cannot be reproduced. People stay — only their access to this portal disappears.',
+    'Людей с доступом сейчас: :n' => 'People with access right now: :n',
+    'Наберите слаг портала — :slug — чтобы подтвердить.'
+        => 'Type the portal slug — :slug — to confirm.',
+    'Слаг портала для подтверждения' => 'Portal slug for confirmation',
+
+    /* --- Сброс --- */
+    'Сброс' => 'Reset',
+    'Отменить нельзя. Ровно поэтому здесь четыре условия, а не одна галочка «я понимаю».'
+        => 'This cannot be undone. That is exactly why there are four conditions here, not one “I understand” checkbox.',
+    'Сначала скачайте бэкап: кнопки сброса отпираются им.'
+        => 'Download a backup first: it is what unlocks the reset buttons.',
+    'Бэкап ещё не скачивали.' => 'No backup has been downloaded yet.',
+    'Последний бэкап: :when — это дольше часа назад.'
+        => 'Last backup: :when — that is more than an hour ago.',
+    'Бэкап скачан :when — можно продолжать.' => 'Backup downloaded :when — you may continue.',
+    'Сбросить данные' => 'Reset the data',
+    'Уйдут люди, сессии, аудит, согласия и фото. Останутся порталы, роли, настройки, документы и ключи.'
+        => 'People, sessions, the audit log, consents and photos go. Portals, roles, settings, documents and keys stay.',
+    'Сбросить проект' => 'Reset the project',
+    'Уйдёт всё, кроме файла конфигурации. Ключи подписи, APP_KEY и cron-токен выпускаются заново, порталы придётся подключать с нуля.'
+        => 'Everything goes except the config file. Signing keys, APP_KEY and the cron token are reissued; portals must be connected from scratch.',
+    'Прислать код на почту' => 'Email me a code',
+    'Код из письма' => 'Code from the email',
+    'Наберите адрес инсталляции' => 'Type the installation address',
+    'Это необратимо. Продолжить?' => 'This is irreversible. Continue?',
+    'Сброс доступен только владельцу и только отсюда: ни Admin API, ни командной строкой. Сброс по HTTP с токеном — это одна утёкшая строка в логе CI.'
+        => 'Reset is available to the owner only and only from here: not via the Admin API, not from the command line. A reset over HTTP with a token is one leaked line in a CI log.',
+
+    'Перенести данные' => 'Transfer the data',
+    'Перенести данные в эту базу и переключиться? На время переноса сайт закроется на обслуживание.'
+        => 'Transfer the data into this database and switch? The site goes into maintenance mode for the duration.',
+    '«Перенести данные» создаёт схему миграциями и копирует строки — работает и между MySQL и SQLite. Потолок: :n МБ; больше — только дампом вручную, оборвавшийся перенос оставляет полбазы.'
+        => '“Transfer the data” builds the schema with migrations and copies rows — this works between MySQL and SQLite too. Cap: :n MB; anything larger goes by hand as a dump, because a transfer that breaks halfway leaves half a database.',
+    'Напомнить письмом ещё раз' => 'Send the reminder again',
+    'связаться некому' => 'nobody to contact',
+
+    /* --- Смена домена --- */
+    'Домен инсталляции' => 'Installation domain',
+    'Домен сменён :h ч назад. Прежний адрес: ' => 'Domain changed :h h ago. Previous address: ',
+    'Вернуть прежний адрес' => 'Restore the previous address',
+    'Вернуть прежний адрес? Passkey это не восстановит.'
+        => 'Restore the previous address? This does not bring passkeys back.',
+    'Что перестанет работать при смене' => 'What stops working after the change',
+    'Passkey (привязаны к домену, перенести нельзя)'
+        => 'Passkeys (bound to the domain, cannot be moved)',
+    'из них — единственный способ входа у:' => 'of these, the only way in for:',
+    'Порталы: нужно поменять issuer в их конфиге'
+        => 'Portals: they must change issuer in their config',
+    'из них не с кем связаться (нет админа портала):'
+        => 'of these, nobody to contact (no portal admin):',
+    'Неиспользованные ссылки из писем' => 'Unused links from emails',
+    'Активные сессии — все завершатся' => 'Active sessions — all will end',
+    'Новый адрес' => 'New address',
+    'Проверить адрес' => 'Check the address',
+    'Сменить домен' => 'Change the domain',
+    'Сменить домен? Passkey перестанут работать безвозвратно, все сессии завершатся.'
+        => 'Change the domain? Passkeys stop working for good and every session ends.',
+    'Новый адрес должен уже вести на этот же экземпляр. Настройте DNS и веб-сервер, затем проверьте снова — по адресу ниже должно отдаваться слово:'
+        => 'The new address must already point at this same instance. Set up DNS and the web server, then check again — the address below must return this word:',
+    'Кнопка смены появляется только после успешной проверки: вписать адрес, которого ещё нет, значит потерять доступ к этой странице.'
+        => 'The change button appears only after a successful check: typing an address that does not exist yet means losing access to this page.',
+    'Администраторам порталов уйдут письма, порталам — вебхук issuer.changed. Вернуть прежний адрес можно в течение суток.'
+        => 'Portal admins get an email, portals get an issuer.changed webhook. The previous address can be restored within a day.',
+
+    'Записей — :n, разных сообщений — :g. Одинаковые свёрнуты: нажмите строку, чтобы увидеть каждую.'
+        => 'Records — :n, distinct messages — :g. Identical ones are collapsed: click a row to see each.',
+    /* ---- v4.6 «Перенос»: забрать людей с портала ---- */
+    '(одноразовая — у аккаунта нет почты)' => '(one-time — the account has no email)',
+
+    'SSO запросит :url — портал сам расскажет о своих ролях, оформлении и о том, умеет ли отдавать своих людей.'
+        => 'SSO will request :url — the portal itself reports its roles, branding, and whether it can hand over its people.',
+    'Адрес выгрузки:' => 'Export address:',
+    'Адрес выгрузки ведёт на чужой хост.' => 'The export address points to a foreign host.',
+    'В ответе нет списка users.' => 'The response has no users list.',
+    'Выдать ключ заново' => 'Issue a new key',
+    'Выдать ключ переноса' => 'Issue a transfer key',
+    'Забрать людей' => 'Fetch people',
+    'Забрать людей с портала? Учётные записи появятся в SSO.' => 'Fetch people from the portal? Accounts will appear in SSO.',
+    'За одно нажатие переносится не больше :n человек.' => 'A single press transfers at most :n people.',
+    'Ключ переноса:' => 'Transfer key:',
+    'Ключ переноса отозван. Портал больше не отдаст нам своих людей.'
+        => 'Transfer key revoked. The portal will no longer hand over its people.',
+    'Модуль выгрузки на стороне портала — файл sso/users.php из набора — и ключ переноса, выданный здесь. Адрес выгрузки портал сообщает манифестом сам; ключ вписывают в его config.php.'
+        => 'The export module on the portal side — the sso/users.php file from the kit — and a transfer key issued here. The portal reports the export address in its manifest; the key goes into its config.php.',
+    'Настроено. Портал отдаёт своих людей по :url, повторный перенос дописывает уже перенесённых.'
+        => 'Configured. The portal serves its people at :url; a repeat transfer tops up those already moved.',
+    'Номер у портала' => 'Portal id',
+    'Нужны две вещи' => 'Two things are needed',
+    'Оборвалось на :n: :why' => 'Broke off at :n: :why',
+    'Ответ портала слишком велик.' => 'The portal response is too large.',
+    'Перенос ещё не настроен' => 'Transfer is not set up yet',
+    'Перенос завершён: заведено — :new, дописано — :upd, пропущено — :skip.'
+        => 'Transfer finished: created — :new, topped up — :upd, skipped — :skip.',
+    'Перенос людей' => 'People transfer',
+    'Перенос людей с портала' => 'Transfer people from the portal',
+    'Перенос людей — :name' => 'People transfer — :name',
+    'Перенос не настроен: нет адреса выгрузки или ключа.' => 'Transfer is not set up: no export address or key.',
+    'Перенос не пошёл: :why' => 'Transfer did not run: :why',
+    'Повторный перенос безопасен: людей узнают по номеру у портала и дописывают, а не заводят заново.'
+        => 'A repeat transfer is safe: people are recognised by their portal id and topped up, not created again.',
+    'Пока не настроено: нужен файл sso/users.php на портале и ключ переноса. Что именно не хватает — на экране переноса.'
+        => 'Not set up yet: the sso/users.php file on the portal and a transfer key are needed. What exactly is missing is on the transfer screen.',
+    'Портал не ответил или отдал не то (HTTP :code).' => 'The portal did not answer or answered wrongly (HTTP :code).',
+    'Портал не отдал список' => 'The portal did not hand over a list',
+    'Портал не принял ключ переноса.' => 'The portal did not accept the transfer key.',
+    'Портал сообщает, что всего у него :n. Считали по первой странице — :p.'
+        => 'The portal reports :n in total. Counted from the first page — :p.',
+    'Проверьте, что файл sso/users.php лежит на месте и что ключ в его config.php совпадает с выданным здесь. Ключ можно выдать заново — старый при этом перестанет работать.'
+        => 'Check that sso/users.php is in place and that the key in its config.php matches the one issued here. The key can be reissued — the old one then stops working.',
+    'Роли не переносятся. Ими управляет карта соответствия, и менять доступы переносом нельзя.'
+        => 'Roles are not transferred. The role map governs them, and a transfer must not change anyone access.',
+    'С оговорками: :why' => 'With reservations: :why',
+    'Считали по первой странице — :p.' => 'Counted from the first page — :p.',
+    'Уже заполненное у нас перенос не перезаписывает: портал — источник истины о себе, но не о человеке.'
+        => 'A transfer never overwrites what is already filled in here: the portal is the source of truth about itself, not about the person.',
+    'Уже связано с этим порталом: :n.' => 'Already linked to this portal: :n.',
+    'Что произойдёт' => 'What will happen',
+    'Что сделаем' => 'What we will do',
+    'будет заведено' => 'will be created',
+    'выдан' => 'issued',
+    'заведём нового' => 'will create a new one',
+    'не выдан' => 'not issued',
+    'нет — задаст сам' => 'none — they will set it',
+    'переедет хэшем' => 'moves as a hash',
+    'портал ещё не сообщил — нажмите «Спросить у портала» в карточке'
+        => 'the portal has not reported it yet — press "Ask the portal" on the card',
+    'пропущено: не по чему узнавать' => 'skipped: nothing to recognise them by',
+    'уже связано: :n' => 'already linked: :n',
+    'узнан по логину' => 'recognised by username',
+    'узнан по почте' => 'recognised by email',
+    'узнан по прошлому переносу' => 'recognised from a previous transfer',
+    'узнаны — допишем, не задвоим' => 'recognised — topped up, not duplicated',
+    /* ---- v4.8 «Лицо»: оформление сайта ---- */
+    'Оформление сайта' => 'Site appearance',
+    'Оформление сохранено.' => 'Appearance saved.',
+    'Неизвестный раздел оформления.' => 'Unknown appearance section.',
+    'Две страницы, которые показывают не вошедшему: главная и форма входа. Имя установки, акцентный цвет и логотип — в настройках: они красят и админку, и письма.'
+        => 'The two pages shown to a signed-out visitor: the home page and the sign-in form. The installation name, accent colour and logo live in settings — they colour the admin area and the emails too.',
+    'К брендингу →' => 'To branding →',
+    'Открыть экран входа' => 'Open the sign-in screen',
+    'Главная' => 'Home page',
+    'Показывать витрину проектов на главной' => 'Show the project showcase on the home page',
+    'Витрина отвечает «куда я попал» тому, кто набрал адрес случайно или пришёл по ссылке из письма. Без отмеченных порталов её не будет в любом случае: пустая витрина хуже, чем сразу форма входа.'
+        => 'The showcase answers “where am I” for someone who typed the address by chance or followed a link from an email. With no portals ticked it will not appear anyway: an empty showcase is worse than the sign-in form straight away.',
+    'Что показывать' => 'What to show',
+    'Выключенный портал в витрину не попадает, даже если отмечен.'
+        => 'A disabled portal never reaches the showcase, even when ticked.',
+    'Порталов пока нет — показывать нечего.' => 'No portals yet — nothing to show.',
+    'Экран входа' => 'Sign-in screen',
+    'Способы входа на экране' => 'Sign-in methods on the screen',
+    'Логин и пароль' => 'Username and password',
+    'Основная форма. Нужна тем, кого перенесли из сервиса без почты.'
+        => 'The main form. Needed by people moved from a service that had no email.',
+    'Ссылка из письма' => 'Link from an email',
+    'Строка с адресом под формой. Без настроенного SMTP работать не будет.'
+        => 'A one-line address field under the form. Will not work without SMTP configured.',
+    'Ключ устройства (passkey)' => 'Device key (passkey)',
+    'Отпечаток или лицо средствами системы.' => 'Fingerprint or face by the operating system.',
+    'Ни один провайдер не настроен — на экране ничего не появится.'
+        => 'No provider is configured — nothing will appear on the screen.',
+    'Настроено провайдеров: :n.' => 'Providers configured: :n.',
+    'Выключить все нельзя: хотя бы один способ обязан остаться, иначе войти не сможет никто, включая вас.'
+        => 'You cannot switch them all off: at least one method must remain, otherwise nobody can sign in — you included.',
+    'Хотя бы один способ входа обязан остаться: иначе войти не сможет никто, включая вас.'
+        => 'At least one sign-in method must remain: otherwise nobody can sign in, you included.',
+    'Панель сбоку' => 'Side panel',
+    'Обложка' => 'Cover image',
+    'Подпись рисуется под обложкой — так она читается на любом кадре.'
+        => 'The caption is drawn under the cover — that way it reads on any shot.',
+    'Как это выглядит' => 'How it looks',
+    'Панель показывается рядом с формой на широком экране. На телефоне её нет: там весь экран занимает сама форма.'
+        => 'The panel sits next to the form on a wide screen. On a phone it is absent: the form takes the whole screen there.',
+    'Обложка и подпись на экране входа, витрина на главной и состав формы — в разделе «Оформление сайта».'
+        => 'The cover and caption on the sign-in screen, the showcase on the home page and the form composition are in “Site appearance”.',
+
+    /* ---- v4.9 «Реквизиты»: указатель разделов и данные владельца ---- */
+    'Реквизиты сохранены.' => 'Company details saved.',
+    'К документам →' => 'To documents →',
+    'Кто оператор' => 'Who the operator is',
+    'Как это попадёт в документы' => 'How this reaches the documents',
+    'Наберите в тексте документа подстановку — при показе она заменится значением. Пустое поле подставится пустотой, поэтому незаполненное лучше из текста убрать.' => 'Type the placeholder into the document text — it is replaced by the value when shown. An empty field substitutes emptiness, so it is better to remove unfilled ones from the text.',
+    'Заполнено :n из :all.' => 'Filled in :n of :all.',
+    'Незаполненные подставятся пустотой.' => 'Unfilled ones substitute emptiness.',
+    'пусто' => 'empty',
+    'контрольная' => 'check digit',
+    'Как выглядит' => 'How it looks',
+    'Как входят' => 'How people sign in',
+    'Документы и данные' => 'Documents and details',
+    'Техника' => 'Technical',
+    'Хозяину' => 'For the owner',
+    'Имя установки, акцентный цвет, логотип, favicon' => 'Installation name, accent colour, logo, favicon',
+    'Пароль, 2FA, блокировки, логин, домены почты при регистрации'
+        => 'Password, 2FA, lockouts, login, email domains at registration',
+    'Сессия, токены, ссылки из писем' => 'Session, tokens, links from emails',
+    'Telegram, VK, Яндекс, GitHub' => 'Telegram, VK, Yandex, GitHub',
+    'Подписи токенов, ротация JWKS' => 'Token signatures, JWKS rotation',
+    'Политика, согласие, соглашение, реквизиты' => 'Policy, consent, terms, company details',
+    'SMTP-сервер, отправитель, проверка отправки' => 'SMTP server, sender, delivery check',
+    'События наружу с подписью HMAC' => 'Outbound events signed with HMAC',
+    'Проверки окружения, очереди, планировщик' => 'Environment checks, queues, scheduler',
+    'Импорт людей, бэкап, чистка, миграции' => 'People import, backup, cleanup, migrations',
+    'Режим обслуживания, хранение журналов' => 'Maintenance mode, log retention',
+    'Домен, база данных, владение, сброс' => 'Domain, database, ownership, reset',
+    'Юридическое название' => 'Legal name',
+    'Краткое название' => 'Short name',
+    'ОГРН / ОГРНИП' => 'State registration number',
+    'КПП' => 'Tax registration reason code',
+    'Юридический адрес' => 'Legal address',
+    'Почтовый адрес' => 'Postal address',
+    'Руководитель' => 'Head of the organisation',
+    'Должность руководителя' => 'Position of the head',
+    'Почта для обращений' => 'Email for enquiries',
+    'Ответственный за обработку данных' => 'Person responsible for data processing',
+
+    /* ---- v4.10: реквизиты под мир, а не под одну страну ---- */
+    'Подобрать' => 'Suggest',
+    'Оператор данных' => 'Data controller',
+    'Страна' => 'Country',
+    'Налоговый номер' => 'Tax number',
+    /* Пример телефона: русской установке уместен +7, английской — нет.
+       Ключ без кириллицы, поэтому сканер словаря его не собирает и
+       в отчёт он попадёт как «текст есть в коде, сканер не дошёл» —
+       это честнее, чем подгонять ключ под проверку. */
+    '+7 900 000-00-00' => '+1 555 000-0000',
+    /* Образцы в полях реквизитов. Перечисление названий по странам оставлено
+       перечислением — оно и есть содержание подсказки, — но русское идёт
+       последним, а пример адреса взят нейтральный. */
+    'ИНН · VAT · EIN · Tax ID' => 'VAT · EIN · Tax ID · TIN',
+    'ОГРН · Company number · Registration no.' => 'Company number · Registration no. · CRN',
+    'Acme Inc. / ООО «Ромашка» / Иван Иванов' => 'Acme Inc. / Example Ltd / Jane Doe',
+    '101000, Москва, ул. Примерная, 1' => '1 Example Street, Springfield, 12345',
+    'Россия / Serbia / Germany' => 'Serbia / Germany / United States',
+    'Имя или подразделение' => 'Name or department',
+    'Регистрационный номер' => 'Registration number',
+    'Сайт' => 'Website',
+    'Ответственный за обработку' => 'Person responsible for processing',
+    'Кто отвечает за обработку: компания или человек. Так, как в учредительных документах' => 'Who is responsible for processing: a company or a person. As stated in the founding documents',
+    'По её праву работает документ — от этого зависит, что в нём обязано быть' => 'The document operates under its law — that determines what it must contain',
+    'Один адрес — тот, по которому оператора находят официально' => 'One address — the one at which the controller is officially found',
+    'Как он называется в вашей стране — так и вписывайте. Формат не проверяем: у каждой страны свой' => 'Write it as it is called in your country. We do not validate the format: every country has its own',
+    'Номер записи о регистрации, если он у вас есть' => 'The registration record number, if you have one',
+    'Куда пишут по поводу данных. Отдельный адрес удобнее личного: его не жалко публиковать' => 'Where people write about their data. A separate address beats a personal one: publishing it costs nothing',
+    'С кодом страны. Необязателен, если хватает почты' => 'With the country code. Optional if email is enough',
+    'С кодом страны' => 'With the country code',
+    'Без имени' => 'No name',
+
+    /* Разрез «Политик» надвое (v4.21). */
+    'Пароль, блокировки, 2FA, замок после простоя, данные профиля'
+        => 'Password, lockouts, 2FA, idle lock, profile fields',
+    'Кто может завести аккаунт, домены почты, логин, капча'
+        => 'Who may create an account, email domains, login, captcha',
+
+    /* Замок: короткая переавторизация (v4.20). */
+    'Замок после простоя' => 'Lock after idling',
+    'Запирать через, минут' => 'Lock after, minutes',
+    '0 — не запирать. Заперто не значит «вышел»: сессия жива, порталы работают, спрашиваем только «это вы».'
+        => '0 — never lock. Locked does not mean signed out: the session lives, portals keep working, we only ask “is this you”.',
+    'Отпирают отпечатком или лицом через ключ устройства, а где биометрии нет — коротким PIN. Пароль не спрашивается: замок для того и нужен, чтобы его не вводить.'
+        => 'Unlocked by fingerprint or face via a device key, and where there is no biometry — by a short PIN. The password is not asked: the lock exists precisely so you do not type it.',
+    'У кого нет ни ключа, ни PIN, замок не сработает — иначе он превратился бы в требование пароля каждые полчаса.'
+        => 'For someone with neither a key nor a PIN the lock does not engage — otherwise it would become a password prompt every half hour.',
+    'Быстрая переавторизация' => 'Quick re-authentication',
+    'После :n мин без действий установка запирает сессию и просит подтвердить, что это вы. Выйти при этом не нужно: пароль не спрашивается, порталы не отключаются.'
+        => 'After :n min of inactivity the installation locks the session and asks you to confirm it is you. No sign-out is involved: the password is not asked and portals stay connected.',
+    'Отпечаток или лицо — ключ устройства' => 'Fingerprint or face — device key',
+    'PIN — запасной путь для устройств без биометрии' => 'PIN — the fallback for devices without biometry',
+    'добавить →' => 'add →',
+    'Пока нет ни ключа устройства, ни PIN — замок не сработает: запирать нечем, а спрашивать пароль каждые полчаса значит превратить его в мучение.'
+        => 'There is neither a device key nor a PIN yet — the lock will not engage: there is nothing to unlock with, and asking for the password every half hour would turn it into torture.',
+    'Задать PIN' => 'Set a PIN',
+    'Новый PIN' => 'New PIN',
+    'Ещё раз' => 'Once more',
+    'От :min до :max цифр. Одинаковые и подряд идущие не принимаются.'
+        => ':min to :max digits. All-same and sequential are not accepted.',
+    'Сохранить PIN' => 'Save PIN',
+    'Сменить PIN' => 'Change PIN',
+    'Убрать PIN' => 'Remove PIN',
+    'Убрать PIN? Останется только ключ устройства.' => 'Remove the PIN? Only the device key will remain.',
+    ':n неверных попыток подряд — и сессия закрывается совсем: дальше только полный вход.'
+        => ':n wrong attempts in a row and the session closes for good: after that only a full sign-in.',
+    'PIN сохранён.' => 'PIN saved.',
+    'PIN убран.' => 'PIN removed.',
+    'Коды не совпали.' => 'The codes did not match.',
+    'PIN — от :min до :max цифр.' => 'The PIN must be :min to :max digits.',
+    'Все цифры одинаковые — так не годится.' => 'All digits are the same — that will not do.',
+    'Цифры подряд — так не годится.' => 'Sequential digits — that will not do.',
+    'Подтвердите, что это вы' => 'Confirm it is you',
+    'Вы не пользовались этим устройством какое-то время. Подтвердите, что это по-прежнему вы.'
+        => 'You have not used this device for a while. Confirm it is still you.',
+    'Отпечаток или лицо' => 'Fingerprint or face',
+    'Открыть' => 'Unlock',
+    'Выйти и войти паролем' => 'Sign out and use the password',
+    'Код не подошёл.' => 'The code did not match.',
+    'Слишком много попыток. Войдите заново.' => 'Too many attempts. Sign in again.',
+    'Сессия заперта' => 'Session locked',
+    'Подтвердите, что это вы, — и повторите действие.' => 'Confirm it is you and repeat the action.',
+
+    /* Первый вход в сервис (v4.19). */
+    'Вход в' => 'Signing in to',
+    'Это сервис :app. Вы войдёте туда под своей учётной записью — заводить ещё одну не нужно.'
+        => 'This is a :app service. You will sign in with your existing account — no need to create another.',
+    'Я хочу пользоваться этим сервисом' => 'I want to use this service',
+    'и принимаю' => 'and I accept',
+    'Продолжить' => 'Continue',
+    'Не сейчас' => 'Not now',
+    'Отметьте галочку — без неё это не согласие.'
+        => 'Tick the box — without it this is not consent.',
+    'Первый вход в сервис' => 'First entry to a service',
+    'Спрашивать при первом входе в каждый сервис' => 'Ask on the first entry to each service',
+    'Человек увидит, куда он входит, и отметит галочкой, что хочет пользоваться этим сервисом. Отметка сохраняется у доступа. Выключено — доверенный сервис пускает молча; недоверенный спрашивает всегда, это требование протокола.'
+        => 'The person sees where they are signing in and ticks a box saying they want to use this service. The tick is stored with the access record. When off, a trusted service admits silently; an untrusted one always asks — that is the protocol.',
+    'Выключать стоит там, где все сервисы свои и вход задуман сквозным: лишний экран между кнопкой и результатом человек читает один раз, а нажимает каждый.'
+        => 'Worth turning off where every service is your own and sign-in is meant to be seamless: an extra screen between the button and the result is read once and clicked every time.',
+
+    /* Чистка помеченных пачкой (v4.18.2). */
+    'Чистка помеченных на удаление' => 'Sweep of accounts marked for deletion',
+    'Удаление аккаунта отложенное: две недели человек может передумать. Отлежавших срок приходилось убирать по одному — зона, пароль, набранное имя, и так сто раз. Здесь они убираются пачкой, но список показывается до, а не после.'
+        => 'Account deletion is deferred: for two weeks a person can change their mind. Those past the term had to be removed one at a time — zone, password, typed name, a hundred times over. Here they go in one batch, but the list is shown before, not after.',
+    'Помеченных на удаление нет.' => 'Nothing is marked for deletion.',
+    'Помечено всего' => 'Marked in total',
+    'Отлежали срок и попадут в чистку' => 'Past the term and included in the sweep',
+    '(за один заход не больше :n)' => '(no more than :n per run)',
+    'Срок «передумать»' => 'Change-your-mind term',
+    'Все помеченные ещё в сроке — удалять пока нечего. Каждого можно убрать поштучно в его опасной зоне, если ждать незачем.'
+        => 'Everyone marked is still within the term — nothing to delete yet. Each can be removed individually in their danger zone if there is no reason to wait.',
+    'Помечен' => 'Marked',
+    'Наберите «удалить», чтобы подтвердить' => 'Type “delete” to confirm',
+    'удалить' => 'delete',
+    'Удалить :n безвозвратно? Отменить будет нечем.'
+        => 'Delete :n irreversibly? There will be nothing to undo with.',
+    'Удалить :n :word' => 'Delete :n :word',
+    'Набрано неверно — никого не тронули.' => 'Typed incorrectly — nobody was touched.',
+    'Удалять было нечего.' => 'There was nothing to delete.',
+    'Удалено :n :word, строк убрано — :rows.' => 'Deleted :n :word, rows removed — :rows.',
+    'Массовая чистка' => 'Batch sweep',
+    'Разом удалено несколько помеченных аккаунтов. Необратимо, поэтому стоит знать.'
+        => 'Several marked accounts were deleted at once. Irreversible, so worth knowing.',
+    'Массовая чистка: удалено :n :word, строк — :rows.'
+        => 'Batch sweep: deleted :n :word, rows — :rows.',
+    'аккаунт' => 'account', 'аккаунта' => 'accounts', 'аккаунтов' => 'accounts',
+    'дней' => 'days',
+
+    /* Неподтверждённая почта: выход из положения, которого не было (v4.18.2). */
+    'Почта :email не подтверждена — письмо со ссылкой уже отправлено.'
+        => 'The address :email is not confirmed — a letter with the link has been sent.',
+    'Прислать ещё раз' => 'Send again',
+    'Другой адрес' => 'Another address',
+    'Письмо не пришло? Скорее всего, в адресе опечатка.'
+        => 'The letter did not arrive? Most likely there is a typo in the address.',
+    'Сейчас указан :email. Новый адрес заменит его, и письмо уйдёт туда.'
+        => 'Currently :email. A new address replaces it, and the letter goes there.',
+    'Сохранить и выслать письмо' => 'Save and send the letter',
+    '← Вернуться' => '← Back',
+
+    /* Проводка, которой не было (v4.18). */
+    'Сменился адрес установки' => 'The installation address changed',
+    'Включена двухфакторная защита — :app' => 'Two-factor protection enabled — :app',
+    'Выключена двухфакторная защита — :app' => 'Two-factor protection disabled — :app',
+    'В вашем аккаунте включили вход по одноразовому коду. Если это были не вы — смените пароль немедленно.'
+        => 'One-time code sign-in was enabled on your account. If this was not you, change your password immediately.',
+    'В вашем аккаунте выключили вход по одноразовому коду. Если это были не вы — включите её снова и смените пароль.'
+        => 'One-time code sign-in was disabled on your account. If this was not you, turn it back on and change your password.',
+
+    /* Уведомления владельцу (v4.17). Каталог событий переводится через
+       t($переменная) — перечислен здесь осознанно. */
+    'Уведомления' => 'Notifications',
+    'Письма владельцу: регистрации, блокировки, подбор пароля'
+        => 'Letters to the owner: registrations, blocks, password guessing',
+    'О чём писать' => 'What to write about',
+    'Всё выключено по умолчанию: письмо о каждой регистрации нужно не всякой установке, а той, где регистрируются сотнями, — точно нет.'
+        => 'Everything is off by default: a letter for every registration is not what every installation wants, and an installation with hundreds a day certainly does not.',
+    'Адреса' => 'Addresses',
+    'Через запятую или по одному на строку. Пусто — владельцу установки.'
+        => 'Comma-separated or one per line. Empty means the installation owner.',
+    'Сейчас письма уйдут на: :list' => 'Right now letters will go to: :list',
+    'Писать сейчас некому: адреса не заданы, а у владельца нет почты.'
+        => 'There is nobody to write to: no addresses are set and the owner has no email.',
+    'Чтобы не завалило' => 'So you are not buried',
+    'Не чаще одного письма в' => 'At most one letter every',
+    '(минут)' => '(minutes)',
+    'На каждый вид события отдельно. Остальные случившиеся за это время не пропадут: они приедут строкой «и ещё столько-то» в следующем письме.'
+        => 'Per event kind separately. The rest that happened meanwhile are not lost: they arrive as an “and N more” line in the next letter.',
+    'Уведомления о своём аккаунте — вход с нового устройства, смена пароля — настраиваются каждым человеком у себя в профиле. Здесь только то, что касается установки целиком.'
+        => 'Notifications about one’s own account — a sign-in from a new device, a password change — are set by each person in their profile. This section is only about the installation as a whole.',
+    'Это уведомление владельцу установки. Выключить или сменить адрес — в настройках, раздел «Уведомления».'
+        => 'This is a notification to the installation owner. Turn it off or change the address in settings, section “Notifications”.',
+    'И ещё' => 'And more',
+    ':n за последние :min мин' => ':n in the last :min min',
+    /* Каталог событий и тексты самих уведомлений. */
+    'Новая регистрация' => 'New registration',
+    'Кто-то завёл аккаунт сам. Полезно, пока установка закрытая или только запускается.'
+        => 'Someone created an account themselves. Useful while the installation is closed or just starting.',
+    'Новый аккаунт: :who.' => 'New account: :who.',
+    'Аккаунт заблокирован' => 'Account blocked',
+    'Заблокировал администратор или автоматика после серии неудачных входов.'
+        => 'Blocked by an administrator or automatically after a series of failed sign-ins.',
+    'Аккаунт :who заблокирован.' => 'Account :who has been blocked.',
+    'Подбор пароля' => 'Password guessing',
+    'Серия неудачных входов подряд по одному аккаунту.'
+        => 'A run of failed sign-ins in a row on one account.',
+    'Подбор пароля — :app' => 'Password guessing — :app',
+    'В аккаунт пытались войти :n раз подряд с неверным паролем. Вход временно закрыт на :min мин.'
+        => 'There were :n sign-in attempts in a row with a wrong password. Sign-in is closed for :min min.',
+    'Аккаунт :who закрыт на :min мин после :n неудачных попыток входа.'
+        => 'Account :who is closed for :min min after :n failed sign-in attempts.',
+    'Подключён портал' => 'Portal connected',
+    'Кто-то из администраторов завёл новый сервис.'
+        => 'One of the administrators added a new service.',
+    'Подключён портал «:name».' => 'Portal “:name” has been connected.',
+    'Загружены чужие настройки' => 'Foreign settings loaded',
+    'Кто-то применил файл настроек. Меняет правила входа разом, поэтому стоит знать.'
+        => 'Someone applied a settings file. It changes sign-in rules at once, so it is worth knowing.',
+    'Применён файл настроек: изменено :n.' => 'A settings file was applied: :n changed.',
+
+    /* Письма (v4.16). Тексты каталога переводятся через t($переменная) — тулза
+       покрытия их не видит, поэтому они перечислены здесь осознанно, а не по
+       её подсказке. */
+    'Подпись под всеми письмами' => 'Signature under every letter',
+    'Подпись' => 'Signature',
+    'Стоит внизу каждого письма. Пусто — как в поставке. Сюда обычно ставят адрес поддержки или название организации.'
+        => 'Sits at the bottom of every letter. Empty means as shipped. This usually holds a support address or the organisation name.',
+    'Приветствие' => 'Greeting',
+    'Надпись на кнопке' => 'Button label',
+    'Объяснение' => 'Explanation',
+    'Строка между приветствием и кнопкой. Пусто — как в поставке.'
+        => 'The line between the greeting and the button. Empty means as shipped.',
+    'свой текст' => 'custom text',
+    'Посмотреть письмо' => 'Preview the letter',
+    'Предпросмотр письма' => 'Letter preview',
+    'Значения выдуманные: настоящие подставятся при отправке.'
+        => 'The values are made up: real ones are filled in when sending.',
+    'Что подставляется' => 'What gets substituted',
+    'Имя получателя. Если его нет, подстановка исчезает вместе с запятой.'
+        => 'The recipient’s name. If there is none, the placeholder disappears along with the comma.',
+    'Название установки — сейчас «:app».' => 'The installation name — currently “:app”.',
+    'Сколько живёт ссылка. Берётся из раздела «Сроки», а не пишется руками.'
+        => 'How long the link lives. Taken from the “Timeouts” section, not typed by hand.',
+    'Кнопка, запасная ссылка текстом и строка про срок остаются нашими: письмо без рабочей кнопки — это человек, который не может войти. Срок в тексте подставляется из настроек и потому не расходится с действительностью.'
+        => 'The button, the plain-text fallback link and the expiry line stay ours: a letter without a working button is a person who cannot sign in. The expiry is substituted from settings and therefore never contradicts reality.',
+    'Тексты писем, тема, подпись, предпросмотр' => 'Letter texts, subject, signature, preview',
+    'Письма' => 'Letters',
+    'Или откройте ссылку:' => 'Or open the link:',
+    'Ссылка действует :for.' => 'The link is valid for :for.',
+    'Иван' => 'John',
+    /* Единицы срока: их подставляет fmt_duration() через plural(). */
+    'около' => 'about',
+    'день' => 'day', 'дня' => 'days',     'час' => 'hour', 'часа' => 'hours', 'часов' => 'hours',
+    'минута' => 'minute', 'минуты' => 'minutes', 'минут' => 'minutes',
+    'секунда' => 'second', 'секунды' => 'seconds', 'секунд' => 'seconds',
+    /* Каталог писем. */
+    'Подтверждение почты' => 'Email confirmation',
+    'После регистрации и по кнопке «отправить письмо ещё раз».'
+        => 'After registration and via the “send the letter again” button.',
+    'Подтвердите почту' => 'Confirm your email',
+    'Здравствуйте' => 'Hello',
+    'Подтвердите почту для вашей учётной записи — нажмите кнопку:'
+        => 'Confirm the email for your account — press the button:',
+    'Подтвердить почту' => 'Confirm email',
+    'Вход по ссылке' => 'Sign-in link',
+    'Когда человек просит ссылку для входа без пароля.'
+        => 'When a person asks for a link to sign in without a password.',
+    'Вход в {{ Название }}' => 'Sign in to {{ Название }}',
+    'Ссылка для входа без пароля:' => 'A link to sign in without a password:',
+    'Сброс пароля' => 'Password reset',
+    'По запросу восстановления и когда админ выдаёт ссылку сам.'
+        => 'On a recovery request and when an admin issues the link themselves.',
+    'Вы (или кто-то от вашего имени) запросили сброс пароля. Задайте новый:'
+        => 'You (or someone on your behalf) requested a password reset. Set a new one:',
+    'Задать новый пароль' => 'Set a new password',
+    'Смена почты' => 'Email change',
+    'На новый адрес, когда его меняют в настройках аккаунта.'
+        => 'To the new address when it is changed in account settings.',
+    'Подтвердите новую почту' => 'Confirm the new email',
+    'Вы меняете почту аккаунта. Подтвердите новый адрес:'
+        => 'You are changing the account email. Confirm the new address:',
+    'Подтвердить адрес' => 'Confirm address',
+    'Выгрузка данных готова' => 'Data export ready',
+    'Когда собран архив с данными по запросу человека.'
+        => 'When the data archive requested by the person has been built.',
+    'Выгрузка ваших данных' => 'Your data export',
+    'Вы заказали выгрузку своих данных. Скачать архив можно по ссылке:'
+        => 'You requested an export of your data. The archive can be downloaded here:',
+    'Скачать мои данные' => 'Download my data',
+    'Когда человек или админ запросил удаление аккаунта.'
+        => 'When the person or an admin requested account deletion.',
+    'Аккаунт будет удалён' => 'The account will be deleted',
+    'Ваша учётная запись помечена на удаление. Данные будут анонимизированы безвозвратно. Передумали?'
+        => 'Your account is marked for deletion. The data will be anonymised irreversibly. Changed your mind?',
+    'Отменить удаление' => 'Cancel deletion',
+
+    /* Слепок настроек и пояс установки (v4.15). */
+    'Часовой пояс установки' => 'Installation time zone',
+    'По умолчанию' => 'Default',
+    'В нём показываются даты тому, у кого свой пояс не выбран, и в нём же уходят письма. Свой пояс человек ставит в настройках аккаунта.'
+        => 'Dates are shown in it to anyone who has not picked their own zone, and emails go out in it. A person sets their own zone in account settings.',
+    'Сейчас на сервере :now.' => 'Server time is :now.',
+    'Настройки одним файлом' => 'Settings as one file',
+    'Выгрузить' => 'Export',
+    'Скачать settings.json' => 'Download settings.json',
+    'Правила, оформление, документы, сроки и реквизиты. Люди, ключи подписи и владелец не переносятся: в чужой базе они указывают в пустоту.'
+        => 'Rules, appearance, documents, timeouts and requisites. People, signing keys and the owner do not travel: in another database they point at nothing.',
+    '…то же с паролями и секретами внутри' => '…the same with passwords and secrets inside',
+    'По умолчанию пароль SMTP и секреты соцвхода в файл не попадают: он ходит по почте и лежит в загрузках.'
+        => 'By default the SMTP password and social sign-in secrets stay out of the file: it travels by email and sits in Downloads.',
+    'Файл настроек' => 'Settings file',
+    'Посмотреть' => 'Preview',
+    'Сначала покажем построчно, что изменится, и только потом спросим. Ключи, которых нет в списке переносимых, не примем.'
+        => 'First we show line by line what will change, and only then ask. Keys outside the portable list are not accepted.',
+    'Что изменится' => 'What will change',
+    'Файл из «:from», версия :version.' => 'File from “:from”, version :version.',
+    'Менять нечего: все настройки уже такие.' => 'Nothing to change: every setting already matches.',
+    'Настройка' => 'Setting',
+    'Станет' => 'Will be',
+    'Совпадает и потому не тронется: :n.' => 'Matching and therefore untouched: :n.',
+    'Не приняли :n :word — они не переносятся между установками: :list'
+        => 'Rejected :n :word — they do not travel between installations: :list',
+    'Применить' => 'Apply',
+    'Применить настройки из файла? Нынешние значения перезапишутся.'
+        => 'Apply settings from the file? Current values will be overwritten.',
+    'Настройки применены: :n :word.' => 'Settings applied: :n :word.',
+    'Ничего не применилось: файл не подошёл или менять было нечего.'
+        => 'Nothing was applied: the file did not fit, or there was nothing to change.',
+    'Файл больше 2 МБ — это не слепок настроек.' => 'The file is over 2 MB — that is not a settings snapshot.',
+    'Файл другого формата (:got вместо :want) — загрузить его нельзя.'
+        => 'The file has a different format (:got instead of :want) — it cannot be loaded.',
+    'Это не файл настроек: в нём нет раздела settings.'
+        => 'This is not a settings file: it has no settings section.',
+
+    /* Правила регистрации и имени входа (v4.14). Тексты ошибок видит не только
+       администратор: логин правят в своём профиле, а отказ по домену читает
+       тот, кого не пустили. */
+    'Имя для входа' => 'Sign-in name',
+    'Минимум символов' => 'Minimum length',
+    'Максимум' => 'Maximum',
+    'Занять имена' => 'Reserve names',
+    'Через запятую или по одному на строку — поверх :n имён, занятых всегда (admin, root, support, noreply и подобные).'
+        => 'Comma-separated or one per line — on top of :n names reserved always (admin, root, support, noreply and the like).',
+    'Набор символов не настраивается: логин уезжает в claim, в адреса и в чужие конфиги. Латиница, цифры, точка, дефис, подчёркивание — и не по краям.'
+        => 'The character set is not configurable: the login travels into claims, addresses and other people’s configs. Latin letters, digits, dot, hyphen, underscore — and not at the edges.',
+    'Логин — от :min до :max символов.' => 'The login must be :min to :max characters.',
+    'В логине допустимы латинские буквы, цифры, точка, дефис и подчёркивание.'
+        => 'A login may contain Latin letters, digits, a dot, a hyphen and an underscore.',
+    'Логин не может начинаться и заканчиваться точкой, дефисом или подчёркиванием.'
+        => 'A login cannot start or end with a dot, hyphen or underscore.',
+    'Это имя занято системой — выберите другое.' => 'This name is reserved by the system — pick another.',
+    'Кому можно регистрироваться' => 'Who may register',
+    'Разрешённые домены почты' => 'Allowed email domains',
+    'Пусто — любой домен. Поддомены считаются своими: mail.example.com пройдёт по правилу example.com.'
+        => 'Empty means any domain. Subdomains count as your own: mail.example.com passes the example.com rule.',
+    'Сейчас зарегистрироваться может любой, у кого есть почта.'
+        => 'Right now anyone with an email address can register.',
+    'Сейчас зарегистрироваться могут только с :list.' => 'Right now only :list can register.',
+    'Ограничение действует только на самостоятельную регистрацию. Приглашение, импорт, SCIM и Admin API его не спрашивают: там аккаунт заводите вы.'
+        => 'The restriction applies to self-registration only. Invitations, import, SCIM and the Admin API do not consult it: there you create the account yourself.',
+    'Регистрация открыта только для адресов: :list. Если ваш адрес должен подойти — попросите администратора.'
+        => 'Registration is open to these addresses only: :list. If yours should qualify, ask an administrator.',
+    'Картинка живёт, секунд' => 'Image lives, seconds',
+    'Допустимо 60 — 3600. Истекшую картинку человек увидит как «попробуйте ещё раз».'
+        => 'Allowed 60 — 3600. An expired image shows up as “please try again”.',
+    'Потолок переноса, МБ' => 'Transfer ceiling, MB',
+    'Перенос идёт в один заход и держит базу закрытой всё это время. Потолок — про то, сколько вы готовы ждать.'
+        => 'The transfer runs in one pass and keeps the database closed the whole time. The ceiling is about how long you are willing to wait.',
+    '«Перенести данные» создаёт схему миграциями и копирует строки — работает и между MySQL и SQLite. Больше потолка — только дампом вручную: оборвавшийся перенос оставляет полбазы.'
+        => '“Transfer data” builds the schema with migrations and copies rows — it works between MySQL and SQLite too. Above the ceiling, use a manual dump: an interrupted transfer leaves half a database.',
+    'Знак рядом с именем на всех порталах. Ставится вручную и означает ровно то, что вы проверили этого человека сами.'
+        => 'A mark next to the name on every portal. Set by hand and means exactly that you checked this person yourself.',
+    'Если пусто — Имя Фамилия' => 'If empty — First name Last name',
+    'Письмо «Задайте пароль» тем, у кого нет хэша' => 'Send a “set your password” email to those without a hash',
+    'Иначе такой человек попадёт в базу, но войти не сможет, пока не восстановит пароль сам.'
+        => 'Otherwise such a person lands in the database but cannot sign in until they recover the password themselves.',
+    'Основной сайт оператора, если он отличается от адреса этой установки' => 'The controller main site, if it differs from this installation address',
+    'В ЕС это обязательный DPO, в других странах — по желанию. Пусто — и в документе строки не будет' => 'In the EU this is a mandatory DPO, elsewhere optional. Leave empty and the line will not appear in the document',
+    'Разделы настроек' => 'Settings sections',
+
+    /* ---- v4.11: поля почты и сроков на объявленном слое ---- */
+    '587 для STARTTLS, 465 для SSL, 25 без шифрования' => '587 for STARTTLS, 465 for SSL, 25 without encryption',
+    'Подпись отправителя в почтовых клиентах' => 'Sender name shown in mail clients',
+    'С какого адреса уходят письма. Домен должен разрешать отправку от вашего имени.' => 'The address letters are sent from. The domain must allow sending on your behalf.',
+    'Файл-лог складывает письма в storage/logs/mail — удобно, пока сервера нет.' => 'The file log stores letters in storage/logs/mail — handy while there is no server.',
+    'сейчас :now, допустимо :min — :max' => 'now :now, allowed :min — :max',
+    'дн' => 'd',
+    'ч' => 'h',
+    'мин' => 'min',
+    'сек' => 's',
+
+    /* ---- v4.11: политики и обслуживание на объявленном слое ---- */
+    'В админке IP всегда виден целиком: по «91.132.✻.✻» инцидент не разберёшь.' => 'In the admin area the IP is always shown in full: you cannot investigate an incident from “91.132.✻.✻”.',
+    'Все получают 503, кроме адресов из списка ниже. Вход в админку тоже закрыт — список это единственная дверь.' => 'Everyone gets a 503 except the addresses listed below. The admin area is closed too — the list is the only door.',
+    'Выключено — каждый решает сам. Включено — админ без второго фактора не попадёт в админку, пока его не настроит.' => 'Off — everyone decides for themselves. On — an admin without a second factor cannot enter the admin area until they set one up.',
+    'Допустимо 0 — 3650' => 'Allowed 0 — 3650',
+    'Допустимо 1 — 64. Длина сама по себе даёт больше, чем любой набор требований.' => 'Allowed 1 — 64. Length alone gives more than any set of requirements.',
+    'Допустимо 1 — 1440' => 'Allowed 1 — 1440',
+    'Допустимо 2 — 20. Ниже двух капча встречает человека с первой опечатки.' => 'Allowed 2 — 20. Below two the captcha meets a person at their first typo.',
+    'Допустимо 3 — 30' => 'Allowed 3 — 30',
+    'Появится только после нескольких неудач подряд — тем, кто вошёл сразу, она не встретится.' => 'Appears only after several failures in a row — those who signed in at once never meet it.',
+    'Пусто при включённом режиме означает, что внутрь не попадёт никто.' => 'Empty while the mode is on means nobody gets in.',
+    'Режим обслуживания' => 'Maintenance mode',
+    'Без ключей ниже кнопка на экране входа не появится.' => 'Without the keys below, the button will not appear on the sign-in screen.',
+    'Имя бота (без @)' => 'Bot name (without @)',
+    'Токен бота' => 'Bot token',
+
+    /* ---- v4.12: загрузки и цвет на объявленном слое ---- */
+    '(png, jpeg или webp, до 2 МБ)' => '(png, jpeg or webp, up to 2 MB)',
+    '(до 6 МБ)' => '(up to 6 MB)',
+    '(квадрат, до 1 МБ)' => '(square, up to 1 MB)',
+    'Впишется в высоту шапки, прозрачность сохраняется' => 'Fits the header height, transparency is preserved',
+    'Данные оператора подставляются из реквизитов.' => 'Controller details are substituted from the company details.',
+    'Заполнить →' => 'Fill in →',
+    'Не заполнено в реквизитах: :list. Эти подстановки уйдут в документ пустыми.' => 'Not filled in the company details: :list. These placeholders will reach the document empty.',
+    'Обрежем в 64×64' => 'We will crop it to 64×64',
+    'Пока текст пуст, документ не показывается независимо от тумблера.' => 'While the text is empty the document is not shown regardless of the toggle.',
+    'Посмотреть →' => 'View →',
+    'Пусто — подставится название' => 'Empty — the installation name is used',
+    'Стоит в шапке, в письмах и в заголовке вкладки' => 'Appears in the header, in emails and in the tab title',
+    'нет' => 'none',
+
+    /* Переименование портала и ключ переноса, который успевают скопировать
+       (v4.21.2). */
+    'Машинное имя' => 'Machine name',
+    'Машинное имя «:slug» уже занято другим порталом.'
+        => 'The machine name “:slug” is already taken by another portal.',
+    'Машинное имя не изменено: только латиница, цифры и дефис, от 2 до 50 знаков.'
+        => 'Machine name unchanged: Latin letters, digits and hyphens only, 2 to 50 characters.',
+    'Латиница, цифры и дефис. Уезжает префиксом в claim roles («:slug:editor») и в имена файлов набора. Пока карта ролей пуста, портал разбирает роли по этому префиксу — переименование он заметит.'
+        => 'Latin letters, digits and hyphens. Travels as the prefix in the roles claim (“:slug:editor”) and in kit file names. While the role map is empty the portal parses roles by this prefix, so it will notice a rename.',
+    'Портал обновлён. Машинное имя теперь «:slug» — если карта ролей пуста, портал начнёт получать роли с новым префиксом.'
+        => 'Portal updated. The machine name is now “:slug” — if the role map is empty, the portal will start receiving roles with the new prefix.',
+    'Ключ переноса выдан — скопируйте его сейчас' => 'Transfer key issued — copy it now',
+    'Больше он не покажется. Потеряли — выдайте заново, старый перестанет работать.'
+        => 'It will not be shown again. Lost it — issue a new one, and the old one stops working.',
+    'Впишите в sso/config.php портала как users_secret. Ключ отдельный от client_secret: его смена вход не ломает.'
+        => 'Put it into the portal sso/config.php as users_secret. This key is separate from client_secret: replacing it does not break sign-in.',
+
+    /* Установка моста одной ссылкой (v4.22). */
+    'Ссылка установки' => 'Install link',
+    'Ссылка установки — откройте её на портале' => 'Install link — open it on the portal',
+    'Ссылка установки готова. Откройте её на портале — реквизиты он заберёт сам. Действует :n минут и один раз.'
+        => 'The install link is ready. Open it on the portal — it will fetch the credentials itself. Valid for :n minutes and one use.',
+    '(одноразовая, :n минут)' => '(one-time, :n minutes)',
+    'Залейте каталог sso/ из набора на сайт и откройте эту ссылку. Портал сам заберёт реквизиты, ключ переноса и адреса — вписывать вручную будет нечего.'
+        => 'Upload the sso/ directory from the kit to the site and open this link. The portal will fetch the credentials, the transfer key and the addresses itself — nothing left to type in by hand.',
+    'Портал забрал реквизиты по ссылке установки' => 'Portal fetched its credentials via the install link',
+    'Портал «:name» забрал свои реквизиты по ссылке установки. Вместе с ними перевыпущен client_secret: прежний перестанет приниматься через сутки.'
+        => 'The portal “:name” fetched its credentials via the install link. The client_secret was reissued along with them: the previous one stops being accepted in 24 hours.',
+
+    /* Области доступа (v4.23). Подписи ступеней — SCOPES.md §2. */
+    'Вся система' => 'Whole installation',
+    'Организация' => 'Organization',
+    'Сервис' => 'Service',
+
+    /* Организация владеет проектами (v4.25). */
+    'Проекты' => 'Projects',
+    'Проекты организации' => 'Organization projects',
+    'Проектов нет' => 'No projects',
+    'Проектов нет.' => 'No projects.',
+    'Порталы, которые ей принадлежат. Роль, выданная на организацию, действует во всех них — это и есть наследование.'
+        => 'The portals it owns. A role granted on the organization applies to all of them — that is inheritance.',
+    'Не путать с доступами: там чужие порталы, куда организацию пускают, здесь — её собственные.'
+        => 'Not to be confused with access: that is other portals the organization is let into, this is its own.',
+    'Проект назначается в карточке портала — поле «Организация».'
+        => 'A project is assigned in the portal card — the “Organization” field.',
+    'Чей это проект. Роли, выданные на организацию, действуют во всех её проектах.'
+        => 'Whose project this is. Roles granted on the organization apply to all of its projects.',
+    '— ничей (уровень системы)' => '— none (installation level)',
+
+    /* Поиск инцидента по номеру со страницы 500 (v4.31). */
+    'Номер инцидента' => 'Incident id',
+    'Открыть это событие в журнале' => 'Open this event in the log',
+    'Найти' => 'Find',
+    'Восемь знаков со страницы ошибки. Ищется по всем дням.'
+        => 'Eight characters from the error page. Searched across all days.',
+    'Номер состоит из восьми знаков — цифр и букв a–f. Проверьте, что скопировали целиком.'
+        => 'The id is eight characters — digits and letters a–f. Check that you copied all of it.',
+    'По номеру :id ничего нет. Записи чистятся по сроку хранения — возможно, инцидент старше него.'
+        => 'Nothing found for :id. Entries are pruned by the retention period — the incident may be older than it.',
+    'Инцидент :id — записей: :n, файл :file.' => 'Incident :id — entries: :n, file :file.',
+
+    /* Рабочее место сервиса и человека (v4.30): те же разделы адресами. */
+    'Реквизиты — показываются один раз' => 'Credentials — shown once',
+    'Файлы для портала' => 'Files for the portal',
+    'Ключи и ссылки' => 'Keys and links',
+    'Спека для нейросети и референс-код: спека говорит «что», набор показывает «как».'
+        => 'A spec for the AI and reference code: the spec says “what”, the kit shows “how”.',
+    'client_secret в файлы не включается — он доступен только в момент создания или перевыпуска.'
+        => 'client_secret is not put into the files — it is available only when created or reissued.',
+    'Ждут одобрения' => 'Awaiting approval',
+    'Есть доступ' => 'Has access',
+    'В этот сервис пока никто не входил.' => 'Nobody has signed in to this service yet.',
+    'Доступ' => 'Access',
+    'открыт' => 'open',
+    'заявка' => 'request',
+    'закрыт' => 'closed',
+    'ни разу' => 'never',
+    'Организации с доступом' => 'Organizations with access',
+    'Часть людей приходит сюда через организации, которым выдан доступ целиком — отзывать их надо там, а не поштучно.'
+        => 'Some people come here through organizations granted access as a whole — revoke there, not one by one.',
+    'Что выдано' => 'What is granted',
+    'Где действует' => 'Where it applies',
+    'вся система' => 'whole installation',
+    'организация :name' => 'organization :name',
+    'сервис :name' => 'service :name',
+    'Ролей нет — только базовая «Пользователь».' => 'No roles — only the base “User”.',
+    'Выдать роль' => 'Grant a role',
+    '— выберите роль' => '— choose a role',
+    'Роль выдаётся в своей области: глобальная — на всю систему, роль сервиса — в этом сервисе. Роль в организации выдают в её разделе «Пользователи».'
+        => 'A role is granted in its own scope: a global one across the installation, a service role within that service. Organization roles are granted in its “Users” section.',
+
+    /* Рабочее место организации (v4.29): сервисы, люди, роли, журнал. */
+    'Сервисы — :name' => 'Services — :name',
+    'Пользователи — :name' => 'Users — :name',
+    'Роли — :name' => 'Roles — :name',
+    'Доступы — :name' => 'Access — :name',
+    'Журнал — :name' => 'Log — :name',
+    'Состояние' => 'State',
+    'Сервисов: :n' => 'Services: :n',
+    'Участников: :n' => 'Участников: :n',
+    'Доступов к чужим порталам: :n' => 'Access to other portals: :n',
+    'Включить организацию' => 'Enable organization',
+    'Выключить организацию' => 'Disable organization',
+    'Выключенная не даёт своим участникам входить в порталы, к которым доступ выдан через неё.'
+        => 'A disabled one stops its members from signing in to portals granted through it.',
+    'У организации нет сервисов — роли, выданной на неё, действовать негде.'
+        => 'The organization has no services — a role granted on it has nowhere to apply.',
+    'Добавить сервис' => 'Add a service',
+    'Сервисов пока нет.' => 'No services yet.',
+    'Присоединить сервис' => 'Attach a service',
+    'Ничей портал' => 'Unowned portal',
+    '— выберите портал' => '— choose a portal',
+    'Отсоединить' => 'Detach',
+    'Людей' => 'People',
+    'Отсоединить сервис от организации? Роли, выданные на организацию, перестанут в нём действовать.'
+        => 'Detach the service from the organization? Roles granted on the organization will stop applying to it.',
+    'Свободных порталов нет: каждый уже принадлежит какой-то организации. Забрать чужой можно только в карточке самого портала — мимоходом, из списка, такое делать нельзя.'
+        => 'No unowned portals: each already belongs to an organization. Taking someone else’s is only possible in the portal card — not in passing, from a list.',
+    'Показаны только ничьи порталы. Роль, выданная на организацию, начнёт действовать в присоединённом сразу.'
+        => 'Only unowned portals are listed. A role granted on the organization applies to the attached one immediately.',
+    '«:name» теперь сервис организации. Роли, выданные на неё, действуют и здесь.'
+        => '“:name” is now a service of the organization. Roles granted on it apply here too.',
+    '«:name» отсоединён. Роли организации в нём больше не действуют.'
+        => '“:name” detached. The organization roles no longer apply to it.',
+    'Этот портал уже принадлежит другой организации. Сменить владельца можно в его карточке.'
+        => 'This portal already belongs to another organization. Change the owner in its card.',
+    'Это не сервис данной организации.' => 'This is not a service of this organization.',
+    'Состав организации' => 'Organization members',
+    'В организации никого нет.' => 'The organization has no members.',
+    'Членство — самостоятельный факт: оно даёт доступ к порталам, выданный организации целиком. Полномочия внутри организации — это роли, они в соседнем разделе.'
+        => 'Membership is a fact of its own: it grants access to portals given to the organization as a whole. Powers inside it are roles — in the next section.',
+    'Убрать из организации? Доступы, выданные через неё, пропадут.'
+        => 'Remove from the organization? Access granted through it will be lost.',
+    'Люди сервисов организации' => 'People of the organization services',
+    'У организации нет сервисов — и людей в них тоже нет.'
+        => 'The organization has no services — and no people in them either.',
+    'В сервисы организации пока никто не входил.' => 'Nobody has signed in to the organization services yet.',
+    'Те, у кого есть доступ хотя бы к одному сервису организации. Это не членство: убрать человека отсюда можно только в самом сервисе.'
+        => 'Those with access to at least one service of the organization. This is not membership: removing a person is only possible in the service itself.',
+    'Человек' => 'Person',
+    'почта или логин' => 'email or login',
+    'На эту организацию ролей ещё не выдавали.' => 'No roles have been granted on this organization yet.',
+    'Выдать роль в организации' => 'Grant a role in the organization',
+    'Выдать' => 'Grant',
+    '— кому' => '— to whom',
+    '— какую роль' => '— which role',
+    'Сначала добавьте людей в состав организации — раздел «Пользователи».'
+        => 'First add people to the organization — the “Users” section.',
+    'Выдаётся на всю организацию: роль начнёт действовать во всех её сервисах, включая те, что появятся позже.'
+        => 'Granted on the whole organization: the role applies to all of its services, including future ones.',
+    'Отозвать роль? Права пропадут во всех сервисах организации сразу.'
+        => 'Revoke the role? The rights disappear in all services of the organization at once.',
+    'Роль сервиса нельзя выдать на организацию — только системную.'
+        => 'A service role cannot be granted on an organization — only a system one.',
+    'Роль «:role» выдана на всю организацию.' => 'The role “:role” is granted on the whole organization.',
+    'Роль отозвана во всех сервисах организации.' => 'The role is revoked in all services of the organization.',
+    'Выберите человека и роль.' => 'Choose a person and a role.',
+    'Выданные доступы' => 'Granted access',
+    'Доступов не выдано.' => 'No access granted.',
+    'Их получают все участники — сразу, без заявок.' => 'All members get it — at once, without requests.',
+    'Событий пока нет.' => 'No events yet.',
+    'Событий нет. У организации ещё нет сервисов, а её собственные действия сюда попадут сразу.'
+        => 'No events. The organization has no services yet; its own actions will appear here right away.',
+    'Показаны последние 200 событий. Полный журнал со всеми фильтрами — в разделе «Аудит».'
+        => 'The last 200 events. The full log with all filters is in the “Audit” section.',
+    'система' => 'system',
+    'Разделы организации' => 'Organization sections',
+    'Полномочие' => 'Power',
+    'Полномочие участника' => 'Member power',
+    'Портал не найден.' => 'Portal not found.',
+    'Присоединить' => 'Attach',
+    'Сервисов' => 'Services',
+    'Присоедините существующий портал ниже или укажите организацию в карточке самого портала.'
+        => 'Attach an existing portal below, or set the organization in the portal card itself.',
+    'Люди и доступ' => 'People and access',
+    'Наблюдение' => 'Watching',
+    'Опасное' => 'Dangerous',
+
+    /* Тестовое событие в карточке портала (v4.28). */
+    'Отправить тестовое событие' => 'Send a test event',
+    'Настоящее подписанное событие типа «test». Портал обязан ответить 200 и ничего не делать.'
+        => 'A real signed event of type “test”. The portal must answer 200 and do nothing.',
+    'Сначала укажите адрес приёмника событий во вкладке «Реквизиты».'
+        => 'First set the event receiver address on the “Credentials” tab.',
+    'Событие доставлено: приёмник ответил 200.' => 'Event delivered: the receiver answered 200.',
+    'Событие поставлено в очередь — результат виден во вкладке «Доставка».'
+        => 'Event queued — the result is on the “Delivery” tab.',
+    'У портала не указан адрес приёмника событий — слать некуда.'
+        => 'The portal has no event receiver address — there is nowhere to send it.',
+
+    /* Контекст админки (v4.26). */
+    'Все организации' => 'All organizations',
+    'Область работы: :name' => 'Working scope: :name',
+    'Эта область вам не видна.' => 'That scope is not visible to you.',
+
+    /* Раздел «Здоровье»: ошибки, поставка, прозвон, опрос машиной (v4.32). */
+    'Ошибки — здоровье' => 'Errors — health',
+    'Поставка — здоровье' => 'Delivery — health',
+    'Прозвон — здоровье' => 'Probe — health',
+    'За сутки' => 'Last 24 hours',
+    'За неделю' => 'Last 7 days',
+    'За сутки ошибок и предупреждений нет.' => 'No errors or warnings in the last 24 hours.',
+    'За неделю ошибок и предупреждений нет.' => 'No errors or warnings in the last 7 days.',
+    'Сообщение' => 'Message',
+    'Раз' => 'Times',
+    'Просмотрено строк журнала: :n, файлов: :d. Одинаковые сообщения сведены: числа в идентификаторах не считаются разницей.'
+        => 'Log lines scanned: :n, files: :d. Identical messages are merged: numbers inside identifiers do not count as a difference.',
+
+    'Что проверено' => 'What was checked',
+
+    /* Раздел ролей группами (v4.43). */
+    'Роли системы' => 'System roles',
+    'Действуют во всей установке. Выдаются в области: на систему, на организацию или на один сервис — от этого меняется охват, а не смысл.'
+        => 'They apply across the installation. They are granted in a scope — the system, an organization or a single service — which changes the reach, not the meaning.',
+    'своих ролей: :n' => 'own roles: :n',
+    'Управлять ролями этого сервиса →' => 'Manage this service’s roles →',
+    'Ролей пока нет.' => 'No roles yet.',
+    'Чья роль' => 'Whose role',
+    'Роль сервиса поедет в claim как' => 'A service role travels in the claim as',
+    'Удалить роль «:slug»? Она снимется у всех.' => 'Delete the “:slug” role? It is removed from everyone.',
+
+    /* Менеджер ролей сервиса (v4.42). */
+    'Своих ролей у сервиса пока нет.' => 'The service has no roles of its own yet.',
+    'Роль сервиса — метка, которую портал получит в claim roles. Заведите её здесь или дождитесь, пока портал расскажет о своих сам.'
+        => 'A service role is a label the portal receives in the roles claim. Add one here, or wait for the portal to report its own.',
+    'Выдана' => 'Granted to',
+    'никому' => 'nobody',
+    'Удалить роль «:slug»? У тех, кому она выдана, она пропадёт.'
+        => 'Delete the “:slug” role? It disappears for everyone who has it.',
+    'Уровень определится по имени: «admin» — 70, «editor» — 60, «moderator» — 55, незнакомое — 20. Прав в самом :app роль сервиса не получает никогда.'
+        => 'The level follows the name: “admin” is 70, “editor” is 60, “moderator” is 55, an unknown name is 20. A service role never gets permissions inside :app itself.',
+    /* Уровень заведённой роли портала — по имени, кнопкой (v4.61). */
+    'Выставить :n' => 'Set to :n',
+    'По имени роли — :tier' => 'By its name — :tier',
+    'Такой роли у этого сервиса нет.' => 'This service has no such role.',
+    'Роль «:slug»: уровень :from → :to.' => 'Role “:slug”: level :from → :to.',
+    /* Карточки объектов (v4.69). */
+    'Люди организации' => 'People of the organisation',
+    'Участники и те, кто ходит в её сервисы. Роль на организацию действует во всех её сервисах, включая будущие; выдать её можно любому из списка — человек из сервиса при этом станет участником.'
+        => 'Members and people who use its services. An organisation role applies in all of its services, including future ones; it can be granted to anyone on the list — a person from a service then becomes a member.',
+    'В организации пока никого нет.' => 'Nobody in the organisation yet.',
+    'В составе' => 'Member',
+    'участник' => 'member',
+    'В состав' => 'Add as member',
+    'ходит в сервис' => 'uses a service',
+    'Человек добавлен в состав организации.' => 'The person was added to the organisation.',
+    /* Разделы карточек по местам (v4.68). */
+    'Выдать роль человеку — в разделе «Пользователи», в его строке.'
+        => 'To grant a role to a person, use their row in “Users”.',
+    'Открыть «Пользователей»' => 'Open “Users”',
+    'Портал сообщает о своих ролях' => 'Roles reported by the portal',
+    'Список присылает сам портал — SSO спрашивает его раз в час.'
+        => 'The portal sends this list itself — SSO asks it once an hour.',
+    'Спросить сейчас — в «Подключении»' => 'Ask now — in “Connection”',
+    'Роли в организации' => 'Roles in the organisation',
+    'Связь с порталом, ссылка установки, набор файлов, ключи'
+        => 'Link with the portal, install link, kit files, keys',
+    'Кто ходит в сервис, их роли, заявки и перенос людей с портала'
+        => 'Who uses the service, their roles, requests and moving people from the portal',
+    'Состав организации, роли участников и люди её сервисов'
+        => 'Organisation members, their roles and the people of its services',
+    'Членство — самостоятельный факт: оно даёт доступ к порталам, выданный организации целиком. Роли на всю организацию — в строке участника: они действуют во всех её сервисах, включая будущие.'
+        => 'Membership is a fact of its own: it gives access to the portals granted to the whole organisation. Organisation-wide roles are in the member’s row: they apply in all of its services, including future ones.',
+    /* Прогон 12.09 (v4.67). */
+    'это вы' => 'this is you',
+    /* Роли портала при переносе людей (v4.66). */
+    'Ролей в сервисе выдано: :n.' => 'Service roles granted: :n.',
+    'роли портала без пары в SSO: :list — заведите их в «Ролях» портала или сопоставьте в карте, затем заберите людей ещё раз'
+        => 'portal roles with no match in SSO: :list — create them under the portal’s “Roles” or map them, then pull the people again',
+    'общие роли SSO перенос не выдаёт: :list' => 'the transfer does not grant SSO-wide roles: :list',
+    /* Экран входа в оформлении портала (v4.65). */
+    'Светлая тема' => 'Light theme',
+    ':scheme: текст должен быть светлее фона.' => ':scheme: the text must be lighter than the background.',
+    ':scheme: текст должен быть темнее фона.' => ':scheme: the text must be darker than the background.',
+    ':scheme: текст :text на :ground — контраст :c при норме 4.5.'
+        => ':scheme: text :text on :ground — contrast :c, 4.5 required.',
+    'Вход через :app' => 'Sign in via :app',
+    'Экран входа в оформлении портала: светлая тема — :light, тёмная — :dark.'
+        => 'Sign-in screen in the portal’s design: light theme — :light, dark — :dark.',
+    'применяется' => 'applied',
+    'не применяется' => 'not applied',
+    /* «Закрыть» — в архив, «Убрать» — стереть (v4.64). */
+    'Закрыть доступ к сервису? В сервисе учётная запись уйдёт в архив: войти нельзя, данные целы. Откроете доступ снова — вернётся.'
+        => 'Close access to this service? The account in the service goes to the archive: no sign-in, data kept. Open access again and it comes back.',
+    'Убрать совсем? Сервис сотрёт учётную запись этого человека и все его данные — безвозвратно. Портал открытый: войти снова человек сможет, но с пустой учётной записью.'
+        => 'Remove completely? The service will erase this person’s account and all their data — irreversibly. The portal is open: they can sign in again, but with an empty account.',
+    'Убрать совсем? Сервис сотрёт учётную запись этого человека и все его данные — безвозвратно.'
+        => 'Remove completely? The service will erase this person’s account and all their data — irreversibly.',
+    /* Экран настроек портала в наборе (v4.63). */
+    'В наборе — экран настроек портала, /sso/admin.php: ввод секрета клиента и ключа переноса и проверка связи. Он обязателен и для портала, собранного по integration.md без набора (§12).'
+        => 'The kit includes the portal settings screen, /sso/admin.php: entering the client secret and the transfer key, and the connection check. It is required for a portal built from integration.md without the kit as well (§12).',
+    'Роль создана.' => 'Role created.',
+    'Роль удалена.' => 'Role deleted.',
+    'Слаг: 2–50 символов (a-z, 0-9, -, _); имя обязательно.'
+        => 'Slug: 2–50 characters (a-z, 0-9, -, _); the name is required.',
+    'Такая роль уже есть в этом скоупе.' => 'That role already exists in this scope.',
+
+    /* Политика новых аккаунтов и приглашения в систему (v4.41). */
+    'Новые аккаунты' => 'New accounts',
+    'Открытая регистрация' => 'Open registration',
+    'Выключено — завести аккаунт можно только по ссылке-приглашению. Вход, соцвход и перенос людей с портала это не трогает: там аккаунт заводите вы.'
+        => 'Off — an account can only be created via an invitation link. Sign-in, social sign-in and importing people from a portal are unaffected: there you create the account yourself.',
+    'Роль нового аккаунта' => 'Role of a new account',
+    'Её получает каждый, кто появился сам: регистрацией, соцвходом, импортом или переносом с портала. В списке только роли не старше «Пользователя» — раздать администратора выпадающим списком нельзя.'
+        => 'Everyone who appears on their own gets it: by registration, social sign-in, import or transfer from a portal. The list holds only roles no higher than “User” — an administrator cannot be handed out from a dropdown.',
+    'Пользователь (user)' => 'User (user)',
+    'Приглашение на регистрацию' => 'Registration invitation',
+    'Регистрация сейчас открытая — приглашение не нужно, аккаунт заводится сам. Закрыть её можно в настройках регистрации.'
+        => 'Registration is open — no invitation needed, the account is created by the person. It can be closed in the registration settings.',
+    'Регистрация закрыта: завести аккаунт можно только по такой ссылке. Укажете почту — ссылка сработает только с ней; оставите пустой — подойдёт любому, кто её откроет.'
+        => 'Registration is closed: an account can only be created via such a link. Name an email and the link works only with it; leave it empty and it suits anyone who opens it.',
+    'Кому (необязательно)' => 'To whom (optional)',
+    'Выдать ссылку' => 'Issue a link',
+    'Выдать ссылку-приглашение →' => 'Issue an invitation link →',
+    'Настройки регистрации →' => 'Registration settings →',
+    'Ссылка-приглашение' => 'Invitation link',
+    'Действует только для :email. Одноразовая: после регистрации перестаёт работать.'
+        => 'Valid only for :email. Single use: it stops working after registration.',
+    'Подойдёт любому, кто её откроет. Одноразовая: после регистрации перестаёт работать.'
+        => 'Suits anyone who opens it. Single use: it stops working after registration.',
+    'Регистрация закрыта' => 'Registration is closed',
+    'Регистрация закрыта. Нужна ссылка-приглашение, а если она у вас есть — откройте её целиком: приглашение может быть выдано на другой адрес.'
+        => 'Registration is closed. An invitation link is needed; if you have one, open it in full — the invitation may be issued for a different address.',
+    'Новые аккаунты сейчас заводит администратор.' => 'New accounts are currently created by the administrator.',
+    'Вы пришли из :name. Аккаунт нужен, но завести его самому сейчас нельзя.'
+        => 'You came from :name. An account is required, but you cannot create one yourself right now.',
+    'Если вас должны были пригласить — попросите ссылку-приглашение: она открывает регистрацию лично вам.'
+        => 'If you were meant to be invited, ask for an invitation link: it opens registration for you personally.',
+    'У меня уже есть аккаунт' => 'I already have an account',
+    'Похоже, в адресе опечатка.' => 'That address looks like a typo.',
+
+    /* Состояния переноса людей: некого забирать и все уже здесь. */
+    'Забирать некого' => 'Nobody to take',
+    'Портал отвечает, но людей у него нет.' => 'The portal answers, but has no people.',
+    'Связь настроена и работает — это не поломка. Заведутся люди на портале, приходите сюда снова.'
+        => 'The link is set up and working — this is not a failure. When people appear on the portal, come back here.',
+    'Все на месте' => 'Everyone is here',
+    'Переносить нечего: все :n человек уже здесь.' => 'Nothing to transfer: all :n people are already here.',
+    'Мы узнали каждого — задвоений не будет. Новые появятся на портале — забирайте снова, повторный перенос безопасен.'
+        => 'We recognised every one of them — there will be no duplicates. When new ones appear on the portal, take them again: a repeat transfer is safe.',
+    'Всё равно забрать заново' => 'Take again anyway',
+    'Связь с порталом' => 'Link with the portal',
+    'Скопировать' => 'Copy',
+    'настроено соответствий: :n' => 'mappings set: :n',
+    'не настроена — портал получает слаги как есть' => 'not set — the portal gets slugs as they are',
+    /* Чистка: токены, журналы, письма (v4.40). */
+    'Ключ показывается один раз при выдаче: в базе лежит только его хэш. Забыли — выдайте новый, старый отзовите.'
+        => 'The key is shown once, at issue: only its hash is stored. Forgot it — issue a new one and revoke the old.',
+    'Убрать отозванные (:n)' => 'Remove revoked (:n)',
+    'Убрать отозванные токены из списка? Они и так не работают.'
+        => 'Remove revoked tokens from the list? They do not work anyway.',
+    'Убрано отозванных токенов: :n.' => 'Revoked tokens removed: :n.',
+    'Отозванных токенов не было.' => 'There were no revoked tokens.',
+    'Убрать старые' => 'Remove old ones',
+    'Убрать журналы старше двух недель? Сегодняшний останется.'
+        => 'Remove logs older than two weeks? Today’s stays.',
+    'Убрано файлов журнала: :n (:size).' => 'Log files removed: :n (:size).',
+    'Убирать нечего: журналов старше :n дней нет.' => 'Nothing to remove: no logs older than :n days.',
+    'Убрать отправленные' => 'Remove sent',
+    'Убрать отправленные письма старше недели? Ждущие и упавшие останутся.'
+        => 'Remove sent messages older than a week? Pending and failed ones stay.',
+    'Убрано отправленных писем: :n.' => 'Sent messages removed: :n.',
+    'Убирать нечего: отправленных писем старше :n дней нет.'
+        => 'Nothing to remove: no sent messages older than :n days.',
+    /* Роль, о которой сообщил портал, заводится одной кнопкой (v4.39). */
+    'Завести роль' => 'Add the role',
+    'уже заведена' => 'already added',
+    'Заведена по сообщению портала.' => 'Added from what the portal reported.',
+    'Непонятное имя роли.' => 'Unclear role name.',
+    'Такая роль в этом сервисе уже есть.' => 'That role already exists in this service.',
+    'Роль «:slug» заведена с уровнем :n.' => 'The “:slug” role is added at level :n.',
+    /* Общий экран выдачи ролей: организация и сервис (v4.38). */
+    'Ролей здесь ещё не выдавали.' => 'No roles have been granted here yet.',
+    'Роли этого сервиса' => 'Roles of this service',
+    'Роль «:role» выдана в этом сервисе.' => 'The “:role” role is granted in this service.',
+    'Роль отозвана.' => 'Role revoked.',
+    'Эта роль принадлежит другому сервису.' => 'That role belongs to another service.',
+    'Отозвать роль в этом сервисе?' => 'Revoke the role in this service?',
+    'Действует только в этом сервисе. Роль на всю организацию выдаётся в её карточке и действует во всех её сервисах сразу.'
+        => 'Applies to this service only. A role for the whole organization is granted on its card and applies to all of its services at once.',
+    'Некому выдавать: в этот сервис ещё никто не заходил. Дайте человеку доступ в разделе «Люди».'
+        => 'Nobody to grant to: no one has signed in to this service yet. Give the person access in the “People” section.',
+    /* Заголовки карточек разделов (v4.37): содержимое раздела везде в карточке. */
+    'Активные сессии' => 'Active sessions',
+    'Выданные роли' => 'Granted roles',
+    'Доставка событий' => 'Event delivery',
+    'Доступ к сервисам' => 'Access to services',
+    'Свои сервисы' => 'Own services',
+
+    /* Управление доступом из карточки сервиса (v4.36). */
+    'Дать доступ' => 'Grant access',
+    'Доступ выдан: :who' => 'Access granted: :who',
+    'Укажите почту или логин.' => 'Enter an email or a login.',
+    'Человек с такой почтой или логином не найден. Заведите аккаунт в разделе «Пользователи».'
+        => 'No person with that email or login. Create the account in the “Users” section.',
+    'Аккаунт при этом не заводится: человек должен уже быть в системе. Завести нового — в разделе «Пользователи».'
+        => 'No account is created here: the person must already exist. To add a new one, use the “Users” section.',
+    'Убрать человека из сервиса? Запись о доступе исчезнет совсем.'
+        => 'Remove the person from the service? The access record disappears entirely.',
+    'Предлагать этот сервис' => 'Offer this service',
+    'Витрина на главной (видна до входа) и «Мои сервисы» в профиле. Выключено — сервис работает, но сам о себе не рассказывает.'
+        => 'The home page showcase (visible before sign-in) and “My services” in the profile. Off — the service works but does not advertise itself.',
+
+    /* Подключение сервиса из карточки организации (v4.35). */
+    'Сервис, заведённый отсюда, сразу принадлежит этой организации.'
+        => 'A service created here belongs to this organization right away.',
+    'Сервис сразу достанется этой организации. Название, адреса возврата и права подставим сами — всё это можно поменять в карточке.'
+        => 'The service will belong to this organization at once. We will fill in the name, redirect addresses and scopes ourselves — all of it can be changed on the card.',
+
+    'Все файлы на месте' => 'All files present',
+    'Поставка неполная: не хватает файлов — :n. Разделы, которым они нужны, будут падать.'
+        => 'Delivery incomplete: :n files are missing. The sections that need them will crash.',
+    'Показать все' => 'Show all',
+    'Поставка неполная' => 'Delivery incomplete',
+    'Размер не совпал с описью' => 'Size differs from the manifest',
+    'Файлов: :n. Либо они правлены на месте — тогда всё в порядке, — либо остались от прошлой версии: заливка оборвалась, и в них нет того, что чинилось.'
+        => 'Files: :n. Either they were edited in place — then all is well — or they are left over from an earlier version: the upload broke off, and they do not contain what was fixed.',
+    'Если своих правок вы не делали — залейте архив поверх ещё раз.'
+        => 'If you made no edits of your own, upload the archive over the top again.',
+    'HTTP 404 от приложения — маршрут не найден' => 'HTTP 404 from the application — route not found',
+    'HTTP :code, и отвечало не приложение: веб-сервер не пропускает пути, начинающиеся с точки. Наш мост адреса знает и так, но сторонний клиент по стандарту их не найдёт.'
+        => 'HTTP :code, and it was not the application answering: the web server blocks paths starting with a dot. Our bridge knows the addresses anyway, but a third-party client following the standard will not find them.',
+    'Если discovery не отдаётся, а отвечало не приложение — дело в правиле веб-сервера вида «резать всё, что начинается с точки» (RedirectMatch 404 /\..*$ и подобные). Путь /.well-known/ должен доходить до приложения; на панельном хостинге это правило снимает поддержка.'
+        => 'If discovery is not served and it was not the application answering, the cause is a web-server rule of the “block everything starting with a dot” kind (RedirectMatch 404 /\..*$ and the like). The /.well-known/ path must reach the application; on panel hosting, support removes that rule.',
+    'файлов по описи: :n, версия :v' => 'files in the manifest: :n, version :v',
+    'Не хватает файлов: :n. Долейте их — приложение будет падать при первом же обращении к недостающему.'
+        => 'Missing files: :n. Upload them — the application will crash at the first request that needs one.',
+    '…и ещё :n' => '…and :n more',
+    'Описи поставки нет — установка развёрнута из репозитория, а не из архива.'
+        => 'There is no delivery manifest — this install came from the repository, not from an archive.',
+    'Опись кладётся в архив сборщиком (dist-manifest.json) и позволяет за секунду сказать, всё ли доехало. У копии из git её нет, и это нормально.'
+        => 'The manifest is put into the archive by the builder (dist-manifest.json) and tells in a second whether everything arrived. A git checkout has none, and that is fine.',
+    'Проще всего залить архив целиком поверх: файлы конфигурации и storage опись не трогает.'
+        => 'The simplest fix is to upload the whole archive over the top: the manifest does not touch config files or storage.',
+
+    'Прозвон не запускался.' => 'The probe has not been run.',
+    'Прозвонить' => 'Run the probe',
+    'Прозвонить ещё раз' => 'Run the probe again',
+    'Свои адреса' => 'Our own addresses',
+    'Нечего звонить.' => 'Nothing to probe.',
+    'Активных порталов нет.' => 'No active portals.',
+    'Это настоящие запросы: к своим адресам и к порталам. Поэтому по кнопке, а не при каждом открытии страницы — иначе мы стучались бы к чужим сайтам всякий раз, когда кто-то сюда заглянул.'
+        => 'These are real requests: to our own addresses and to the portals. Hence a button rather than every page view — otherwise we would knock on other people’s sites whenever someone looked in here.',
+    'Приёмник событий проверяется запросом без токена: он обязан отказать. Настоящее событие ради прозвона слать нельзя — оно гасит живые сессии, для этого есть кнопка в карточке портала.'
+        => 'The event receiver is checked with a request carrying no token: it must refuse. A real event cannot be sent just to probe — it kills live sessions; there is a button for that on the portal card.',
+    /* «Discovery (.well-known)» перевода не требует и в словаре не лежит:
+       кириллицы в нём нет, Lang::t вернёт ключ как есть. */
+    'Ключи подписи (jwks.json)' => 'Signing keys (jwks.json)',
+    'Манифест :name' => 'Manifest of :name',
+    'Приёмник событий :name' => 'Event receiver of :name',
+    'ключей: :n' => 'keys: :n',
+    'ответ без ключей — порталы не проверят подпись'
+        => 'answer without keys — portals cannot verify the signature',
+    'отдаётся' => 'served',
+    'открывается' => 'opens',
+    'отвечает (HTTP :code)' => 'answers (HTTP :code)',
+    'не отвечает' => 'no answer',
+    'нет — роли и перенос людей недоступны' => 'absent — roles and user import are unavailable',
+    'HTTP :code — веб-сервер режет пути, начинающиеся с точки'
+        => 'HTTP :code — the web server blocks paths starting with a dot',
+    'HTTP :code — войти нельзя' => 'HTTP :code — signing in is impossible',
+    'HTTP :code — выход и блокировка до портала не дойдут'
+        => 'HTTP :code — logout and blocking will not reach the portal',
+    'проверить не вышло — возможно, сервер обслуживает один процесс. Откройте адрес в браузере.'
+        => 'could not check — the server may serve one process at a time. Open the address in a browser.',
+
+    /* Подсказка на странице 500, когда причина — недоехавший файл. */
+    'Похоже, файл не доехал при заливке' => 'It looks like a file did not arrive during upload',
+    'И ещё файлов недостаёт: :n. Недоехавший файл редко бывает один.'
+        => 'And :n more files are missing. A file that did not arrive is rarely alone.',
+    'Залейте архив целиком поверх — конфигурацию и storage он не трогает.'
+        => 'Upload the whole archive over the top — it does not touch config or storage.',
+    'Проверить поставку целиком' => 'Check the whole delivery',
+
+    'Опрос состояния машиной' => 'Machine-readable status',
+    'Ссылка для опроса' => 'Polling link',
+    'Выдать новый' => 'Issue a new one',
+    'Выдать новый токен? Старый перестанет работать сразу.'
+        => 'Issue a new token? The old one stops working immediately.',
+    'Токен выдан. Прежний, если был, перестал работать.'
+        => 'Token issued. The previous one, if any, stopped working.',
+    'Адрес /health.json отдаёт то же самое в JSON: проверки, целость поставки, сводку ошибок. Нужен, чтобы состояние можно было спросить, а не пересказывать.'
+        => 'The /health.json address serves the same in JSON: checks, delivery integrity, error digest. It exists so the state can be asked for rather than retold.',
+    'Добавьте &probe=1, чтобы заодно прозвонить адреса и порталы — это дольше и ходит наружу.'
+        => 'Add &probe=1 to also probe addresses and portals — that is slower and reaches outside.',
+
+    /* Подписи разделов из каталогов (ObjectMap). Сканер переводов их не
+       видел — они лежат данными и проходят через t() позже, в оболочке.
+       Из-за этого английский интерфейс показывал русскую колонку
+       разделов в каждой карточке, а проверка была зелёной (v4.44). */
+    'Проверки' => 'Checks',
+    'База, ключи, диск, почта, очереди — и что из этого в порядке' => 'Database, keys, disk, mail, queues — and which of them are fine',
+    'Ошибки' => 'Errors',
+    'Что ломается и как часто — за сутки и за неделю' => 'What breaks and how often — over a day and over a week',
+    'Поставка' => 'Delivery',
+    'Все ли файлы доехали при заливке' => 'Whether every file arrived during upload',
+    'Прозвон' => 'Probe',
+    'Живые запросы к своим адресам и к порталам' => 'Live requests to our own addresses and to the portals',
+    'Журнал' => 'Log',
+    'Подключение' => 'Connection',
+    'Название, адреса, политика доступа, организация-владелец' => 'Name, addresses, access policy, owning organization',
+    'Ссылка установки, набор файлов, манифест, перенос людей' => 'Install link, file kit, manifest, user transfer',
+    'Кто ходит в этот сервис и кто ждёт одобрения' => 'Who visits this service and who is awaiting approval',
+    'Роли сервиса и карта соответствия с его собственными' => 'Service roles and the map onto its own',
+    'Ссылки-приглашения в этот сервис' => 'Invitation links to this service',
+    'Очередь событий порталу: выход, блокировка, отзыв доступа' => 'Event queue for the portal: logout, blocking, access revocation',
+    'Что происходило с этим сервисом' => 'What happened to this service',
+    'Удаление сервиса со всем, что к нему привязано' => 'Deleting the service with everything attached to it',
+    'Название, описание, связи' => 'Name, description, links',
+    'Порталы, принадлежащие организации. Роль на организацию действует во всех них' => 'Portals owned by the organization. A role granted on it applies to all of them',
+    'Состав организации и люди её сервисов' => 'Members of the organization and people of its services',
+    'Кому что выдано в этой организации' => 'Who has been granted what in this organization',
+    'Чужие порталы, куда пускают участников организации' => 'Other portals its members are allowed into',
+    'События организации и её сервисов' => 'Events of the organization and its services',
+    'Удаление организации со всем, что к ней привязано' => 'Deleting the organization with everything attached to it',
+    'Имя, почта, логин, статус' => 'Name, email, login, status',
+    'Куда человек допущен и через что — сам, организацию или приглашение' => 'Where the person is allowed and by what — directly, an organization or an invitation',
+    'Что и в какой области ему выдано' => 'What has been granted to them and in which scope',
+    'Живые входы и устройства' => 'Live sign-ins and devices',
+    'Что происходило с этим человеком и что делал он сам' => 'What happened to this person and what they did themselves',
+    'Блокировка, ссылка для входа, вход от имени' => 'Blocking, sign-in link, signing in as them',
+    'Окончательное удаление мимо 14-дневного холда' => 'Permanent deletion, bypassing the 14-day hold',
+
+    /* v4.70: вход по ссылке подтверждается нажатием, чек-лист безопасности
+       называет состояние, а не задачу. */
+    'Входим в аккаунт — секунду.' => 'Signing you in — one moment.',
+    'Почта подтверждена' => 'Email confirmed',
+    'Почта не подтверждена' => 'Email not confirmed',
+    'Двухфакторная защита включена' => 'Two-factor protection on',
+    'Двухфакторная защита не включена' => 'Two-factor protection off',
+    'Пароль задан' => 'Password set',
+    'Пароль не задан' => 'No password set',
+    'Passkey добавлен' => 'Passkey added',
+    'Passkey не добавлен' => 'No passkey added',
+    'да' => 'yes',
+    'сегодня · за 14 дней: :n' => 'today · 14 days: :n',
+    'Неудачные входы за 14 дней' => 'Failed sign-ins over 14 days',
+
+    /* v4.70: словарь событий аудита (Audit::TITLES) — дашборд, журнал,
+       история объекта. */
+    'Вход выполнен' => 'Signed in',
+    'Вход по ключу устройства' => 'Signed in with a passkey',
+    'Вход по ссылке из письма' => 'Signed in via email link',
+    'Неверный код второго фактора' => 'Wrong second-factor code',
+    'Вход заблокирован после попыток' => 'Sign-in locked after attempts',
+    'Выход' => 'Signed out',
+    'Выход на всех устройствах' => 'Signed out everywhere',
+    'Запрошен сброс пароля' => 'Password reset requested',
+    'Включена двухфакторная защита' => 'Two-factor protection enabled',
+    'Выключена двухфакторная защита' => 'Two-factor protection disabled',
+    'Использован код восстановления' => 'Recovery code used',
+    'Задан PIN замка' => 'Lock PIN set',
+    'Замок снят PIN-кодом' => 'Unlocked with PIN',
+    'PIN замка сброшен' => 'Lock PIN cleared',
+    'Профиль изменён' => 'Profile changed',
+    'Профиль объединён с другим' => 'Profile merged into another',
+    'Аккаунты объединены' => 'Accounts merged',
+    'Запрошена выгрузка данных' => 'Data export requested',
+    'Аккаунт обезличен' => 'Account anonymized',
+    'Сессия закрыта' => 'Session closed',
+    'Закрыты все сессии' => 'All sessions closed',
+    'Выдан код авторизации' => 'Authorization code issued',
+    'Повторное использование кода — отказано' => 'Code reused — refused',
+    'Обновлён токен' => 'Token refreshed',
+    'Повторное использование refresh-токена — сессии закрыты' => 'Refresh token reused — sessions closed',
+    'Токен отозван' => 'Token revoked',
+    'Согласие дано' => 'Consent given',
+    'В согласии отказано' => 'Consent declined',
+    'Выдан доступ' => 'Access granted',
+    'Доступ отозван' => 'Access revoked',
+    'Запрошен доступ' => 'Access requested',
+    'В доступе отказано' => 'Access denied',
+    'Изменён профиль' => 'Profile edited',
+    'Блокировка снята' => 'Unblocked',
+    'Аккаунт удалён' => 'Account deleted',
+    'Аккаунт удалён окончательно' => 'Account permanently deleted',
+    'Выдана ссылка для входа' => 'Sign-in link issued',
+    'Удалены аккаунты пачкой' => 'Accounts deleted in bulk',
+    'Импорт людей' => 'People imported',
+    'Создано приглашение' => 'Invitation created',
+    'Назначена роль' => 'Role assigned',
+    'Роль снята' => 'Role removed',
+    'Роль заведена' => 'Role created',
+    'Роль удалена' => 'Role deleted',
+    'Изменены права роли' => 'Role permissions changed',
+    'Вход от имени' => 'Signed in as the user',
+    'Выход из режима «от имени»' => 'Left “signed in as” mode',
+    'Организация создана' => 'Organization created',
+    'Изменены реквизиты' => 'Details changed',
+    'Включена или выключена' => 'Turned on or off',
+    'Организация удалена' => 'Organization deleted',
+    'Добавлен участник' => 'Member added',
+    'Участник удалён' => 'Member removed',
+    'Изменена роль участника' => 'Member role changed',
+    'Выдана роль в организации' => 'Organization role granted',
+    'Снята роль в организации' => 'Organization role removed',
+    'Портал подключён' => 'Portal connected',
+    'Портал удалён' => 'Portal deleted',
+    'Изменено машинное имя портала' => 'Portal slug changed',
+    'Перевыпущен секрет' => 'Secret reissued',
+    'Принят адрес возврата' => 'Redirect address accepted',
+    'Выдана роль в сервисе' => 'Service role granted',
+    'Снята роль в сервисе' => 'Service role removed',
+    'Заведена роль от портала' => 'Role adopted from the portal',
+    'Выставлен уровень роли' => 'Role level set',
+    'Отправлено пробное событие' => 'Test event sent',
+    'Портал подключён через API' => 'Portal connected via API',
+    'Портал изменён через API' => 'Portal changed via API',
+    'Человек заведён через API' => 'Person created via API',
+    'Человек заведён через SCIM' => 'Person created via SCIM',
+    'Портал установил набор' => 'Portal installed the kit',
+    'Выдана ссылка установки' => 'Install link issued',
+    'Выдан ключ переноса' => 'Transfer key issued',
+    'Ключ переноса отозван' => 'Transfer key revoked',
+    'Люди перенесены с портала' => 'People moved over from the portal',
+    'Изменена карта ролей' => 'Role map changed',
+    'Портал прислал манифест' => 'Portal sent its manifest',
+    'Изменены настройки' => 'Settings changed',
+    'Настройки выгружены' => 'Settings exported',
+    'Настройки загружены' => 'Settings imported',
+    'Изменено оформление' => 'Appearance changed',
+    'Скачана резервная копия' => 'Backup downloaded',
+    'Изменён документ' => 'Document changed',
+    'Открыта опасная зона' => 'Danger zone opened',
+    'Назначен владелец установки' => 'Installation owner assigned',
+    'Уборка осиротевших записей' => 'Orphaned records cleaned up',
+    /* v4.71: экран входа портала и оформление сайта одним редактором, группы событий журнала. */
+    ':scheme: нужны фон, карточка и текст вместе — часть палитры не применяется.' => ':scheme: page background, card and text are needed together — part of the palette is not applied.',
+    'Аккаунты' => 'Accounts',
+    'Акцент' => 'Accent',
+    'Без оформления портала' => 'Without the portal’s look',
+    'Взять за основу и настроить' => 'Use as a starting point and adjust',
+    'Второй фактор' => 'Second factor',
+    'Вход в этот сервис выглядит как вход в саму установку.' => 'Signing in to this service looks like signing in to the installation itself.',
+    'Входит сразу' => 'Gets in right away',
+    'Входы' => 'Sign-ins',
+    'Выключенное на всём сайте здесь не включится. Если от выбора ничего не останется, экран покажет общий состав — запереть вход нельзя.' => 'What is off site-wide will not turn on here. If nothing of the choice is left, the screen shows the common set — sign-in cannot be locked.',
+    'Выключено — тёмная тема родная.' => 'Off — the dark theme stays native.',
+    'Выходы' => 'Sign-outs',
+    'Действия администраторов' => 'Administrator actions',
+    'Для разработчика портала' => 'For the portal developer',
+    'Знак сервиса над формой — его иконка из реквизитов.' => 'The service mark above the form is its icon from the details.',
+    'Изменён экран входа' => 'Sign-in screen changed',
+    'Как выглядит вход в этот сервис: цвета, шрифты, панель, способы входа' => 'How signing in to this service looks: colours, fonts, panel, sign-in methods',
+    'Как на всём сайте' => 'Same as site-wide',
+    'Как присылает портал' => 'As the portal sends it',
+    'Как текст' => 'Same as text',
+    'Как у сайта' => 'Same as the site',
+    'Карточка и поля' => 'Card and fields',
+    'Коды авторизации' => 'Authorization codes',
+    'Компьютер' => 'Computer',
+    'Лёгкие пятна акцентного цвета на фоне страницы. Выключено — фон ровный.' => 'Soft spots of the accent colour on the page background. Off — a flat background.',
+    'Над формой' => 'Above the form',
+    'Например, только пароль и passkey' => 'For example, only password and passkey',
+    'Начать с чистого листа' => 'Start from scratch',
+    'Одна-две фразы голосом сервиса' => 'One or two sentences in the service’s voice',
+    'Открыть предпросмотр отдельно' => 'Open the preview separately',
+    'Откуда оформление' => 'Where the look comes from',
+    'Отметьте хотя бы один способ входа из включённых на сайте — иначе на этом портале войти будет нечем.' => 'Tick at least one sign-in method enabled on the site — otherwise there will be no way to sign in to this portal.',
+    'Оформление сайта →' => 'Site appearance →',
+    'Панель видна на широком экране. На телефоне её нет в любом случае — там весь экран у формы.' => 'The panel shows on wide screens. On a phone it is never shown — the whole screen belongs to the form.',
+    'Панель рядом с формой' => 'Panel next to the form',
+    'Панель слева' => 'Panel on the left',
+    'Панель справа' => 'Panel on the right',
+    'Пароли' => 'Passwords',
+    'Подкраска фона' => 'Background tint',
+    'Подписи, поля, кнопки. Только рубленые: антиква в 13px не читается.' => 'Labels, fields, buttons. Sans-serif only: a serif at 13px is hard to read.',
+    'Подпись к цитате' => 'Quote caption',
+    'Портал может держать это у себя в /.well-known/sso-portal.json — тогда оформление переедет вместе с ним. Обложка в манифест не входит: картинку SSO загружает только отсюда.' => 'The portal can keep this in its /.well-known/sso-portal.json — then the look moves together with it. The cover is not part of the manifest: SSO takes the image only from here.',
+    'Портал может прислать тему сам — в блоке branding своего манифеста (integration.md, §«Манифест»). Или задайте её здесь: «Своё».' => 'The portal can send a theme itself — in the branding block of its manifest (integration.md, “Manifest”). Or set it here: “Custom”.',
+    'Портал прислал оформление в манифесте:' => 'The portal sent a look in its manifest:',
+    'Портал прислал оформление экрана входа.' => 'The portal sent a sign-in screen look.',
+    'Портал тему не присылал — экран как у сайта' => 'The portal sent no theme — the screen matches the site',
+    'Последний раз — :at.' => 'Last time — :at.',
+    'Предпросмотр' => 'Preview',
+    'Предпросмотр обновляется сам. Кнопки в нём не нажимаются — это настоящий экран входа, только без отправки. Обложка появится после сохранения.' => 'The preview updates by itself. Its buttons do not click — it is the real sign-in screen, just without submitting. The cover appears after saving.',
+    'Предпросмотр экрана входа' => 'Sign-in screen preview',
+    'Профили' => 'Profiles',
+    'Пустое поле — цвет установки, он виден подсказкой. Палитра темы применяется целиком: фон, карточка и текст вместе.' => 'An empty field means the installation’s colour, shown as the placeholder. A theme palette applies as a whole: background, card and text together.',
+    'Раскладка' => 'Layout',
+    'Регистрации' => 'Registrations',
+    'Реквизиты →' => 'Details →',
+    'Светлая' => 'Light',
+    'Своя тёмная тема' => 'Own dark theme',
+    'Своё' => 'Custom',
+    'Скругление углов' => 'Corner radius',
+    'Собрать' => 'Build',
+    'Собрать палитру из цвета' => 'Build a palette from a colour',
+    'События порталов' => 'Portal events',
+    'Согласия' => 'Consents',
+    'Способы входа' => 'Sign-in methods',
+    'Стоит под «Вы входите в :name». Знак сервиса и знак SSO над формой остаются всегда.' => 'Shown under “You are signing in to :name”. The service mark and the SSO mark above the form always stay.',
+    'Строка под именем сервиса' => 'Line under the service name',
+    'Так выглядит вход в саму установку — и в любой портал, у которого нет своего оформления.' => 'This is how signing in to the installation itself looks — and to any portal without its own look.',
+    'Текст' => 'Text',
+    'Тема из манифеста портала' => 'Theme from the portal manifest',
+    'Токены' => 'Tokens',
+    'Только выбранные' => 'Only selected',
+    'Только те, кого позвали вы' => 'Only those you invited',
+    'Только форма' => 'Form only',
+    'Тёмная' => 'Dark',
+    'Фон, карточка и текст обеих тем подберутся с запасом по контрасту. Поправить их можно ниже.' => 'Background, card and text of both themes are picked with contrast to spare. You can adjust them below.',
+    'Фон страницы' => 'Page background',
+    'Форма и шрифты' => 'Shape and fonts',
+    'Цвета' => 'Colours',
+    'Цвета, шрифты и панель — здесь' => 'Colours, fonts and panel — here',
+    'Цитата на панели' => 'Panel quote',
+    'Человек просит, вы одобряете' => 'The person asks, you approve',
+    'Чем занят сервис — в одной строке' => 'What the service does — in one line',
+    'Через API' => 'Via API',
+    'Через SCIM' => 'Via SCIM',
+    'Что включено в «Оформлении сайта»' => 'What is enabled in “Site appearance”',
+    'Шрифт заголовков и цитаты' => 'Heading and quote font',
+    'Шрифт интерфейса' => 'Interface font',
+    'Шрифтом заголовков. Без цитаты и обложки панель будет как у всей установки.' => 'In the heading font. Without a quote or cover the panel looks like the rest of the installation.',
+    'Шрифт устройства' => 'Device font',
+    'Экран' => 'Screen',
+    'Экран входа сохранён.' => 'Sign-in screen saved.',
+    'Экран входа с этим оформлением' => 'Sign-in screen with this look',
+    'Экран входа →' => 'Sign-in screen →',
+    'акцент' => 'accent',
+    'выключен на всём сайте' => 'off site-wide',
+    'ещё не входили' => 'not signed in yet',
+    'кнопки и ссылки' => 'buttons and links',
+    'палитра светлой темы' => 'light theme palette',
+    'палитра тёмной темы' => 'dark theme palette',
+    'раскладка' => 'layout',
+    'скругление' => 'corner radius',
+    'то же оформление блоком манифеста' => 'the same look as a manifest block',
+    'цитата' => 'quote',
+    'шрифт' => 'font',
+    'шрифт заголовков' => 'heading font',
+    '— любые' => '— any',
+    /* v4.72: защита, блокировки, журнал активности, вход окном */
+    'IPv4 или IPv6. Подсеть — через «/»: не шире /8 для IPv4 и /32 для IPv6.' => 'IPv4 or IPv6. A subnet goes after “/”: no wider than /8 for IPv4 and /32 for IPv6.',
+    'Адрес :ip' => 'Address :ip',
+    'Адреса и подсети, с которых доступ закрыт' => 'Addresses and subnets that are denied access',
+    'Адрес заблокирован. С него не откроется ни одна страница.' => 'Address blocked. No page will open from it.',
+    'Адрес или подсеть' => 'Address or subnet',
+    'Адрес содержит' => 'Path contains',
+    'Блокировка снята.' => 'Block removed.',
+    'Блокировки' => 'Blocks',
+    'Ваш адрес сейчас — :ip. Заблокировать его не получится: вы заперли бы себя.' => 'Your address right now is :ip. You can’t block it — you would lock yourself out.',
+    'Введите этот код на экране регистрации:' => 'Enter this code on the sign-up screen:',
+    'Вводит шесть цифр на экране регистрации' => 'Types six digits on the sign-up screen',
+    'Верный адрес' => 'Correct address',
+    'Видна только здесь. Тому, кого закрыли, покажем одно: «с этого адреса доступ закрыт».' => 'Visible only here. The blocked visitor sees just one thing: “access from this address is denied”.',
+    'Возвращаемся в :portal…' => 'Taking you back to :portal…',
+    'Войти в другой аккаунт' => 'Sign in to another account',
+    'Все запросы' => 'All requests',
+    'Все запросы с адреса →' => 'All requests from this address →',
+    'Всей страницей' => 'As a full page',
+    'Входит после перехода по ссылке' => 'Signs in after following the link',
+    'Входит сразу, письмо подтверждения приходит следом' => 'Signs in right away; the confirmation email follows',
+    'Вы вошли' => 'You’re signed in',
+    'Год' => 'A year',
+    'Готово. Письмо ушло на новый адрес.' => 'Done. The email went to the new address.',
+    'Действие' => 'Action',
+    'Для себя: кто это и почему' => 'For yourself: who this is and why',
+    'Доступ закрыт' => 'Access denied',
+    'Если вы нигде не регистрировались — просто не вводите код, аккаунт без него не заработает.' => 'If you didn’t sign up anywhere, just don’t enter the code — the account won’t work without it.',
+    'Журнал активности, дней' => 'Activity log, days',
+    'Заблокирован адрес' => 'Address blocked',
+    'Заблокировать адрес' => 'Block address',
+    'Закрыт правилом :rule.' => 'Blocked by rule :rule.',
+    'Закрыть адрес' => 'Block the address',
+    'Закрыть всю подсеть →' => 'Block the whole subnet →',
+    'Записей нет. Журнал пишется с версии 4.72 и хранится по сроку из «Политик входа».' => 'No entries. The log is written since version 4.72 and kept for the period set in “Sign-in policies”.',
+    'Запросы' => 'Requests',
+    'Исправлен неподтверждённый адрес' => 'Unconfirmed address corrected',
+    'Как задано в коде портала' => 'As set in the portal’s code',
+    'Как открывается вход' => 'How sign-in opens',
+    'Как открывается и выглядит вход в этот сервис: окно или страница, цвета, шрифты, способы входа' => 'How signing in to this service opens and looks: window or page, colours, fonts, sign-in methods',
+    'Как решил портал' => 'As the portal decides',
+    'Код действует :for.' => 'The code is valid for :for.',
+    'Код не подошёл. Нужен код из последнего письма — прежние гаснут, когда приходит новый.' => 'That code didn’t work. Use the code from the latest email — earlier ones expire when a new one arrives.',
+    'Кодом из письма' => 'With a code from the email',
+    'Код подтверждения: {{ Код }}' => 'Confirmation code: {{ Код }}',
+    'Код подтверждения почты' => 'Email confirmation code',
+    'Код подтверждения — только в письме с кодом.' => 'The confirmation code appears only in the code email.',
+    'Кто приходил с этого адреса' => 'Who came from this address',
+    'Месяц' => 'A month',
+    'Мы отправили код на :email. Введите его — и вход продолжится.' => 'We sent a code to :email. Enter it and signing in will continue.',
+    'Мы отправили письмо на :email. Откройте его и нажмите «Подтвердить почту» — вход продолжится сам.' => 'We sent an email to :email. Open it and press “Confirm email” — signing in will continue on its own.',
+    'Навсегда' => 'Forever',
+    'На сколько' => 'For how long',
+    'Неверный код подтверждения почты' => 'Wrong email confirmation code',
+    'Неделю' => 'A week',
+    'Не требовать' => 'Don’t require',
+    'Ни один адрес не заблокирован. Адреса из журналов открываются своей страницей — там кнопка «Заблокировать».' => 'No addresses are blocked. Addresses in the logs open their own page — the “Block” button is there.',
+    'Ни один вошедший аккаунт с этого адреса не замечен — только анонимные запросы.' => 'No signed-in account has been seen from this address — only anonymous requests.',
+    'Окно входа открыто. Не видите его — оно могло уйти за это окно.' => 'The sign-in window is open. If you can’t see it, it may be behind this one.',
+    'Окном поверх сайта' => 'In a window over the site',
+    'Окно поверх сайта умеют порталы, подключённые скриптом sso.js из набора. На телефоне вход всегда открывается страницей: окна там неудобны.' => 'A window over the site works for portals connected with sso.js from the kit. On phones sign-in always opens as a page: windows are awkward there.',
+    'Ответ' => 'Response',
+    'Откуда приходил и что открывал: каждый запрос' => 'Where they came from and what they opened: every request',
+    'Отправили ещё раз. Загляните и в «Спам» — туда такие письма попадают чаще всего.' => 'Sent again. Check “Spam” too — that’s where such emails most often end up.',
+    'Отправить на этот адрес' => 'Send to this address',
+    'Отправить письмо ещё раз' => 'Send the email again',
+    'Ошиблись адресом?' => 'Wrong address?',
+    'Переход на страницу входа и обратно' => 'Go to the sign-in page and back',
+    'Письмо идёт до пары минут. Нет во «Входящих» — загляните в «Спам».' => 'The email can take a couple of minutes. Not in your inbox? Check “Spam”.',
+    'Письмо подтверждения отправлено ещё раз' => 'Confirmation email sent again',
+    'Подтвердить' => 'Confirm',
+    'Под это правило попадает ваш собственный адрес — вы заперли бы себя.' => 'Your own address falls under this rule — you would lock yourself out.',
+    'Показать окно' => 'Show window',
+    'Показывать «Вы вошли»' => 'Show “You’re signed in”',
+    'Пока не видно ни одного: журнал пишется с версии 4.72.' => 'None seen yet: the log is written since version 4.72.',
+    'Попаданий' => 'Hits',
+    'Попыток после блокировки: :n.' => 'Attempts since blocking: :n.',
+    'После «/» — число: длина префикса подсети.' => 'After “/” comes a number: the subnet prefix length.',
+    'После входа — короткий экран со знаком сервиса и именем человека, через полторы секунды — возврат в сервис. Повторный заход уже вошедшего проходит без него.' => 'After signing in, a short screen with the service’s mark and the person’s name; after a second and a half, back to the service. Returning visits of someone already signed in skip it.',
+    'После регистрации, когда подтверждение почты обязательно и выбрано «кодом».' => 'After sign-up, when email confirmation is required and set to “code”.',
+    'Посмотреть «Вы вошли» →' => 'Preview “You’re signed in” →',
+    'Правила' => 'Rules',
+    'Префикс длиннее адреса.' => 'The prefix is longer than the address.',
+    'Прислать новый код' => 'Send a new code',
+    'Причина' => 'Reason',
+    'Причина: :r.' => 'Reason: :r.',
+    'Раньше →' => 'Earlier →',
+    'Сайт остаётся на месте, вход — в отдельном окне' => 'The site stays put; sign-in happens in a separate window',
+    'Слишком широкая подсеть: не шире /:n — иначе одна опечатка закроет вход целым странам.' => 'Subnet too wide: no wider than /:n — otherwise one typo would lock out whole countries.',
+    'Сначала подтвердите почту — письмо у вас в ящике.' => 'Confirm your email first — the message is in your inbox.',
+    'Снята блокировка адреса' => 'Address block removed',
+    'Снять' => 'Remove',
+    'Снять блокировку' => 'Remove block',
+    'Снять блокировку :rule?' => 'Remove the block on :rule?',
+    'Событий с этого адреса нет.' => 'No events from this address.',
+    'События аудита' => 'Audit events',
+    'Срок' => 'Period',
+    'Ссылкой из письма' => 'With a link from the email',
+    'Сутки' => 'A day',
+    'С этого адреса доступ к сервису закрыт.' => 'Access to the service from this address is denied.',
+    'Такое правило уже есть.' => 'This rule already exists.',
+    'Только для новых аккаунтов, заведённых регистрацией. Действующие аккаунты, вход через сервисы, перенос людей с порталов, импорт и API это не затрагивает. Выключите — и ждущие подтверждения смогут войти.' => 'Only for new accounts created by sign-up. Existing accounts, sign-in through services, moving people from portals, import and the API are not affected. Turn it off and those waiting for confirmation can sign in.',
+    'Только отказы и сбои' => 'Only denials and failures',
+    'Человек увидит, куда он входит, и нажмёт «Продолжить»; галочка появится, только если включены документы. Отметка сохраняется у доступа. Выключено — доверенный сервис пускает молча; недоверенный спрашивает всегда, это требование протокола.' => 'The person sees where they are signing in and presses “Continue”; the checkbox appears only if documents are enabled. The mark is kept with the access. Off — a trusted service lets people in silently; an untrusted one always asks, as the protocol requires.',
+    'Это ваш собственный адрес — заблокировать его нельзя.' => 'This is your own address — it can’t be blocked.',
+    'Это не адрес: нужен IPv4 (1.2.3.4) или IPv6, можно с подсетью (/24).' => 'That’s not an address: use IPv4 (1.2.3.4) or IPv6, optionally with a subnet (/24).',
+    'до :d' => 'until :d',
+    'навсегда' => 'forever',
+    'не вошёл' => 'not signed in',
+    'отказы и сбои' => 'denials and failures',
+    'с :first по :last' => 'from :first to :last',
+    'Вход паролем' => 'Password sign-in',
+    'Открыл вход' => 'Opened sign-in',
+    'Код второго фактора' => 'Second-factor code',
+    'Запросил ссылку для входа' => 'Requested a sign-in link',
+    'Ссылка для входа из письма' => 'Sign-in link from an email',
+    'Открыл регистрацию' => 'Opened sign-up',
+    'Восстановление пароля' => 'Password recovery',
+    'Вход в сервис' => 'Sign-in to a service',
+    'Согласие на вход в сервис' => 'Consent to sign in to a service',
+    'Ключ устройства' => 'Device passkey',
+    'Вход через сервис' => 'Sign-in through a service',
+    'Кабинет: безопасность' => 'Account: security',
+    'Кабинет: настройки' => 'Account: settings',
+    'Кабинет: сервисы' => 'Account: services',
+    'Кабинет: устройства' => 'Account: devices',
+    'Кабинет' => 'Account',
+    'Админка: пользователи' => 'Admin: users',
+    'Админка: порталы' => 'Admin: portals',
+    'Админка: организации' => 'Admin: organisations',
+    'Админка: роли' => 'Admin: roles',
+    'Админка: журналы' => 'Admin: logs',
+    'Админка: настройки' => 'Admin: settings',
+    'Admin API' => 'Admin API',
+    'SCIM' => 'SCIM',
+    /* v4.73: вход окном на странице портала */
+    'Вход откроется отдельным окном' => 'Sign-in will open in a separate window',
+    'Маленькое окно браузера, страница портала затемняется' => 'A small browser window; the portal page is dimmed',
+    'Не открывается?' => 'Not opening?',
+    'Окна умеют порталы, подключённые скриптом sso.js из набора. Вход через сервисы и ссылкой из письма из окна на странице продолжается отдельным окном. На телефоне вход всегда открывается страницей.' => 'Windows work on portals connected with sso.js from the kit. Signing in through services or with an email link continues from the on-page window in a separate window. On phones sign-in always opens as a page.',
+    'Отдельным окном браузера' => 'In a separate browser window',
+    'Открыть окно входа' => 'Open the sign-in window',
+    'Открыть отдельным окном' => 'Open in a separate window',
+    'Форма входа во всплывающем окне прямо на странице портала' => 'The sign-in form in a pop-up right on the portal page',
+    'Этот браузер не пускает вход внутри страницы :portal. В отдельном окне всё то же самое.' => 'This browser doesn’t allow signing in inside the :portal page. The separate window has everything the same.',
+    /* v4.74: тосты, заголовки, страницы ошибок, письма — перевод при выводе */
+    '2FA выключена. Для входа в админку её придётся включить снова.' => '2FA is off. You will have to turn it on again to enter the admin area.',
+    ':app — коды восстановления 2FA' => ':app — 2FA recovery codes',
+    ':provider привязан к аккаунту.' => ':provider is linked to the account.',
+    'Favicon: не удалось обработать файл.' => 'Favicon: the file could not be processed.',
+    'Passkey удалён.' => 'Passkey removed.',
+    'Setup-ссылка использована или устарела. Попросите новую в админке SSO.' => 'The setup link has been used or has expired. Ask for a new one in the SSO admin area.',
+    'Webhook создан. Секрет показан один раз — сохраните его.' => 'Webhook created. The secret is shown once — save it.',
+    'Webhook удалён.' => 'Webhook deleted.',
+    'Аватар обновлён.' => 'Avatar updated.',
+    'Аватар удалён — вернулись инициалы.' => 'Avatar removed — initials are back.',
+    'Аватар — до 5 МБ.' => 'Avatar — up to 5 MB.',
+    'Администратор' => 'Administrator',
+    'Админ портала' => 'Portal admin',
+    'Адрес изменён. Проверьте почту — там письмо со следующим шагом.' => 'Address changed. Check your email — the next step is there.',
+    'Адрес инсталляции набран неверно — ничего не тронуто.' => 'The installation address was typed incorrectly — nothing was changed.',
+    'Адрес убран.' => 'Address removed.',
+    'Адрес уже занят другим аккаунтом — смена отменена.' => 'The address is already used by another account — the change was cancelled.',
+    'Аккаунт помечен на удаление (анонимизация через 14 дней).' => 'The account is marked for deletion (anonymised in 14 days).',
+    'Аккаунт создан. Добавьте почту — без неё не получится восстановить доступ.' => 'Account created. Add an email — without it you won’t be able to recover access.',
+    'Аккаунт создан. Мы отправили письмо — подтвердите почту.' => 'Account created. We sent an email — confirm your address.',
+    'Аудитор' => 'Auditor',
+    'Аудитор организации' => 'Organisation auditor',
+    'Бэкап устарел. Скачайте свежий и повторите.' => 'The backup is outdated. Download a fresh one and try again.',
+    'В ваш аккаунт вошли с устройства, которое мы видим впервые. Если это были вы — ничего делать не нужно.' => 'Someone signed in to your account from a device we are seeing for the first time. If it was you, there is nothing to do.',
+    'Введите этот код на экране регистрации — или просто нажмите кнопку:' => 'Enter this code on the sign-up screen — or just press the button:',
+    'Вернули прежний адрес. Passkey это не восстанавливает.' => 'The previous address is back. This does not restore passkeys.',
+    'Вернуть прежнюю почту?' => 'Restore the previous email?',
+    'Владельцем может стать только суперадмин.' => 'Only a superadmin can become the owner.',
+    'Владение принято.' => 'Ownership accepted.',
+    'Войдите, чтобы получить права администратора портала.' => 'Sign in to receive portal administrator rights.',
+    'Войдите под аккаунтом, которому предложили владение.' => 'Sign in with the account that was offered ownership.',
+    'Восстановление доступа' => 'Access recovery',
+    'В пароле нужен хотя бы один спецсимвол.' => 'The password needs at least one special character.',
+    'В пароле нужна хотя бы одна буква.' => 'The password needs at least one letter.',
+    'В пароле нужна хотя бы одна цифра.' => 'The password needs at least one digit.',
+    'В пароле нужны буквы в обоих регистрах.' => 'The password needs both upper- and lower-case letters.',
+    'В режиме имперсонизации изменения запрещены.' => 'Changes are not allowed while impersonating.',
+    'В режиме имперсонизации смена пароля и почты запрещена.' => 'Changing the password and email is not allowed while impersonating.',
+    'Все остальные сессии завершены.' => 'All other sessions have been ended.',
+    'Все сессии пользователя завершены.' => 'All of the user’s sessions have been ended.',
+    'Вход через этот сервис выключен администратором.' => 'Signing in through this service is turned off by the administrator.',
+    'Вы вышли.' => 'You have signed out.',
+    'Выгрузка готовится' => 'The export is being prepared',
+    'Выгрузка уже заказана.' => 'The export has already been requested.',
+    'Вы назначены администратором портала «:portal».' => 'You have been made administrator of the portal “:portal”.',
+    'Вы приняли приглашение — доступ к порталу «:portal» выдан.' => 'You accepted the invitation — access to the portal “:portal” is granted.',
+    'Готово. Проверьте почту — там письмо со следующим шагом.' => 'Done. Check your email — the next step is there.',
+    'Двухфакторная защита включена. Сохраните recovery-коды!' => 'Two-factor protection is on. Save your recovery codes!',
+    'Для вашего аккаунта только что установили пароль. Если это были не вы — немедленно восстановите доступ.' => 'A password was just set for your account. If it wasn’t you, recover access right away.',
+    'Добавлен passkey — :app' => 'Passkey added — :app',
+    'Доступ выдан.' => 'Access granted.',
+    'Доступ к :portal открыт' => 'Access to :portal is open',
+    'Доступ к «:portal» открыт.' => 'Access to “:portal” is open.',
+    'Доступ сервиса «:portal» отозван.' => 'Access of the service “:portal” has been revoked.',
+    'Если email существует — письмо отправлено.' => 'If the email exists, a message has been sent.',
+    'Если такой email зарегистрирован — письмо со ссылкой уже в пути.' => 'If this email is registered, a message with a link is on its way.',
+    'Задайте пароль' => 'Set a password',
+    'Запрос доступа' => 'Access request',
+    'Изменения сохранены.' => 'Changes saved.',
+    'Иконка: до 2 МБ, и серверному GD нужна поддержка webp.' => 'Icon: up to 2 MB, and the server’s GD needs webp support.',
+    'Иконка не похожа на изображение.' => 'The icon doesn’t look like an image.',
+    'Каждый код — одноразовый. Храните как пароль.' => 'Each code works once. Keep them like a password.',
+    'К вашему аккаунту добавлен новый ключ входа «:label».' => 'A new sign-in key “:label” was added to your account.',
+    'Ключ не прошёл проверку: :why' => 'The key failed verification: :why',
+    'Ключ от :date' => 'Key from :date',
+    'Код не подошёл. Попробуйте ещё раз.' => 'That code didn’t work. Try again.',
+    'Код не подошёл 5 раз. Войдите заново.' => 'The code failed 5 times. Sign in again.',
+    'Код не подошёл или устарел.' => 'The code is wrong or has expired.',
+    'Код не совпал. Проверьте время на телефоне и попробуйте ещё раз.' => 'The code didn’t match. Check the time on your phone and try again.',
+    'Код подтверждения сброса — :app' => 'Reset confirmation code — :app',
+    'Логотип: не удалось обработать файл (нужен GD с webp).' => 'Logo: the file could not be processed (GD with webp is required).',
+    'Мы отправили письмо на :email. Введите код из него — или нажмите в письме кнопку «Подтвердить почту».' => 'We sent an email to :email. Enter the code from it — or press “Confirm email” in the message.',
+    'Мы уже записали инцидент. Попробуйте обновить страницу.' => 'We have already recorded the incident. Try reloading the page.',
+    'Набрано неверно — аккаунт не тронут.' => 'Typed incorrectly — the account was not changed.',
+    'Настройки сохранены.' => 'Settings saved.',
+    'Настройки уведомлений сохранены.' => 'Notification settings saved.',
+    'Неизвестная секция настроек.' => 'Unknown settings section.',
+    'Некорректный запрос' => 'Bad request',
+    'Нельзя снять superadmin с самого себя.' => 'You can’t remove superadmin from yourself.',
+    'Не удалось войти через :provider: :why' => 'Couldn’t sign in through :provider: :why',
+    'Не удалось разобрать файл: нужен CSV (разделитель , или ;) или JSON-массив объектов.' => 'Couldn’t parse the file: a CSV (separator , or ;) or a JSON array of objects is required.',
+    'Не удалось сохранить фото.' => 'Couldn’t save the photo.',
+    'Новая setup-ссылка сгенерирована (одноразовая, 7 дней).' => 'A new setup link has been generated (single-use, 7 days).',
+    'Новый аккаунт входит только после подтверждения. В письме — и код, и кнопка: кому удобнее ввести шесть цифр, вводит, кому удобнее нажать — нажимает.' => 'A new account can sign in only after confirming. The email has both a code and a button: whoever prefers six digits types them, whoever prefers a click just clicks.',
+    'Новый вход в :app' => 'New sign-in to :app',
+    'Номер аккаунта меняет только суперадмин.' => 'Only a superadmin can change the account number.',
+    'Номер не подходит: девять цифр с верной контрольной цифрой.' => 'The number doesn’t fit: nine digits with a correct check digit.',
+    'Нужны название и корректный URL приёмника.' => 'A name and a valid receiver URL are required.',
+    'Опасная зона закрыта — подтвердите пароль заново.' => 'The danger zone is locked — confirm your password again.',
+    'Организация обновлена.' => 'Organisation updated.',
+    'Организация создана. Добавьте участников и выдайте доступ к порталам.' => 'Organisation created. Add members and grant access to portals.',
+    'Откатывать нечего.' => 'Nothing to roll back.',
+    'Отмена смены почты' => 'Cancel the email change',
+    'Отправили письмо. Владение перейдёт, когда получатель подтвердит.' => 'Email sent. Ownership will transfer when the recipient confirms.',
+    'Отправлено — проверьте ящик.' => 'Sent — check the inbox.',
+    'Ошибка авторизации' => 'Authorisation error',
+    'Пароль вашего аккаунта только что изменили, остальные сессии завершены. Если это были не вы — немедленно восстановите доступ.' => 'Your account password was just changed and other sessions were ended. If it wasn’t you, recover access right away.',
+    'Пароль изменён — :app' => 'Password changed — :app',
+    'Пароль не подошёл.' => 'Wrong password.',
+    'Пароль не подошёл — 2FA осталась включённой.' => 'Wrong password — 2FA stays on.',
+    'Пароль не подошёл — аккаунт не тронут.' => 'Wrong password — the account was not changed.',
+    'Пароль обновлён. Войдите с новым паролем.' => 'Password updated. Sign in with the new password.',
+    'Пароль — от :n :word.' => 'Password — at least :n :word.',
+    'Передать владение не удалось: аккаунт больше не суперадмин.' => 'Ownership transfer failed: the account is no longer a superadmin.',
+    'Перейти в :portal' => 'Go to :portal',
+    'Письмо отправлено.' => 'Email sent.',
+    'Письмо отправлено ещё раз. Проверьте папку «Спам» — туда попадает чаще всего.' => 'The email was sent again. Check “Spam” — it most often ends up there.',
+    'Поддержка' => 'Support',
+    'Подписка на события обновлена.' => 'Event subscription updated.',
+    'Подтвердите новый адрес' => 'Confirm the new address',
+    'Подтверждение входа' => 'Sign-in confirmation',
+    'Подтверждение почты новым аккаунтом' => 'Email confirmation for new accounts',
+    'Политика инсталляции требует 2FA для админ-ролей. Включите её — и админка откроется.' => 'The installation policy requires 2FA for admin roles. Turn it on and the admin area will open.',
+    'Пользователь заблокирован, порталы оповещены.' => 'User blocked, portals notified.',
+    'Пользователь разблокирован.' => 'User unblocked.',
+    'Пользователь с такой почтой или логином не найден. Сначала пригласите его в систему.' => 'No user with this email or login. Invite them to the system first.',
+    'Попытка доставки выполнена.' => 'Delivery attempt made.',
+    'Попытка регистрации в :app' => 'Sign-up attempt at :app',
+    'Портал обновлён.' => 'Portal updated.',
+    'После регистрации, когда подтверждение почты обязательно.' => 'After sign-up, when email confirmation is required.',
+    'Посмотреть устройства' => 'View devices',
+    'Почта аккаунта меняется — :app' => 'The account email is changing — :app',
+    'Почта обновлена.' => 'Email updated.',
+    'Почта подтверждена.' => 'Email confirmed.',
+    'Почта подтверждена вручную.' => 'Email confirmed manually.',
+    'Права суперадмина не редактируются: снять их с себя значило бы запереть систему.' => 'Superadmin rights can’t be edited: removing them from yourself would lock the system.',
+    'Превышен лимит запросов. Подождите немного и повторите.' => 'Request limit exceeded. Wait a little and try again.',
+    'Привязка удалена.' => 'Link removed.',
+    'Приглашение в :portal' => 'Invitation to :portal',
+    'Приглашение выписано на другой email' => 'The invitation was issued for another email',
+    'Приглашение выписано на другой адрес.' => 'The invitation was issued for another address.',
+    'Приглашение для другого адреса' => 'Invitation for another address',
+    'Приглашение недействительно' => 'The invitation is not valid',
+    'Приглашение отозвано.' => 'Invitation revoked.',
+    'Приглашение уже недействительно.' => 'The invitation is no longer valid.',
+    'Провайдер недоступен' => 'Provider unavailable',
+    'Проверьте новый адрес.' => 'Check the new address.',
+    'Проверьте почту: мы отправили письмо со следующим шагом.' => 'Check your email: we sent a message with the next step.',
+    'Проект сброшен — :app' => 'Project reset — :app',
+    'Профиль обновлён.' => 'Profile updated.',
+    'Роль в организации изменена.' => 'Organisation role changed.',
+    'Роль назначена.' => 'Role assigned.',
+    'Роль снята.' => 'Role removed.',
+    'Себе доступ здесь не закрывают — это делает другой администратор.' => 'You can’t close your own access here — another administrator does that.',
+    'Сейчас сервис не отвечает. Попробуйте через несколько минут.' => 'The service isn’t responding right now. Try again in a few minutes.',
+    'Секрет перевыпущен. Старый работает ещё 24 часа.' => 'Secret reissued. The old one keeps working for 24 hours.',
+    'Сервер не смог разобрать запрос. Проверьте адрес и попробуйте ещё раз.' => 'The server couldn’t understand the request. Check the address and try again.',
+    'Сервис недоступен' => 'Service unavailable',
+    'Сессия завершена.' => 'Session ended.',
+    'Сессия формы истекла. Обновите страницу и повторите действие.' => 'The form session has expired. Reload the page and repeat the action.',
+    'Сессия формы истекла — обновите страницу.' => 'The form session has expired — reload the page.',
+    'Слаг организации набран неверно — ничего не тронуто.' => 'The organisation slug was typed incorrectly — nothing was changed.',
+    'Слаг портала набран неверно — портал не тронут.' => 'The portal slug was typed incorrectly — the portal was not changed.',
+    'Слишком часто' => 'Too often',
+    'Смена адреса' => 'Address change',
+    'Смена почты отменена, все сессии завершены. Войдите и смените пароль.' => 'The email change was cancelled and all sessions were ended. Sign in and change your password.',
+    'Сначала скачайте бэкап — кнопка отпирается им, а не галочкой.' => 'Download the backup first — it unlocks the button, not a checkbox.',
+    'Снова не ушло — детали в очереди.' => 'Not sent again — details are in the queue.',
+    'Сопоставьте хотя бы одно поле: email или логин — по чему-то человека надо узнавать.' => 'Map at least one field — email or login: a person has to be recognised by something.',
+    'Ссылка-приглашение создана.' => 'Invitation link created.',
+    'Ссылка на выгрузку устарела или недействительна.' => 'The export link has expired or is not valid.',
+    'Ссылка недействительна' => 'The link is not valid',
+    'Ссылка отозвана, исчерпана или срок её действия истёк. Попросите администратора портала выдать новую.' => 'The link was revoked, used up or has expired. Ask the portal administrator for a new one.',
+    'Ссылка подтверждения устарела. Запросите новую в профиле.' => 'The confirmation link has expired. Request a new one in your profile.',
+    'Ссылка сброса отправлена на почту пользователя.' => 'The reset link was sent to the user’s email.',
+    'Ссылка создана. Она одноразовая и живёт 15 минут — передайте её сейчас.' => 'Link created. It works once and lives 15 minutes — pass it on now.',
+    'Ссылка устарела. Запросите восстановление пароля.' => 'The link has expired. Request password recovery.',
+    'Ссылка устарела. Запросите новую.' => 'The link has expired. Request a new one.',
+    'Ссылка устарела или уже использована.' => 'The link has expired or has already been used.',
+    'Ссылка устарела или уже использована. Запросите новую.' => 'The link has expired or has already been used. Request a new one.',
+    'Страница не найдена' => 'Page not found',
+    'Суперадмина нельзя заблокировать.' => 'A superadmin can’t be blocked.',
+    'Суперадмина нельзя удалить.' => 'A superadmin can’t be deleted.',
+    'Суперадмина удалить нельзя: сначала снимите роль.' => 'A superadmin can’t be deleted: remove the role first.',
+    'Суперадмин не может удалить себя: сначала передайте права.' => 'A superadmin can’t delete themselves: transfer the rights first.',
+    'Такого фото нет.' => 'No such photo.',
+    'Такой логин уже занят.' => 'This login is already taken.',
+    'Такой роли в организации нет.' => 'There is no such role in the organisation.',
+    'Такой страницы нет — возможно, ссылка устарела.' => 'This page doesn’t exist — perhaps the link is outdated.',
+    'Текущий пароль не подошёл.' => 'The current password is wrong.',
+    'Токен отозван.' => 'Token revoked.',
+    'Требовать подтверждение почты у новых аккаунтов' => 'Require email confirmation for new accounts',
+    'У аккаунта нет почты — ссылка показана здесь. Она одноразовая; передайте её человеку сами.' => 'The account has no email — the link is shown here. It works once; pass it to the person yourself.',
+    'У вас нет прав для просмотра этой страницы.' => 'You don’t have permission to view this page.',
+    'Удаление отменено — аккаунт снова активен.' => 'Deletion cancelled — the account is active again.',
+    'Укажите корректный email для теста.' => 'Enter a valid email for the test.',
+    'У организации должно быть название.' => 'The organisation needs a name.',
+    'Установлен пароль — :app' => 'Password set — :app',
+    'У токена должно быть название — по нему он опознаётся в аудите.' => 'The token needs a name — that’s how it is identified in the audit log.',
+    'Участник не найден.' => 'Member not found.',
+    'Участник удалён из организации.' => 'Member removed from the organisation.',
+    'Файл большой: за раз импортируются первые 5000 строк — прогоните его несколько раз.' => 'The file is large: the first 5000 rows are imported at a time — run it several times.',
+    'Файл выгрузки не найден — закажите её заново.' => 'The export file wasn’t found — request it again.',
+    'Файл не загрузился. Попробуйте другой.' => 'The file didn’t upload. Try another one.',
+    'Форма устарела' => 'The form has expired',
+    'Фото удалено.' => 'Photo removed.',
+    'Что-то сломалось' => 'Something broke',
+    'Эта ссылка предназначена для :invited, а вы вошли как :you. Войдите под нужным аккаунтом.' => 'This link is meant for :invited, but you are signed in as :you. Sign in with the right account.',
+    'Это единственный способ входа. Сначала задайте пароль или добавьте passkey.' => 'This is the only way to sign in. Set a password or add a passkey first.',
+    'Это не похоже на изображение.' => 'This doesn’t look like an image.',
+    'Это не я — восстановить доступ' => 'It wasn’t me — recover access',
+    'Это письмо отправлено автоматически — отвечать на него не нужно. Если действие запрашивали не вы, просто проигнорируйте письмо.' => 'This email was sent automatically — no need to reply. If you didn’t request this, just ignore it.',
+    'Этот аккаунт уже владелец.' => 'This account is already the owner.',
+    'Этот ключ уже зарегистрирован' => 'This key is already registered',
+    'Этот номер уже привязан к другому аккаунту.' => 'This number is already linked to another account.',
+    'Этот номер уже у другого аккаунта.' => 'Another account already has this number.',
+    'от :n :word' => 'at least :n :word',
+    'полный сброс проекта' => 'full project reset',
+    'портал' => 'portal',
+    'сброс данных' => 'data reset',
+    /* v4.74: правило длины пароля */
+    'символа' => 'characters',
+    'символов' => 'characters',
+    /* v4.74: остатки в шаблонах */
+    ':ip или :net' => ':ip or :net',
+    ':n ждёт' => ':n pending',
+    ':n мс' => ':n ms',
+    'Все подсистемы отвечают штатно.' => 'All subsystems respond normally.',
+    'Всё работает' => 'Everything works',
+    'Частичная деградация' => 'Partial degradation',
+    'Часть подсистем отвечает медленно или недоступна. Мы уже в курсе.' => 'Some subsystems are slow or unavailable. We already know.',
+    'в JWKS до :d' => 'in JWKS until :d',
+    'для любого' => 'for anyone',
+    'история' => 'history',
+    'пора ротировать' => 'time to rotate',
+    /* v4.74: статус приглашения */
+    'исчерпан' => 'used up',
+    /* v4.74: письма вне каталога */
+    'Адрес системы входа изменился. Портал :portal перестанет принимать вход, пока в его настройках указан прежний адрес.' => 'The sign-in system address has changed. The portal :portal will stop accepting sign-ins while its settings still point to the old address.',
+    'Было:' => 'Was:',
+    'Стало:' => 'Now:',
+    'Вам предлагают стать владельцем этой инсталляции. Владелец — единственный, кому доступны смена домена, управление базой данных и сброс проекта.' => 'You are being offered ownership of this installation. The owner is the only one who can change the domain, manage the database and reset the project.',
+    'Восстановите доступ' => 'Recover access',
+    'Для вашей учётной записи запрошена смена почты на :email.' => 'An email change to :email was requested for your account.',
+    'Если вы этого не запрашивали — просто не вводите код, операция не выполнится. И проверьте, кто ещё имеет доступ к аккаунту владельца.' => 'If you didn’t request this, just don’t enter the code — the operation won’t run. And check who else has access to the owner account.',
+    'Если это были вы — просто :login. Забыли пароль? :recover.' => 'If it was you, just :login. Forgot your password? :recover.',
+    'Если это были не вы — ничего делать не нужно, аккаунт в безопасности.' => 'If it wasn’t you, there is nothing to do — the account is safe.',
+    'Задать пароль' => 'Set a password',
+    'Кнопка действует 7 дней. Если смену запросили вы — ничего делать не нужно.' => 'The button works for 7 days. If you requested the change, there is nothing to do.',
+    'Код подтверждения:' => 'Confirmation code:',
+    'Кто-то попытался зарегистрироваться с вашим email — но аккаунт уже существует.' => 'Someone tried to sign up with your email — but the account already exists.',
+    'Нажмите кнопку — смена отменится, все сессии будут закрыты:' => 'Press the button — the change will be cancelled and all sessions will be closed:',
+    'Не узнаёте это действие? Смените пароль и завершите все сессии в разделе «Безопасность». Отключить такие письма можно в настройках аккаунта.' => 'Don’t recognise this action? Change your password and end all sessions in “Security”. You can turn off these emails in the account settings.',
+    'Он подтверждает операцию «:level» в системном разделе. Код действует 10 минут.' => 'It confirms the operation “:level” in the system section. The code is valid for 10 minutes.',
+    'Письмо отправлено администраторам портала автоматически. Ключи подписи прежние, перевыпускать ничего не нужно.' => 'This email was sent to the portal administrators automatically. The signing keys are the same; nothing needs to be reissued.',
+    'Принять владение' => 'Accept ownership',
+    'Проект сброшен. Данные, порталы и настройки удалены, ключи подписи выпущены заново. Ваш аккаунт заведён заново и остаётся владельцем инсталляции — задайте пароль:' => 'The project has been reset. Data, portals and settings were deleted, and new signing keys were issued. Your account was created anew and remains the owner of the installation — set a password:',
+    'Ссылка действует 7 дней. Порталы придётся подключить заново: их прежние client_id и client_secret больше не существуют.' => 'The link works for 7 days. Portals will have to be connected again: their old client_id and client_secret no longer exist.',
+    'Ссылка действует сутки. Ничего не делать — тоже ответ: без подтверждения владелец не меняется.' => 'The link works for a day. Doing nothing is also an answer: without confirmation the owner doesn’t change.',
+    'Что поправить: в конфигурации SSO-модуля портала (обычно :file) замените значение :issuer на новое. Остальные реквизиты — :client_id, :client_secret и адреса возврата — не меняются.' => 'What to fix: in the portal’s SSO module configuration (usually :file) replace the :issuer value with the new one. The other details — :client_id, :client_secret and the return addresses — stay the same.',
+    'Это были не вы?' => 'Wasn’t it you?',
+    'Это не я — отменить' => 'It wasn’t me — cancel',
+    'войдите' => 'sign in',
+    /* v4.74: сообщения входа, ключей и кабинета */
+    'Аккаунт недоступен' => 'The account is unavailable',
+    'Аккаунт недоступен. Обратитесь к администратору.' => 'The account is unavailable. Contact the administrator.',
+    'Архив готов — ссылка отправлена на почту.' => 'The archive is ready — the link was sent to your email.',
+    'В режиме имперсонизации нельзя добавлять ключи' => 'Keys can’t be added while impersonating',
+    'Время вышло — попробуйте ещё раз' => 'Time ran out — try again',
+    'Все сессии будут завершены — войдите заново и смените пароль.' => 'All sessions will be ended — sign in again and change your password.',
+    'Заявка принята. Архив соберётся фоновой задачей, ссылка придёт письмом.' => 'Request accepted. The archive will be built in the background, and the link will come by email.',
+    'Как к вам обращаться?' => 'What should we call you?',
+    'Ключ не найден. Возможно, он был удалён из аккаунта.' => 'Key not found. It may have been removed from the account.',
+    'Неверный логин или пароль.' => 'Wrong login or password.',
+    'Остался один шаг.' => 'One step left.',
+    'Отменить смену' => 'Cancel the change',
+    'Отправили подтверждение на новый адрес и уведомление на текущий.' => 'We sent a confirmation to the new address and a notice to the current one.',
+    'Отправили подтверждение на указанный адрес.' => 'We sent a confirmation to the address you entered.',
+    'Пароль обновлён, остальные сессии завершены.' => 'Password updated, other sessions ended.',
+    'Пароль установлен — теперь можно входить и по нему.' => 'Password set — you can now sign in with it too.',
+    'Слишком много неудачных попыток. Подождите 15 минут или сбросьте пароль.' => 'Too many failed attempts. Wait 15 minutes or reset your password.',
+    'Это тот же самый адрес. Если письмо не дошло — отправьте его ещё раз.' => 'That’s the same address. If the email didn’t arrive, send it again.',
+    /* v4.74: подсказка к паролю */
+    'в обоих регистрах' => 'with upper and lower case',
+    'с буквой' => 'with a letter',
+    'со спецсимволом' => 'with a special character',
+    'с цифрой' => 'with a digit',
+    /* v4.74: кнопка уведомления */
+    'Проверить безопасность' => 'Check security',
+    /* v4.74: сообщения админки с подстановкой */
+    ':app — тестовое письмо' => ':app — test email',
+    ':detail. Работаем с новой базой. Копия прежнего конфига: :file.' => ':detail. Now working with the new database. Copy of the previous config: :file.',
+    ':name добавлен в организацию.' => ':name was added to the organisation.',
+    'SMTP-диалог' => 'SMTP dialogue',
+    'SMTP настроен верно.' => 'SMTP is configured correctly.',
+    'SMTP настроен верно. Письмо из /admin/settings.' => 'SMTP is configured correctly. Email from /admin/settings.',
+    'Администратор :admin создал одноразовую ссылку для входа в ваш аккаунт. Она действует 15 минут. Если вы об этом не просили — смените пароль и сообщите владельцу сервиса.' => 'Administrator :admin created a single-use sign-in link for your account. It works for 15 minutes. If you didn’t ask for it, change your password and tell the service owner.',
+    'Аккаунт удалён окончательно. Строк убрано: :n.' => 'Account deleted permanently. Rows removed: :n.',
+    'База переключена. Копия прежнего конфига: :file.' => 'Database switched. Copy of the previous config: :file.',
+    'Бэкап не собрался: :why' => 'The backup could not be built: :why',
+    'Вы смотрите как :name. Плашка сверху — выход из режима.' => 'You are viewing as :name. The bar at the top exits this mode.',
+    'Данные перенесены, но конфиг не переписан: :why' => 'Data transferred, but the config was not rewritten: :why',
+    'Данные перенесены, но приёмник не прошёл проверку — остались на прежней базе: :what' => 'Data transferred, but the target failed the check — staying on the previous database: :what',
+    'Данные сброшены: строк удалено :n. Ваш аккаунт заведён заново — задайте пароль по ссылке из письма.' => 'Data reset: :n rows deleted. Your account was created anew — set a password using the link in the email.',
+    'Данные сброшены — :app' => 'Data reset — :app',
+    'Для вашего аккаунта создана ссылка входа — :app' => 'A sign-in link was created for your account — :app',
+    'Домен изменён. Писем администраторам порталов: :n. Копия прежнего конфига: :file.' => 'Domain changed. Emails to portal administrators: :n. Copy of the previous config: :file.',
+    'Домен не изменён: :why' => 'Domain not changed: :why',
+    'Доступ к «:portal» выдан всей организации.' => 'Access to “:portal” was granted to the whole organisation.',
+    'Доступ организации отозван. Уже выданные персональные доступы остаются — снимите их в карточках пользователей, если нужно.' => 'Organisation access revoked. Personal access already granted stays — remove it in the user cards if needed.',
+    'Импорт завершён: создано :created, пропущено :skipped.' => 'Import finished: :created created, :skipped skipped.',
+    'Ключ ротирован: новый kid=:kid. Старый останется в JWKS 48 часов.' => 'Key rotated: new kid=:kid. The old one stays in JWKS for 48 hours.',
+    'Код отправлен на :email. Он действует 10 минут.' => 'The code was sent to :email. It is valid for 10 minutes.',
+    'Конфиг не переписан: :why' => 'Config not rewritten: :why',
+    'Не доставлено: :why' => 'Not delivered: :why',
+    'Не ушло: :why' => 'Not sent: :why',
+    'Номер аккаунта изменён на :number.' => 'Account number changed to :number.',
+    'Организация «:org» удалена. Строк убрано: :n.' => 'Organisation “:org” deleted. Rows removed: :n.',
+    'Организация включена.' => 'Organisation enabled.',
+    'Организация выключена: участники больше не получают доступ через неё.' => 'Organisation disabled: members no longer get access through it.',
+    'Отправили ещё :n писем администраторам порталов.' => 'Sent :n more emails to portal administrators.',
+    'Передача владения — :app' => 'Ownership transfer — :app',
+    'Перенос не выполнен: :why' => 'Transfer failed: :why',
+    'Портал «:portal» удалён. Строк убрано: :n.' => 'Portal “:portal” deleted. Rows removed: :n.',
+    'Права роли сохранены.' => 'Role permissions saved.',
+    'Права сохранены. Добавлено чтение области, без которого изменение не имеет смысла: :list.' => 'Permissions saved. Read access to the area was added, without which the change makes no sense: :list.',
+    'Пробное событие доставлено (HTTP :code).' => 'Test event delivered (HTTP :code).',
+    'Проект сброшен. Ссылка на установку пароля отправлена на :email.' => 'Project reset. A link to set a password was sent to :email.',
+    'Системные роли (:slug) не удаляются.' => 'System roles (:slug) can’t be deleted.',
+    'нет ответа' => 'no response',
+    'строка :n: email «:email» некорректен' => 'row :n: the email “:email” is invalid',
+    'строка :n: ни почты, ни логина — узнавать человека не по чему' => 'row :n: no email and no login — nothing to recognise the person by',
+    /* v4.74: экран отказа и страницы ошибок входа (app/Oidc), панель, тосты */
+    'redirect_uri не входит в список, зарегистрированный для «:portal». Сравнение — байт-в-байт.' => 'redirect_uri is not in the list registered for “:portal”. The comparison is byte-for-byte.',
+    'Адрес возврата не совпадает' => 'Redirect address doesn’t match',
+    'Webhook включён.' => 'Webhook enabled.',
+    'Webhook выключен.' => 'Webhook disabled.',
+    'Ваш доступ к «:portal» отозван. Если это ошибка — напишите администратору портала.' => 'Your access to “:portal” has been revoked. If this is a mistake, write to the portal administrator.',
+    'Возвращаемся в сервис' => 'Returning to the service',
+    'Вход по приглашениям' => 'Sign-in by invitation',
+    'График' => 'Chart',
+    'Данных пока нет' => 'No data yet',
+    'Доступ закрыт — в сервисе учётная запись ушла в архив; откроете доступ — вернётся.' => 'Access closed — the account in the service went to the archive; reopen access and it comes back.',
+    'Доступ и так был закрыт.' => 'Access was already closed.',
+    'Доступ к «:portal» выдаётся по подтверждению. Заявка создана — администратор портала увидит её в ближайшее время.' => 'Access to “:portal” is granted on approval. A request has been created — the portal administrator will see it soon.',
+    'Запись о доступе убрана — сервис сотрёт учётную запись этого человека и его данные.' => 'Access record removed — the service will erase this person’s account and their data.',
+    'Заявка на рассмотрении' => 'Request under review',
+    'Заявка отклонена.' => 'Request declined.',
+    'Заявка отклонена — сюда человек не войдёт; передумаете — «Открыть».' => 'Request declined — this person won’t get in here; if you change your mind, use “Open”.',
+    'Неизвестный сервис' => 'Unknown service',
+    'Параметр client_id не зарегистрирован или сервис отключён.' => 'The client_id parameter is not registered or the service is disabled.',
+    'Писем не ушло: у порталов нет своих администраторов.' => 'No emails sent: the portals have no administrators of their own.',
+    'Портал «:portal» доступен только по приглашению. Попросите администратора выдать вам доступ.' => 'The portal “:portal” is invitation-only. Ask an administrator to grant you access.',
+    /* v4.74: то, чего сторож не видел по форме, — нашёл разбор токенов */
+    '0 байт — не долился' => '0 bytes — upload cut short',
+    ':actual вместо :size' => ':actual instead of :size',
+    'Адрес входа изменился — :app' => 'Sign-in address changed — :app',
+    'Б' => 'B', 'КБ' => 'KB', 'МБ' => 'MB', 'ГБ' => 'GB',
+    'Включена или выключена 2FA' => '2FA turned on or off',
+    'Возвращено в очередь: :n; отправлено сразу: :sent. Остальное дошлёт крон.' => 'Returned to the queue: :n; sent right away: :sent. Cron will deliver the rest.',
+    'Вход с нового устройства' => 'Sign-in from a new device',
+    'Добавлен или удалён passkey' => 'Passkey added or removed',
+    'Кэш очищен (:n :word).' => 'Cache cleared (:n :word).',
+    'Люди и роли' => 'People and roles',
+    'Мост с порталом проложен' => 'Portal bridge established',
+    'Портал забрал свои реквизиты по ссылке установки. Вместе с ними уходит секрет, поэтому знать об этом стоит.' => 'A portal collected its credentials via the install link. The secret goes with them, so this is worth knowing.',
+    'Отозвать токен «:name»? Скрипты, использующие его, перестанут работать.' => 'Revoke the token “:name”? Scripts that use it will stop working.',
+    'Разбор' => 'Analysis',
+    'Серия неудачных попыток входа' => 'A series of failed sign-in attempts',
+    'Сессия истекла — войдите заново.' => 'Session expired — sign in again.',
+    'Событие аудита #:id' => 'Audit event #:id',
+    'У вашего аккаунта нет пароля — задайте его в профиле, без него опасную зону не открыть.' => 'Your account has no password — set one in your profile; the danger zone can’t be opened without it.',
+    'Удалить webhook «:name»? История доставок тоже исчезнет.' => 'Delete the webhook “:name”? Its delivery history will be gone too.',
+    'Хлебные крошки' => 'Breadcrumbs',
+    'Создан' => 'Created',
+    /* Слова склонения: plural() не на русском — t(one) или t(many) */
+    'запись' => 'record', 'записи' => 'records', 'записей' => 'records',
+    'запрос' => 'request', 'запроса' => 'requests', 'запросов' => 'requests',
+    'ключ' => 'key', 'ключа' => 'keys', 'ключей' => 'keys',
+    'пользователь' => 'user', 'пользователя' => 'users', 'пользователей' => 'users',
+    'участника' => 'members', 'участников' => 'members',
+    'файл' => 'file', 'файла' => 'files', 'файлов' => 'files',
+    'человек' => 'person', 'человека' => 'people', 'человеку' => 'person', 'людям' => 'people',
+    'секунду' => 'second',
+    /* v4.74: строки app.js — словарь js_i18n() во всех раскладках */
+    'Готово' => 'Done',
+    'Контрольная цифра, считается сама' => 'Check digit, calculated automatically',
+    'Наберите :n цифр — последняя посчитается сама.' => 'Type :n digits — the last one is calculated automatically.',
+    'Номер целиком: :n' => 'Full number: :n',
+    'Первая цифра не может быть нулём: номер потеряет её при копировании.' => 'The first digit can’t be zero: the number would lose it when copied.',
+    'Подробности' => 'Details',
+    'Проверяю…' => 'Checking…',
+    'Сбой запроса — посмотрите логи.' => 'Request failed — check the logs.',
+    'Тема: авто' => 'Theme: auto',
+    'Тема: светлая' => 'Theme: light',
+    'Тема: тёмная' => 'Theme: dark',
+    /* v4.74.1: названия на экране — бренд и браузер (device_text) */
+    'Яндекс' => 'Yandex',
+    'Яндекс Браузер' => 'Yandex Browser',
+    'Браузер' => 'Browser',
+    /* v4.75: passkey.js — словарь js_i18n() */
+    'Браузер не поддерживает passkeys' => 'This browser doesn’t support passkeys',
+    'Ждём подтверждение…' => 'Waiting for confirmation…',
+    'Как назвать этот ключ?' => 'What should this key be called?',
+    'Мой passkey' => 'My passkey',
+    'Не получилось.' => 'That didn’t work.',
+    'Не получилось — попробуйте ещё раз.' => 'That didn’t work — please try again.',
+    'Отменено или время вышло.' => 'Cancelled or timed out.',
+    'Ошибка: :e' => 'Error: :e',
+    'Следуйте подсказкам браузера…' => 'Follow your browser’s prompts…',
+    /* v4.76: обложка портала на витрине */
+    '(JPEG, PNG, GIF или WebP до 5 МБ, лучше 1200×630)' => '(JPEG, PNG, GIF or WebP up to 5 MB, ideally 1200×630)',
+    'Взята с сайта портала :at — картинка превью ссылок (og:image). Обновляется раз в сутки.' => 'Taken from the portal’s site :at — its link preview image (og:image). Refreshed once a day.',
+    'Взять с сайта сейчас' => 'Fetch from the site now',
+    'Картинка взята с сайта портала.' => 'The image was taken from the portal’s site.',
+    'Картинка с чужого сайта — только по https.' => 'An image from another site is accepted over https only.',
+    'Картинку не отдали: :why' => 'The image was not served: :why',
+    'Картинку не удалось перекодировать.' => 'The image could not be re-encoded.',
+    'На главной портала нет картинки для превью ссылок (og:image).' => 'The portal’s home page has no link preview image (og:image).',
+    'Обложка: нужна картинка JPEG, PNG, GIF или WebP до 5 МБ.' => 'Cover: a JPEG, PNG, GIF or WebP image up to 5 MB is needed.',
+    'Обложка на витрине' => 'Showcase cover',
+    'Сайт портала не ответил: :why' => 'The portal’s site did not respond: :why',
+    'Своей нет — SSO возьмёт картинку превью ссылок (og:image) с главной портала. Пока её нет — карточка в цвете портала с его знаком.' => 'None of your own — SSO will take the link preview image (og:image) from the portal’s home page. Until then the card shows the portal’s mark on its colour.',
+    'Своя картинка — сайт портала её не заменяет. Уберите, чтобы снова брать картинку с сайта.' => 'Your own image — the portal’s site doesn’t replace it. Remove it to take the image from the site again.',
+    'С сайта взять не вышло: :why Пока — карточка в цвете портала с его знаком.' => 'Couldn’t take it from the site: :why For now the card shows the portal’s mark on its colour.',
+    'Стоит своя картинка — сайт её не заменяет.' => 'Your own image is set — the site doesn’t replace it.',
+    'Убрать свою картинку' => 'Remove your image',
+    'У портала нет адреса сайта.' => 'The portal has no site address.',
+    'Это не картинка или она слишком большая.' => 'This isn’t an image, or it’s too large.',
+    'неверный адрес' => 'invalid address',
+    'только https' => 'https only',
+    'имя сайта не находится' => 'the site name doesn’t resolve',
+    'адрес во внутренней сети' => 'an address on an internal network',
+    'переадресация на другой сайт' => 'a redirect to another site',
+    'слишком много переадресаций' => 'too many redirects',
+    'не ответил вовремя' => 'didn’t respond in time',
+    'не принимает соединения' => 'refuses connections',
+    'ошибка сертификата https' => 'https certificate error',
+    'слишком большой ответ' => 'the response is too large',
+    /* v4.77: снимок главной портала, оформление на весь сайт */
+    'Если портал не отдаёт картинку превью ссылок (og:image), обложкой станет снимок его главной. Снимок делает сервис Microlink (microlink.io): ему уходит публичный адрес главной портала, больше ничего. Раз в сутки на портал; своя картинка в карточке портала главнее.' => 'If a portal doesn’t provide a link preview image (og:image), its cover becomes a screenshot of its home page. The screenshot is taken by the Microlink service (microlink.io): it receives the portal’s public home address and nothing else. Once a day per portal; your own image in the portal card takes priority.',
+    'Снимать главную портала для витрины' => 'Screenshot portal home pages for the showcase',
+    'Снимок главной сайта портала :at (сервис Microlink). Обновляется раз в сутки; картинка превью ссылок (og:image), если портал её отдаст, главнее снимка.' => 'A screenshot of the portal’s home page :at (Microlink service). Refreshed once a day; a link preview image (og:image), if the portal provides one, takes priority over the screenshot.',
+    'Снимок главной тоже не вышел: :why' => 'The home page screenshot didn’t work either: :why',
+    'Снят снимок главной сайта портала.' => 'A screenshot of the portal’s home page was taken.',
+    'Цвета, шрифты и скругления — и на главной, и в кабинете, и в панели. Выключено — только на экранах входа; главная — тоже экран входа, она в оформлении всегда.' => 'Colours, fonts and corner radius — on the home page, in the account and in the admin panel. Off — only on sign-in screens; the home page is a sign-in screen too, so it always follows this look.',
+    'Это оформление — на весь сайт' => 'Apply this look to the whole site',
+    /* v4.78: шрифты из Google Fonts, готовые схемы */
+    'Google Fonts не отдал шрифт «:f».' => 'Google Fonts didn’t return the font “:f”.',
+    'В ответе Google Fonts нет файлов с кириллицей и латиницей.' => 'The Google Fonts response has no Cyrillic and Latin files.',
+    'Готовые схемы' => 'Ready-made schemes',
+    'Добавить шрифт из Google Fonts' => 'Add a font from Google Fonts',
+    'Каталог Google подгружается — обновите страницу через минуту или впишите точное название семейства.' => 'The Google catalogue is loading — refresh the page in a minute or type the exact family name.',
+    'Каталог с кириллицей: :n семейств. Начните вводить название — появятся подсказки.' => 'Catalogue with Cyrillic: :n families. Start typing a name to see suggestions.',
+    'Любой шрифт Google Fonts с кириллицей. SSO скачивает его файлы к себе один раз и отдаёт со своего домена: браузеры посетителей к Google не ходят. Установленный появится в выборе шрифтов выше и в оформлении порталов.' => 'Any Google Fonts family with Cyrillic. SSO downloads its files once and serves them from its own domain: visitors’ browsers never contact Google. Once installed, it appears in the font choices above and in portal looks.',
+    'Своих шрифтов пока нет — работают шрифты поставки: Golos Text, Inter, EB Garamond и шрифт устройства.' => 'No custom fonts yet — the bundled fonts are in use: Golos Text, Inter, EB Garamond and the device font.',
+    'Сначала выберите в оформлении другой шрифт' => 'First choose another font in the look',
+    'Такого шрифта нет.' => 'There is no such font.',
+    'Файл шрифта «:f» не скачался.' => 'The font file for “:f” didn’t download.',
+    'Шрифт «:f» используется: :where. Сначала выберите там другой.' => 'The font “:f” is in use: :where. Choose another one there first.',
+    'Шрифт «:f» уже установлен.' => 'The font “:f” is already installed.',
+    'Шрифт «:f» установлен — выберите его в оформлении.' => 'The font “:f” is installed — choose it in the look.',
+    'Шрифта «:f» нет в каталоге Google с кириллицей.' => 'The font “:f” isn’t in the Google catalogue with Cyrillic.',
+    'Шрифт убран.' => 'Font removed.',
+    'Шрифты' => 'Fonts',
+    'используется: :where' => 'in use: :where',
+    'оформление сайта' => 'site look',
+    'Аа Вход' => 'Aa Sign in',
+    /* Категории каталога Google и имена схем */
+    'Sans Serif' => 'Sans Serif', 'Serif' => 'Serif', 'Display' => 'Display', 'Handwriting' => 'Handwriting', 'Monospace' => 'Monospace',
+    'Терракота' => 'Terracotta', 'Море' => 'Sea', 'Лес' => 'Forest', 'Слива' => 'Plum', 'Графит' => 'Graphite', 'Янтарь' => 'Amber',
+    'Роза' => 'Rose', 'Небо' => 'Sky', 'Мята' => 'Mint', 'Бумага' => 'Paper', 'Неон' => 'Neon', 'Уголь и лайм' => 'Charcoal and lime',
+    /* v4.79: конструктор оформления, свои схемы */
+    'Без теней' => 'No shadows',
+    'В оформлении пока нечего сохранять — выберите цвета, шрифты или форму.' => 'There’s nothing to save in the look yet — choose colours, fonts or shape.',
+    'Высота полей и кнопок' => 'Field and button height',
+    'Главная кнопка' => 'Main button',
+    'Жирная' => 'Bold',
+    'Заливка' => 'Filled',
+    'Заметные' => 'Pronounced',
+    'Как назвать схему?' => 'What should the scheme be called?',
+    'Контур' => 'Outline',
+    'Крупная' => 'Large',
+    'Мои схемы' => 'My schemes',
+    'Мягкая' => 'Soft',
+    'Мягкие' => 'Soft',
+    'Назовите схему.' => 'Name the scheme.',
+    'Обычная' => 'Regular',
+    'Плотная' => 'Compact',
+    'Полужирная' => 'Semibold',
+    'Рамка полей' => 'Field border',
+    'Своих схем пока нет. Настройте цвета, шрифты и форму — и сохраните их одной плиткой: она появится и у порталов.' => 'No schemes of your own yet. Set up colours, fonts and shape — and save them as one tile: it will appear for portals too.',
+    'Сохранить как схему' => 'Save as a scheme',
+    'Средняя' => 'Medium',
+    'Схема «:name» сохранена — она есть и у порталов.' => 'The scheme “:name” is saved — portals have it too.',
+    'Схема убрана.' => 'Scheme removed.',
+    'Схем уже :n — уберите лишние.' => 'There are already :n schemes — remove some.',
+    'Такой схемы нет.' => 'There is no such scheme.',
+    'Тени' => 'Shadows',
+    'Толщина заголовков' => 'Heading weight',
+    'Толщина кнопок и подписей' => 'Button and label weight',
+    'Убрать схему «:name»' => 'Remove the scheme “:name”',
+    'Убрать схему «:name»?' => 'Remove the scheme “:name”?',
+    /* v4.80: схемы, конструктор фона и темы, витрина */
+    'Базовая' => 'Base', 'Базовые' => 'Base', 'Базовые схемы' => 'Base schemes', 'Цветные' => 'Colourful', 'Схемы' => 'Schemes',
+    'Чёрно-белая' => 'Black on white', 'Бело-чёрная' => 'White on black',
+    'Полночь' => 'Midnight', 'Песок' => 'Sand', 'Кофе' => 'Coffee', 'Лаванда' => 'Lavender', 'Изумруд' => 'Emerald',
+    'Коралл' => 'Coral', 'Сталь' => 'Steel', 'Океан' => 'Ocean',
+    'Без узора' => 'No pattern', 'Сетка' => 'Grid', 'Линии' => 'Lines', 'Узор фона' => 'Background pattern',
+    'Как у устройства' => 'Like the device', 'Тема для новых посетителей' => 'Theme for new visitors',
+    'Пока человек сам не переключил тему кнопкой внизу. Выбор человека главнее.' => 'Until the person switches the theme with the button at the bottom. Their choice takes priority.',
+    'Карточки' => 'Cards', 'Плоские' => 'Flat', 'Стекло' => 'Glass', 'С тенью' => 'With shadow',
+    'Стекло — полупрозрачные карточки, сквозь которые размыто виден фон.' => 'Glass — translucent cards with a blurred background showing through.',
+    'Фон и тема' => 'Background and theme', 'Форма' => 'Shape',
+    'Больше шрифтов ставится в оформлении сайта — и сразу появляется здесь.' => 'More fonts are installed in the site look — and appear here right away.',
+    'Больше шрифтов — любой из Google Fonts с кириллицей: раздел «Шрифты» ниже на этой странице.' => 'More fonts — any Google Fonts family with Cyrillic: see the “Fonts” section further down this page.',
+    'Главная, экран входа и вид всего сайта: схемы, цвета, шрифты, форма' => 'Home page, sign-in screen and the look of the whole site: schemes, colours, fonts, shape',
+    /* v4.81: живая обложка */
+    '(MP4 или WebM, до :mb МБ)' => '(MP4 or WebM, up to :mb MB)',
+    '(до :n, по 6 МБ)' => '(up to :n, 6 MB each)',
+    ':n с' => ':n s',
+    'Видео' => 'Video',
+    'Видео идёт без звука и по кругу. На телефоне панели нет — там весь экран у формы.' => 'Video plays muted and on a loop. Phones have no panel — the whole screen belongs to the form.',
+    'Видео на обложке' => 'Cover video',
+    'Видео не принято: больше :mb МБ или не дошло.' => 'Video not accepted: over :mb MB or it did not arrive.',
+    'Видео не принято: нужен файл MP4 или WebM.' => 'Video not accepted: an MP4 or WebM file is needed.',
+    'Видео не сохранилось: нет места или прав на запись.' => 'The video was not saved: no space or no write permission.',
+    'Видео с YouTube' => 'YouTube video',
+    'Видео файлом' => 'Video file',
+    'Выбран YouTube, но ссылки нет — на панели будут картинки.' => 'YouTube is selected but there is no link — the panel will show the pictures.',
+    'Выбрано видео, но файла нет — на панели будут картинки.' => 'Video is selected but there is no file — the panel will show the pictures.',
+    'Движение' => 'Motion',
+    'Живые обои' => 'Live wallpaper',
+    'Живые обои — кадр медленно приближается и плывёт. Кто просил в системе «без движения», увидит первый кадр неподвижным.' => 'Live wallpaper — the picture slowly zooms and drifts. Anyone who asked their system for reduced motion sees the first picture standing still.',
+    'Кадр держится' => 'Each picture stays',
+    'Картинка «:name» не принята: больше 6 МБ или не дошла.' => 'Picture “:name” not accepted: over 6 MB or it did not arrive.',
+    'Картинка «:name» не принята: это не картинка или на сервере нет GD с webp.' => 'Picture “:name” not accepted: not an image, or the server has no GD with webp.',
+    'Картинки' => 'Pictures',
+    'Картинок в обложке не больше :n — лишние не добавлены.' => 'A cover holds at most :n pictures — the extra ones were not added.',
+    'Можно выбрать несколько сразу. Одна — снимок, несколько — сменяются по кругу. Уложим в 1600×1400 и перекодируем.' => 'You can pick several at once. One is a still picture, several take turns on a loop. We fit them into 1600×1400 and re-encode.',
+    'Отметьте, чтобы убрать' => 'Tick to remove',
+    'Отмеченные крестиком уберутся при сохранении, новые встанут в конец. Первая — заставка видео и картинка портала на витрине.' => 'Pictures marked with a cross are removed on save, new ones go to the end. The first is the video placeholder and the portal picture on the showcase.',
+    'Показывается с youtube-nocookie.com: браузер посетителя обращается к YouTube (Google), и тот видит его адрес. Пока видео грузится — первая картинка.' => 'Played from youtube-nocookie.com: the visitor’s browser contacts YouTube (Google), which sees their address. The first picture shows while the video loads.',
+    'Смена кадров' => 'Crossfade',
+    'Ссылка на видео YouTube' => 'YouTube video link',
+    'Ссылка не похожа на видео YouTube — оставлена прежняя.' => 'The link does not look like a YouTube video — the previous one is kept.',
+    'Убрать видео' => 'Remove video',
+    'Убрать картинку :n' => 'Remove picture :n',
+    'Файл отдаётся с этого сайта. Сжимайте заранее: полминуты в 1080p — это 10–20 МБ, и столько скачает каждый, кто откроет вход.' => 'The file is served from this site. Compress it first: half a minute of 1080p is 10–20 MB, and everyone who opens sign-in downloads that much.',
+    'первая' => 'first',
+    /* v4.83: контрольный прогон, звук обложки */
+    'Видео начинает без звука: со звуком браузеры его не запускают, пока человек ничего не нажал. Кнопка в углу панели даёт посетителю включить звук самому.' => 'The video starts muted: browsers refuse to start a video with sound before the person has clicked anything. A button in the corner of the panel lets the visitor turn the sound on.',
+    'Включить звук' => 'Turn sound on',
+    'Выключить звук' => 'Turn sound off',
+    'Кнопка звука' => 'Sound button',
+    'Данные владельца: заполняются один раз и подставляются во все документы' => 'Owner details: filled in once and inserted into every document',
+    /* v4.84: фон страниц */
+    'Без размытия' => 'No blur',
+    'Видео и YouTube — только на широком экране и не при экономии трафика; на телефоне стоит первая картинка.' => 'Video and YouTube play only on wide screens and not in data saver mode; phones show the first picture.',
+    'Вход и главная' => 'Sign-in and home page',
+    'Где показывать' => 'Where to show',
+    'Живой фон' => 'Living background',
+    'Картинки или видео за формами входа, кабинетом и админкой. Текст стоит на вуали цвета фона, карточки остаются карточками; со «стеклом» в форме сквозь них размыто виден фон.' => 'Pictures or video behind the sign-in forms, the account and the admin panel. Text sits on a veil in the background colour and cards stay cards; with “glass” cards the background shows through them, blurred.',
+    'Лёгкое' => 'Light',
+    'Ничего не отмечено — фона нет нигде. В окне входа на странице портала фона нет всегда: вокруг свой сайт.' => 'Nothing ticked — no background anywhere. The sign-in window on a portal page never has one: the portal’s own site is around it.',
+    'Приглушение' => 'Dimming',
+    'Размытие' => 'Blur',
+    'Сильное' => 'Strong',
+    'Сильное — фон едва угадывается, текст читается как на ровном. Чем легче, тем ярче фон и тем труднее читаются подписи вне карточек.' => 'Strong — the background is barely visible and text reads as on a plain page. The lighter it is, the brighter the background and the harder it is to read labels outside cards.',
+    'Среднее' => 'Medium',
+    'Фон' => 'Background',
+    'Фон страниц' => 'Page background',
+    'Фон чуть смещается за курсором — как окно, в которое смотришь под другим углом. Только мышью; кто просил «без движения», увидит его неподвижным.' => 'The background shifts slightly with the cursor — like looking through a window from another angle. Mouse only; anyone who asked for reduced motion sees it still.',
+    'Что на фоне' => 'What is in the background',
+    /* v4.84: кривые на дашборде */
+    'Входы за 14 дней' => 'Sign-ins over 14 days',
+    'Новые сессии за 14 дней' => 'New sessions over 14 days',
+    'Регистрации за 14 дней' => 'Sign-ups over 14 days',
+    'успешные · за 14 дней: :n' => 'successful · over 14 days: :n',
+    /* v4.91: обзоры портала и организации */
+    'Адреса возврата сходятся' => 'Return addresses match',
+    'Выход, блокировка и отзыв доступа не дошли до портала.' => 'Sign-outs, blocks and access revocations did not reach the portal.',
+    'Заявок ждут одобрения: :n' => 'Requests awaiting approval: :n',
+    'Заявок нет' => 'No requests',
+    'Как дела' => 'Status',
+    'Люди' => 'People',
+    'Люди, вход, связь с порталом и что требует внимания' => 'People, sign-in, portal link and what needs attention',
+    'Не доставлено событий: :n' => 'Events not delivered: :n',
+    'Не пускает никого и не обновляет токены.' => 'Lets nobody in and does not refresh tokens.',
+    'Организация включена' => 'Organization enabled',
+    'Организациям' => 'To organizations',
+    'Оформление' => 'Look',
+    'Портал выключен' => 'Portal disabled',
+    'Портал не отвечает' => 'The portal does not respond',
+    'Портал о себе ещё не рассказывал — это не ошибка, если модуль его не отдаёт' => 'The portal has not described itself yet — not an error if its module does not serve that',
+    'Портал отвечает — рассказал о себе :ago' => 'The portal responds — described itself :ago',
+    'Своих ролей' => 'Own roles',
+    'События доставлены' => 'Events delivered',
+    'Способы' => 'Methods',
+    'Таких адресов: :n — добавьте их или забудьте.' => 'Such addresses: :n — add or forget them.',
+    'Чей и кому открыт' => 'Owner and access',
+    'Числа организации, название и состояние' => 'Organization numbers, name and state',
+    'все способы установки' => 'all methods of this installation',
+    'в составе организации' => 'in the organization',
+    'всё доставлено' => 'all delivered',
+    'ещё никто не входил' => 'nobody has signed in yet',
+    'ждут одобрения' => 'awaiting approval',
+    'за неделю входили: :n' => 'signed in this week: :n',
+    'за неделю никто не входил' => 'nobody signed in this week',
+    'к чужим порталам для всех участников' => 'to other portals for all members',
+    'ничей (уровень системы)' => 'nobody’s (system level)',
+    'новых нет' => 'no new ones',
+    'принадлежат организации' => 'owned by the organization',
+    'участники и те, кто ходит в её сервисы' => 'members and those who use its services',
+    /* v4.90: списки порталов и организаций */
+    'Что выдано организации, получают все её участники. Роли внутри неё управляют составом, а не правами в сервисах.'
+        => 'Whatever is granted to an organization, all its members get. Roles inside it manage membership, not permissions in services.',
+    'вход окном поверх сайта' => 'sign-in in a window over the site',
+    'вход отдельным окном' => 'sign-in in a separate window',
+    'вход страницей' => 'sign-in as a page',
+    'не ушло' => 'not sent',
+    'нужен 2FA' => '2FA required',
+    'отправлено' => 'sent',
+    'пока никого' => 'nobody yet',
+    'родственный домен' => 'sibling domain',
+    'сервис' => 'service', 'сервиса' => 'services', 'сервисов' => 'services',
+    'сервисов нет' => 'no services',
+    'событие не доставлено' => 'event not delivered',
+    'события не доставлены' => 'events not delivered',
+    'событий не доставлено' => 'events not delivered',
+    /* v4.88: дубли — «Войти и привязать» и объединение в админке */
+    ':provider уже привязан к другому аккаунту — эту связку не трогаем.' => ':provider is already linked to another account — that link is left as it is.',
+    'Аккаунты объединены: :dup влит в :main. Перенесено: сервисов входа :i, ключей :k, доступов :a, ролей :r, организаций :o.'
+        => 'Accounts merged: :dup was merged into :main. Moved: sign-in services :i, keys :k, access grants :a, roles :r, organizations :o.',
+    'Вливаемый аккаунт — суперадмин. Оставьте его, а влейте другой, или сначала снимите роль.'
+        => 'The account being merged is a superadmin. Keep it and merge the other one instead, or remove the role first.',
+    'Возможные дубли' => 'Possible duplicates',
+    'Войдите в свой аккаунт — :provider привяжется к нему.' => 'Sign in to your account — :provider will be linked to it.',
+    'Войти в него и привязать :provider' => 'Sign in to it and link :provider',
+    'Второй' => 'Other',
+    'Второй аккаунт' => 'Other account',
+    'Второй аккаунт не найден.' => 'The other account was not found.',
+    'Второй вольётся сюда' => 'The other one will be merged into this one',
+    'Второй — :who' => 'The other — :who',
+    'Для дублей одного человека: второй аккаунт через другую почту или другой аккаунт сервиса. Оставшемуся переедут сервисы входа, ключи, доступы, роли и организации; почта влитого станет дополнительной, пустые поля профиля дополнятся. Влитый аккаунт получит статус «удалён» со ссылкой на оставшийся, его сессии закроются, порталам уйдёт событие удаления с новым адресом.'
+        => 'For duplicates of one person: a second account via another email or another service account. The remaining account receives the sign-in services, keys, access grants, roles and organizations; the merged account’s email becomes an additional address, and empty profile fields are filled in. The merged account is marked deleted with a link to the remaining one, its sessions are closed, and portals receive a deletion event with the new address.',
+    'Какой аккаунт оставить' => 'Which account to keep',
+    'Ключи устройства' => 'Device keys',
+    'Нет, создать новый аккаунт' => 'No, create a new account',
+    'Не удалось объединить: :why' => 'Could not merge: :why',
+    'Объединить' => 'Merge',
+    'Объединить аккаунты? Это необратимо.' => 'Merge the accounts? This cannot be undone.',
+    'Объединить с другим аккаунтом' => 'Merge with another account',
+    'Оставить' => 'Keep',
+    'Отменить' => 'Cancel',
+    'Похоже, у вас уже есть аккаунт' => 'Looks like you already have an account',
+    'Почта, логин, телефон или #номер' => 'Email, login, phone or #number',
+    'Слить дубль в этот аккаунт или этот — в другой' => 'Merge a duplicate into this account, or this one into another',
+    'Сначала подтвердите пароль — слияние необратимо.' => 'Confirm your password first — merging cannot be undone.',
+    'Такого живого аккаунта нет — или это он сам.' => 'No such active account — or it is this one.',
+    'Этот' => 'This',
+    'Этот вольётся туда' => 'This one will be merged into the other',
+    'Этот — :who' => 'This — :who',
+    'аккаунт, в который входили через :services' => 'an account signed in to via :services',
+    'аккаунт без почты' => 'an account without email',
+    'совпали фамилия, имя и дата рождения' => 'same last name, first name and date of birth',
+    'совпали фамилия и имя' => 'same last name and first name',
+    'совпал номер телефона' => 'same phone number',
+    /* v4.87: Telegram переходом */
+    'Проверяем ответ Telegram…' => 'Checking Telegram’s answer…',
+    'Telegram не вернул данные входа. Попробуйте ещё раз или выберите другой способ.' => 'Telegram did not return sign-in data. Try again or choose another way.',
+    /* v4.86: кнопки сервисов входа */
+    'Продолжить с :name' => 'Continue with :name',
+    'Яндекс ID' => 'Yandex ID',
+    'Сервисы — первыми' => 'Services first',
+    'Кнопки «Продолжить с …» над формой, как у Google, Apple и X: в окне поверх сайта портала они тогда видны сразу. Выключено — под формой.' => 'The “Continue with …” buttons go above the form, as at Google, Apple and X, so they are visible right away in the window over a portal’s site. Off — below the form.',
+    /* v4.85: чей дизайн главнее на входе в порталы */
+    'Вход в порталы' => 'Portal sign-in',
+    'Дизайн сайта главнее' => 'Site design first',
+    'Шрифты, форма, карточки, узор, фон и раскладка — отсюда; цвета — портала, чтобы вход в него узнавался' => 'Fonts, shape, cards, pattern, background and layout come from here; colors come from the portal so its sign-in stays recognizable',
+    'Портал главнее' => 'Portal first',
+    'Что портал прислал в манифесте — его; чего не прислал — отсюда' => 'Whatever the portal sends in its manifest is used; whatever it does not comes from here',
+    'Только дизайн сайта' => 'Site design only',
+    'Все порталы выглядят как вход в установку; их темы не применяются' => 'Every portal looks like this installation’s sign-in; portal themes are not applied',
+    'Для тем, которые порталы присылают сами. Портал, которому в карточке задано «Своё», выглядит как настроено там.' => 'Applies to themes that portals send themselves. A portal set to “Custom” in its card looks as configured there.',
+    'Как тема портала сочетается с «Оформлением сайта», решает выбор «Вход в порталы» там; «Своё» — как настроено здесь, а чего здесь не задано — оттуда.' => 'How the portal theme combines with “Site appearance” is decided by the “Portal sign-in” choice there; “Custom” looks as configured here, and whatever is not set here comes from there.',
+    /* v4.92: экраны людей — роли по строке, сессии по устройству, действия карточками */
+    'уровень :n' => 'level :n',
+    'удалённый сервис #:id' => 'deleted service #:id',
+    'удалённая организация #:id' => 'deleted organization #:id',
+    'Выдача на удалённую область ничего не открывает — она осталась от сервиса или организации, которых больше нет. Её можно убрать.' => 'A grant on a deleted scope opens nothing — it is left over from a service or organization that no longer exists. You can remove it.',
+    ':n :sessions на :places :devices' => ':n :sessions on :places :devices',
+    'сессия' => 'session', 'сессии' => 'sessions', 'сессий' => 'sessions',
+    'устройстве' => 'device', 'устройствах' => 'devices',
+    'Активных сессий нет — человек нигде не вошёл.' => 'No active sessions — the person is not signed in anywhere.',
+    'Впервые' => 'First seen',
+    'ваша текущая' => 'your current',
+    'Завершить остальные' => 'End the others',
+    'Завершено сессий: :n.' => 'Sessions ended: :n.',
+    'Порталы получат событие выхода и закроют свои сессии.' => 'Portals will get a logout event and close their own sessions.',
+    'Помочь войти' => 'Help sign in',
+    'Отправить' => 'Send',
+    'Уйдёт письмом на :email — новый пароль человек задаст сам.' => 'Goes by email to :email — the person sets a new password themselves.',
+    'Почты у аккаунта нет — ссылка появится здесь, передадите её сами.' => 'The account has no email — the link will appear here for you to pass on.',
+    'Одноразовая, на 15 минут — когда нет ни пароля, ни почты. Владелец получит уведомление.' => 'Single-use, valid for 15 minutes — for when there is neither a password nor email. The owner will be notified.',
+    'Когда владение адресом подтверждено другим путём — письмо не дошло, а человек рядом.' => 'When ownership of the address was confirmed another way — the email did not arrive, but the person is right there.',
+    'Глазами владельца' => 'Through the owner’s eyes',
+    'Профиль откроется так, как его видит человек. Каждый шаг — в журнал; пароль и почту в этом режиме не сменить.' => 'The profile opens the way the person sees it. Every step is logged; password and email cannot be changed in this mode.',
+    'Доступ к аккаунту' => 'Account access',
+    'Это суперадмин: заблокировать или удалить его нельзя. Сначала снимите роль в разделе «Роли».' => 'This is a superadmin: they cannot be blocked or deleted. Remove the role in “Roles” first.',
+    'Аккаунт помечен на удаление :when. Данные обезличатся через 14 дней после этого; войдёт раньше — аккаунт вернётся.' => 'The account was marked for deletion :when. Its data will be anonymized 14 days later; signing in before then restores it.',
+    'Войти нельзя ни сюда, ни в порталы. Разблокируете — вход откроется снова.' => 'Signing in is closed here and in portals. Unblock to open it again.',
+    'Вход закроется, сессии завершатся, порталы получат событие блокировки.' => 'Sign-in closes, sessions end, portals get a block event.',
+    'Пропадёт из списков, порталы его отключат. Через 14 дней данные обезличатся; войдёт раньше — аккаунт вернётся.' => 'Disappears from lists and portals disable it. Data is anonymized after 14 days; signing in before then restores the account.',
+    'Стереть сразу и без следа —' => 'To erase at once without a trace —',
+    'в опасной зоне' => 'in the danger zone',
+    'Номер, который человек называет в поддержке' => 'The number the person gives to support',
+    'Прежний номер останется в журнале — обращения по нему не потеряются.' => 'The previous number stays in the log, so requests that cite it are not lost.',
+    /* v4.93: роли и полоса «Сохранить» */
+    'никого' => 'nobody',
+    /* v4.94: журналы */
+    'Скрыто стуков сканеров за сутки: :n — гости по адресам, которых нет.' => 'Scanner knocks hidden over the last day: :n — guests requesting addresses that do not exist.',
+    'Чаще всех:' => 'Most frequent:',
+    'Показать всё' => 'Show everything',
+    'Показаны и стуки сканеров.' => 'Scanner knocks are shown too.',
+    'Каждый запрос к приложению: кто, откуда, что открыл и чем ответили. Токены из адресов вырезаны, у параметров — только имена.' => 'Every request to the application: who, from where, what was opened and what the answer was. Tokens are cut from addresses; parameters keep only their names.',
+    'Хранится :n :days.' => 'Kept for :n :days.',
+    'Хранится без срока.' => 'Kept with no time limit.',
+];

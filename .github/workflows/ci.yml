@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: PHP ${{ matrix.php }} · SQLite
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Установить PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo_sqlite, openssl, mbstring, curl, gd, sodium, zip
+          coverage: none
+          ini-values: display_errors=On
+
+      - name: Прогнать всю батарею
+        run: bash tests/run-all.sh
+
+      - name: Логи серверов при провале
+        if: failure()
+        run: |
+          echo "── SSO ──"; tail -50 tests/tmp/server-8710.log 2>/dev/null || true
+          echo "── RP ──";  tail -50 tests/tmp/server-8711.log 2>/dev/null || true
+          echo "── app ──"; tail -50 storage/logs/app-*.log 2>/dev/null || true
+
+  mysql:
+    name: PHP 8.3 · MySQL 8 (боевой драйвер)
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: sso_test
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Установить PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, openssl, mbstring, curl, gd, sodium, zip
+          coverage: none
+
+      - name: Установка на MySQL и прогон миграций
+        run: |
+          php -r '
+            define("SSO_ROOT", getcwd());
+            require "app/bootstrap.php";
+            $pdo = new PDO("mysql:host=127.0.0.1;port=3306;dbname=sso_test;charset=utf8mb4", "root", "root",
+              [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+            foreach (glob("migrations/*.sql") as $file) {
+              $sql = preg_replace("~\{([a-z_]+)\}~", "sso_$1", file_get_contents($file));
+              foreach (App\Core\SqliteCompat::splitStatements($sql) as $st) {
+                if (trim($st) !== "") $pdo->exec($st);
+              }
+              echo "применена " . basename($file) . "\n";
+            }
+            $n = $pdo->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = \"sso_test\"")->fetchColumn();
+            echo "таблиц в MySQL: $n\n";
+            if ((int)$n < 19) { fwrite(STDERR, "мало таблиц — миграции не полностью применились\n"); exit(1); }
+          '
+
+      - name: Сборка дистрибутива (проверка на секреты)
+        run: php build_dist.php

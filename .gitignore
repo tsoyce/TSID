@@ -1,0 +1,21 @@
+/config/config.php
+/config/installed.lock
+/storage/logs/*
+/storage/keys/*
+/storage/avatars/*
+/storage/cache/*
+/storage/exports/*
+!/storage/**/.gitkeep
+/tests/tmp/
+.DS_Store
+Thumbs.db
+tests/tmp*
+storage/*.sqlite
+/tests/rp/
+/dist/
+/config/config.php.bak-*
+
+
+# Файл секретов, который экран настроек набора пишет в e2e (tests/rp/sso → «выше веб-корня»)
+/tests/tsoy-secrets.php
+/tests/sso-secrets.php

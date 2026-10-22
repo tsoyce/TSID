@@ -1,0 +1,30 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sso",
+      "runtimeExecutable": "php",
+      "runtimeArgs": [
+        "-d", "extension=pdo_sqlite",
+        "-d", "extension=sodium",
+        "-S", "localhost:8710",
+        "-t", "public",
+        "tests/router.php"
+      ],
+      "port": 8710,
+      "autoPort": false
+    },
+    {
+      "name": "test-rp",
+      "runtimeExecutable": "php",
+      "runtimeArgs": [
+        "-d", "extension=pdo_sqlite",
+        "-d", "extension=sodium",
+        "-S", "localhost:8711",
+        "-t", "tests/rp"
+      ],
+      "port": 8711,
+      "autoPort": false
+    }
+  ]
+}

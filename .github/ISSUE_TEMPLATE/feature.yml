@@ -1,0 +1,35 @@
+name: Предложение
+description: Идея новой возможности или улучшения
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Сверьтесь с [ROADMAP.md](../blob/main/ROADMAP.md): возможно, это уже запланировано —
+        тогда лучше поддержать существующий issue. В §10 перечислено, чего проект
+        осознанно **не** делает (SPA, Composer в проде, SAML, микросервисы).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую задачу это решает
+      description: Опишите ситуацию, а не сразу решение
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: Как видите реализацию
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Соответствие принципам проекта (ROADMAP §1)
+      options:
+        - label: Не навязывает ограничений — всё выключаемо настройкой
+        - label: Действие пользователя укладывается в 30 секунд
+        - label: Не требует новых зависимостей, Composer или node
+        - label: Не содержит зашитого названия инсталляции (white-label)

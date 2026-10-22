@@ -1,0 +1,66 @@
+name: Баг
+description: Что-то работает не так, как задумано
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Нашли уязвимость? **Не открывайте issue** — см. [SECURITY.md](../blob/main/SECURITY.md).
+
+  - type: textarea
+    id: what
+    attributes:
+      label: Что происходит
+      description: И что ожидалось вместо этого
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Как воспроизвести
+      placeholder: |
+        1. Открыть /admin/settings
+        2. Нажать «Отправить тест»
+        3. Ничего не происходит
+    validations:
+      required: true
+
+  - type: input
+    id: php
+    attributes:
+      label: Версия PHP
+      placeholder: "8.3.10 (php -v)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: db
+    attributes:
+      label: База данных
+      options: [MySQL 8, MariaDB 10.6+, MariaDB 11, SQLite (dev), другое]
+    validations:
+      required: true
+
+  - type: input
+    id: server
+    attributes:
+      label: Веб-сервер и хостинг
+      placeholder: "Apache 2.4 / BrainyCP, DocumentRoot на public/"
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Логи
+      description: |
+        Хвост `storage/logs/app-*.log` и, если проблема при установке, `storage/logs/install.log`.
+        **Уберите токены, секреты и пароли перед вставкой.**
+      render: text
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Проверено
+      options:
+        - label: На странице `/admin/health` нет красных пунктов (или они относятся к делу)
+        - label: Кэш браузера сброшен, файлы обновлены полностью

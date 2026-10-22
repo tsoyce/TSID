@@ -1,0 +1,40 @@
+Options -Indexes
+RewriteEngine On
+# Basic-auth для /token и /introspect: FPM/CGI-режимы съедают заголовок без этого
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Discovery живёт по пути, начинающемуся с точки, и на панельном хостинге
+# регулярно попадает под правило «резать всё скрытое». Пускаем его в приложение
+# первым и явно. Помогает не всегда: если запрет стоит в конфиге виртуального
+# хоста (RedirectMatch 404 /\..*$), он срабатывает раньше любого .htaccess — там
+# снимает только поддержка. Проверить, кто ответил, можно в разделе «Прозвон»:
+# ответ приложения помечен заголовком X-SSO-App (до 4.89 — X-TSOY-ID).
+RewriteRule ^\.well-known/ index.php [QSA,L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [QSA,L]
+
+<FilesMatch "\.(woff2|css|js|svg|png|webp)$">
+  Header set Cache-Control "public, max-age=604800"
+</FilesMatch>
+
+# Сжатие ответов (v4.67). Замер 12.09 на боевой: HTML, app.css (137 КБ) и app.js
+# (59 КБ) уходили несжатыми при загруженных brotli и deflate — просто никто не
+# попросил. Каждая строка — под проверкой своего модуля: неизвестная директива
+# в .htaccess роняет сайт в 500, а отсутствующий модуль должен значить «без
+# сжатия», а не «без сайта». Шрифты woff2 уже сжаты — их не трогаем.
+<IfModule mod_filter.c>
+  <IfModule mod_brotli.c>
+    <IfModule mod_deflate.c>
+      AddOutputFilterByType BROTLI_COMPRESS;DEFLATE text/html text/plain text/css application/javascript text/javascript application/json application/manifest+json image/svg+xml
+    </IfModule>
+    <IfModule !mod_deflate.c>
+      AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css application/javascript text/javascript application/json application/manifest+json image/svg+xml
+    </IfModule>
+  </IfModule>
+  <IfModule !mod_brotli.c>
+    <IfModule mod_deflate.c>
+      AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript text/javascript application/json application/manifest+json image/svg+xml
+    </IfModule>
+  </IfModule>
+</IfModule>

@@ -1,0 +1,52 @@
+-- Схема под подключение к {{APP_NAME}}. MySQL 8 / MariaDB 10.4+.
+-- Не «выполните это», а «вот что требуется словами из integration.md §3,
+-- переведённое в DDL». Имена таблиц у вас свои — правьте под себя.
+--
+-- Три требования, которые чаще всего переводят в схему неправильно.
+
+-- 1. sso_sub — единственный идентификатор человека со стороны {{APP_NAME}}.
+--    Он вечен: почта меняется, логин меняется, sub — нет. UNIQUE обязателен,
+--    NULL разрешён (у тех, кто заведён до подключения, его ещё нет).
+ALTER TABLE users
+    ADD COLUMN sso_sub VARCHAR(64) NULL AFTER id,
+    ADD UNIQUE KEY uq_users_sso_sub (sso_sub);
+
+-- 2. email допускает NULL, и UNIQUE по нему тоже.
+--    У части людей почты нет вовсе — их перенесли из сервиса, где регистрация
+--    шла логином и паролём. В MySQL UNIQUE не мешает нескольким NULL, а вот
+--    NOT NULL и «пустая строка вместо отсутствия» — мешают: второй такой
+--    человек не заведётся, а первый склеится с чужой пустотой.
+ALTER TABLE users
+    MODIFY COLUMN email VARCHAR(255) NULL,
+    MODIFY COLUMN password_hash VARCHAR(255) NULL;   -- вход по паролю больше не обязателен
+
+-- 3. Кэш профиля: имя и аватар приезжают в токене и меняются на той стороне.
+--    Держать их у себя стоит, считать источником истины — нет.
+ALTER TABLE users
+    ADD COLUMN sso_name VARCHAR(255) NULL,
+    ADD COLUMN sso_picture VARCHAR(500) NULL,
+    ADD COLUMN sso_synced_at DATETIME NULL;
+
+-- 4. Реестр сессий: без него backchannel-выход работает только в простейшем
+--    случае (файловые сессии, один сервер). Событие приходит по sid или sub —
+--    и должно гасить ВСЕ сессии человека, а не ту одну, в которой он сейчас.
+--    Приёмник только помечает revoked = 1; проверка живости — на каждом
+--    запросе. Так это переносимо на Redis, на кластер и на что угодно ещё.
+CREATE TABLE sso_sessions (
+    id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    php_sid       VARCHAR(128) NOT NULL,
+    sso_sub       VARCHAR(64)  NOT NULL,
+    sso_sid       VARCHAR(64)  NULL,
+    revoked       TINYINT(1)   NOT NULL DEFAULT 0,
+    created_at    DATETIME     NOT NULL,
+    last_seen_at  DATETIME     NULL,
+    UNIQUE KEY uq_php_sid (php_sid),
+    KEY idx_sub (sso_sub),
+    KEY idx_sid (sso_sid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Проверка, что всё легло как задумано: обе строки должны выполниться без
+-- ошибки, а вторая — не нарушить UNIQUE.
+-- INSERT INTO users (email, sso_sub) VALUES (NULL, 'test-sub-1');
+-- INSERT INTO users (email, sso_sub) VALUES (NULL, 'test-sub-2');
+-- DELETE FROM users WHERE sso_sub IN ('test-sub-1', 'test-sub-2');
