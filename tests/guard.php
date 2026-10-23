@@ -288,7 +288,7 @@ ok((int)DB::val("SELECT COUNT(*) FROM {activity_log} WHERE path = '/old'") === 0
 ok((int)DB::val('SELECT COUNT(*) FROM {activity_log} WHERE id > ?', [$mark]) >= 3, 'свежее остаётся');
 
 foreach (['/admin/logs/requests' => 'Запросы', '/admin/ip/' . rawurlencode('::1') => 'Адрес ::1',
-          '/admin/users/' . (int)$admin['id'] . '/activity' => 'Адреса', '/admin/blocks' => 'Блокировки'] as $url => $needle) {
+          '/admin/users/' . (int)$admin['id'] . '/activity' => 'Адреса', '/admin/blocks' => 'Откуда шли боты'] /* v4.95: «Блокировки» стали «Адресами» — вкладкой журналов */ as $url => $needle) {
     [$st, $body] = http('GET', SSO . $url);
     ok($st === 200 && pageClean($body) && str_contains($body, $needle), "страница $url", "status=$st");
 }
