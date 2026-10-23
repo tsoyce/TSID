@@ -45,6 +45,9 @@ final class EventDispatcher
             ClientEvent::markFailedAttempt($eventId, 99, 'backchannel_uri не задан');
             return false;
         }
+        // v5.4: событие отправляет один — тот, чей UPDATE сдвинул счётчик (см. Mailer::attempt)
+        if (\App\Core\DB::run('UPDATE {client_events} SET attempts = ? WHERE id = ? AND attempts = ? AND status = ?',
+                [$attempts, $eventId, (int)$row['attempts'], 'pending'])->rowCount() !== 1) return false;
         $payload = json_decode((string)$row['payload'], true) ?: [];
         $token = IdToken::issueEvent($row, (string)$row['event'], $payload);
         [$ok, $err] = self::post((string)$row['backchannel_uri'], $token);
@@ -67,6 +70,9 @@ final class EventDispatcher
             CURLOPT_TIMEOUT => 5,
             CURLOPT_CONNECTTIMEOUT => 3,
             CURLOPT_FOLLOWLOCATION => false, // редиректов в back-channel нет
+            /* v5.4: только http(s) — адрес задаёт админ портала, а libcurl
+               умеет gopher://, dict://, file://: нагрузка во внутреннюю сеть. */
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS | CURLPROTO_HTTP,
             CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
         ]);
         curl_exec($ch);

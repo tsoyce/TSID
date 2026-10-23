@@ -20,6 +20,21 @@ final class Mailer
         return implode("\n", array_slice(self::$debugLines, -$tailLines));
     }
 
+    /**
+     * Текст письма для журнала «Почта» — без действующих ссылок и кодов (v5.4).
+     *
+     * В очереди лежат письма сброса пароля, входа по ссылке и коды
+     * подтверждения. Журнал видит и роль «только чтение»: аудитор запрашивал
+     * сброс на почту владельца и входил по ссылке из его письма. Токен в
+     * ссылке и цифровой код маскируются; что за письмо и кому — видно.
+     */
+    public static function redact(string $text): string
+    {
+        $text = (string)preg_replace('~(https?://\S+?/)[A-Za-z0-9_-]{20,}(?=[\s?#&"\')\]]|$)~u', '$1•••', $text);
+        $text = (string)preg_replace('~([?&](?:token|code|rt)=)[^\s&#]+~iu', '$1•••', $text);
+        return (string)preg_replace('~(?<!\d)(?<!\d[.:/-])\d{3}[ -]?\d{3}(?!\d|[.:/-]\d)~u', '••••••', $text);
+    }
+
     /** Положить в очередь и сразу попытаться отправить. */
     public static function queue(string $to, string $subject, string $html, string $text): int
     {
@@ -118,6 +133,11 @@ final class Mailer
     {
         $mail = DB::row('SELECT * FROM {mail_queue} WHERE id = ?', [$mailId]);
         if (!$mail || $mail['status'] === 'sent') return false;
+        /* v5.4: письмо берёт тот, чей условный UPDATE сдвинул счётчик попыток.
+           Немедленная попытка из Defer и cron (или два cron при медленном SMTP)
+           брали одну строку оба — и человек получал два письма с кодом. */
+        if (DB::run('UPDATE {mail_queue} SET attempts = attempts + 1 WHERE id = ? AND attempts = ? AND status <> ?',
+                [$mailId, (int)$mail['attempts'], 'sent'])->rowCount() !== 1) return false;
         try {
             self::transport($mail['to_email'], $mail['subject'], $mail['body_html'], $mail['body_text']);
             DB::update('mail_queue', ['status' => 'sent', 'sent_at' => now(), 'attempts' => (int)$mail['attempts'] + 1], 'id = ?', [$mailId]);

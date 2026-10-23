@@ -34,6 +34,12 @@ final class ClientsController extends AdminBase
      * этого области и заводились (SCOPES §2). Без организации сервис ничей, и
      * заводить такой вправе только администратор системы.
      */
+    /** v5.4: адрес http(s) с хостом — или null. Один на создание и правку. */
+    private static function httpUrl(string $url): ?string
+    {
+        return preg_match('~^https?://[^\s/?#]+~i', $url) === 1 && !preg_match('~\s~', $url) ? $url : null;
+    }
+
     public static function mayCreate(?int $orgId = null): bool
     {
         if (!\App\Core\Auth::check()) return false;
@@ -169,7 +175,7 @@ final class ClientsController extends AdminBase
             'redirect_uris' => $redirects,
             'post_logout_uris' => $postLogout,
             'allowed_scopes' => $scopes,
-            'backchannel_uri' => trim((string)($_POST['backchannel_uri'] ?? '')) ?: null,
+            'backchannel_uri' => self::httpUrl(trim((string)($_POST['backchannel_uri'] ?? ''))),
             /* Быстрое подключение не спрашивает про доверие: свой портал —
                обычный случай, и лишний экран согласия на нём только мешает.
                Снять галочку можно в карточке. */
@@ -631,7 +637,7 @@ final class ClientsController extends AdminBase
         $client = $this->client($id, 'clients.write');
         $this->clientPage($client, 'invites', [
             'invites' => \App\Models\Invite::forClient((int)$client['id']),
-            'roles' => Role::forClient((int)$client['id']),
+            'roles' => \App\Core\RoleOffer::inScope(\App\Core\Scope::client((int)$client['id'])),
             'freshInvite' => (($_SESSION['fresh_invite']['client'] ?? null) === (int)$client['id'])
                 ? (function () { $u = $_SESSION['fresh_invite']['url']; unset($_SESSION['fresh_invite']); return $u; })()
                 : null,
@@ -738,6 +744,19 @@ final class ClientsController extends AdminBase
             Flash::error(t('Обложка: нужна картинка JPEG, PNG, GIF или WebP до 5 МБ.'));
         }
         $baseUrl = rtrim(trim((string)($_POST['base_url'] ?? $client['base_url'])), '/');
+        /* v5.4: та же проверка, что при создании. Без неё в «Реквизитах»
+           сохранялся javascript:… или пустая строка — и уходил в href
+           кабинета, письма и редирект приглашения. */
+        $urlError = null;
+        if (self::httpUrl($baseUrl) === null) {
+            $urlError = t('Адрес сервиса не изменён: нужен адрес http(s)://.');
+            $baseUrl = (string)$client['base_url'];
+        }
+        $backchannel = trim((string)($_POST['backchannel_uri'] ?? ''));
+        if ($backchannel !== '' && self::httpUrl($backchannel) === null) {
+            $urlError = t('Адрес приёмника событий не изменён: нужен адрес http(s)://.');
+            $backchannel = (string)($client['backchannel_uri'] ?? '');
+        }
         $scopes = array_values(array_diff($client['allowed_scopes'], ['offline_access']));
         if (!empty($_POST['allow_offline'])) $scopes[] = 'offline_access';
 
@@ -766,6 +785,11 @@ final class ClientsController extends AdminBase
         if ($orgNew !== null && \App\Models\Org::find($orgNew) === null) {
             $orgNew = $client['org_id'] === null ? null : (int)$client['org_id'];
         }
+        /* v5.4: сменить владельца — то же право, что завести портал в нём
+           (mayCreate). Админ портала уводил его в любую организацию или
+           делал ничьим — мимо владельца-организации. */
+        $orgWas = $client['org_id'] === null ? null : (int)$client['org_id'];
+        if ($orgNew !== $orgWas && !self::mayCreate($orgNew)) $orgNew = $orgWas;
 
         Client::update((int)$client['id'], [
             'allowed_scopes' => $scopes,
@@ -776,7 +800,7 @@ final class ClientsController extends AdminBase
             'base_url' => $baseUrl,
             'redirect_uris' => $this->linesToUris((string)($_POST['redirect_uris'] ?? ''), null),
             'post_logout_uris' => $this->linesToUris((string)($_POST['post_logout_uris'] ?? ''), $baseUrl . '/'),
-            'backchannel_uri' => trim((string)($_POST['backchannel_uri'] ?? '')) ?: null,
+            'backchannel_uri' => $backchannel ?: null,
             'is_trusted' => !empty($_POST['is_trusted']) ? 1 : 0,
             'same_site_family' => !empty($_POST['same_site_family']) ? 1 : 0,
             'access_policy' => in_array($_POST['access_policy'] ?? '', ['open', 'approval', 'invite'], true)
@@ -797,8 +821,8 @@ final class ClientsController extends AdminBase
             if ($fresh) \App\Core\Defer::after(static fn() => \App\Core\PortalManifest::fetch($fresh));
         }
         Audit::log('admin.client.update', ['client' => (int)$client['id']]);
-        if ($slugError !== null) {
-            Flash::error($slugError);
+        if ($slugError !== null || $urlError !== null) {
+            Flash::error((string)($slugError ?? $urlError));
         } elseif ($slugNew !== (string)$client['slug']) {
             /* Переименование машинного имени видно снаружи: пока карта ролей
                пуста, портал получает роли префиксом «слаг:роль». Молчать об
@@ -830,7 +854,7 @@ final class ClientsController extends AdminBase
             Flash::error('Иконка: до 2 МБ, и серверному GD нужна поддержка webp.');
             return $client['icon_path'];
         }
-        $img = @imagecreatefromstring((string)file_get_contents($f['tmp_name']));
+        $img = \App\Core\Image::fromBytes((string)file_get_contents($f['tmp_name']));
         if ($img === false) {
             Flash::error('Иконка не похожа на изображение.');
             return $client['icon_path'];
@@ -1053,15 +1077,28 @@ final class ClientsController extends AdminBase
                     : t('Событие поставлено в очередь — результат виден во вкладке «Доставка».'));
                 break;
             case 'retry_event':
-                ClientEvent::retryNow((int)($_POST['event_id'] ?? 0));
-                EventDispatcher::attempt((int)($_POST['event_id'] ?? 0));
+                /* v5.4: событие — только этого портала: номер приходит из
+                   формы, и админ портала A перезапускал доставки портала B. */
+                $eventId = (int)($_POST['event_id'] ?? 0);
+                if (!\App\Core\DB::val('SELECT 1 FROM {client_events} WHERE id = ? AND client_id = ?',
+                        [$eventId, (int)$client['id']])) ErrorPage::render(404);
+                ClientEvent::retryNow($eventId);
+                EventDispatcher::attempt($eventId);
                 Flash::success('Попытка доставки выполнена.');
                 break;
 
             case 'create_invite':
                 $email = mb_strtolower(trim((string)($_POST['invite_email'] ?? '')));
+                /* v5.4: роль из POST сверяется с тем, что в этом портале можно
+                   выдать, — список в форме лишь занавеска (см. RoleOffer). */
+                $inviteRole = (int)($_POST['invite_role'] ?? 0) ?: null;
+                if ($inviteRole !== null
+                    && !\App\Core\RoleOffer::allows(\App\Core\Scope::client((int)$client['id']), $inviteRole)) {
+                    Flash::error(t('Эту роль в этом сервисе выдать нельзя: он её не знает.'));
+                    redirect('/admin/clients/' . $client['id'] . '/invites');
+                }
                 $token = \App\Models\Invite::create((int)$client['id'], [
-                    'role_id' => (int)($_POST['invite_role'] ?? 0) ?: null,
+                    'role_id' => $inviteRole,
                     'email' => filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : null,
                     'max_uses' => (int)($_POST['invite_uses'] ?? 1),
                     'days' => (int)($_POST['invite_days'] ?? 7),

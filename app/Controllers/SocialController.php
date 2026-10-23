@@ -124,7 +124,7 @@ final class SocialController
                         DB::update('linked_identities', ['user_id' => (int)$target['id']],
                             'id = ?', [(int)$linked['id']]);
                         $this->absorbProfile((int)$target['id'], $p->id(), $profile);
-                        LoginFlow::complete($target, false, 'login.social');
+                        LoginFlow::afterFirstFactor($target, false, 'login.social');
                     }
                 }
                 $this->fail(t('Аккаунт недоступен. Обратитесь к администратору.'));
@@ -132,7 +132,7 @@ final class SocialController
             DB::update('linked_identities', ['meta' => json_encode($profile, JSON_UNESCAPED_UNICODE)],
                 'id = ?', [(int)$linked['id']]);
             $this->absorbProfile((int)$user['id'], $p->id(), $profile);
-            LoginFlow::complete($user, false, 'login.social');
+            LoginFlow::afterFirstFactor($user, false, 'login.social');
         }
 
         /* 3. Новый для нас человек: связываем по ПОДТВЕРЖДЁННОЙ почте или заводим
@@ -143,17 +143,24 @@ final class SocialController
         if ($email !== null) {
             $existing = \App\Models\UserEmail::findOwner($email);
             if ($existing && !\App\Models\User::canSignIn($existing)) $existing = null;
+            /* v5.4: только к аккаунту, чья почта подтверждена. Подтверждение
+               по умолчанию выключено, и аккаунт с чужим адресом и своим
+               паролем мог завести кто угодно — хозяин адреса входил сюда через
+               провайдера и работал в аккаунте, от которого у того есть пароль.
+               Хозяину ящика путь открыт: восстановление по почте. */
+            if ($existing && $existing['email_verified_at'] === null) {
+                Audit::log('social.link_refused', ['on' => (int)$existing['id'],
+                    'meta' => ['provider' => $p->id(), 'why' => 'email_unverified']]);
+                $this->fail(t('Аккаунт с этой почтой есть, но адрес в нём не подтверждён. Восстановите доступ по почте — после этого вход через :provider заработает.',
+                    ['provider' => $p->title()]));
+            }
             if ($existing) {
-                // Почту подтвердил сам провайдер — связываем без пароля (как §13.2 для порталов)
+                // Почту подтвердил сам провайдер, и в аккаунте она подтверждена — связываем без пароля
                 $this->link((int)$existing['id'], $p->id(), $uid, $profile);
-                if ($existing['email_verified_at'] === null) {
-                    User::update((int)$existing['id'], ['email_verified_at' => now(),
-                        'status' => $existing['status'] === 'pending' ? 'active' : $existing['status']]);
-                }
                 Audit::log('social.linked', ['actor' => (int)$existing['id'], 'on' => (int)$existing['id'],
                     'meta' => ['provider' => $p->id(), 'via' => 'email_match']]);
                 $this->absorbProfile((int)$existing['id'], $p->id(), $profile);
-                LoginFlow::complete(User::find((int)$existing['id']), false, 'login.social');
+                LoginFlow::afterFirstFactor(User::find((int)$existing['id']), false, 'login.social');
             }
         }
 
@@ -260,7 +267,7 @@ final class SocialController
             Flash::info('Аккаунт создан. Добавьте почту — без неё не получится восстановить доступ.');
         }
         $this->absorbProfile($newId, $p->id(), $profile);
-        LoginFlow::complete(User::find($newId), false, 'login.social');
+        LoginFlow::afterFirstFactor(User::find($newId), false, 'login.social');
     }
 
     /** GET /social/signup/cancel — передумал: не остаётся ни аккаунта, ни связки. */

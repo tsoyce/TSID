@@ -159,9 +159,9 @@ ok(User::useRecoveryCode($uid, 'ABCD-1234-EF56') === false, 'код восста
 
 echo "\n── Ротация refresh: второй раз — повтор, семья отзывается ──\n";
 $rt = RefreshToken::issueFamily($uid, $cid, null, 'openid offline_access');
-[$old, $new] = RefreshToken::rotate($rt);
+[$old, $new] = RefreshToken::rotate($rt, $cid);
 ok($old !== null && is_string($new) && $new !== '', 'первая ротация выдала новый токен');
-[$old2, $new2] = RefreshToken::rotate($rt);
+[$old2, $new2] = RefreshToken::rotate($rt, $cid);
 ok($old2 === null && $new2 === null, 'вторая ротация того же токена отвергнута');
 ok(RefreshToken::findValid((string)$new) === null, 'и новый токен семьи отозван — повтор значит утечку');
 

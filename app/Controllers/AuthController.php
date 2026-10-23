@@ -148,10 +148,7 @@ final class AuthController
             ]);
         }
         \App\Core\Captcha::clearFailures();
-        if ($user['totp_enabled_at'] !== null) {
-            LoginFlow::require2fa($user, $remember);
-        }
-        LoginFlow::complete($user, $remember);
+        LoginFlow::afterFirstFactor($user, $remember);
     }
 
     /* ---- 2FA ---- */
@@ -279,10 +276,7 @@ final class AuthController
             \App\Core\EmailGate::pass($user, 'magic_link');
             $user = User::find((int)$user['id']);
         }
-        if ($user['totp_enabled_at'] !== null) {
-            LoginFlow::require2fa($user, false);
-        }
-        LoginFlow::complete($user, false, 'login.magic_link');
+        LoginFlow::afterFirstFactor($user, false, 'login.magic_link');
     }
 
     /* ---- Выход (§2.4) ---- */
@@ -416,6 +410,19 @@ final class AuthController
 
     /* ---- Сервисные переходы по токенам ---- */
 
+    /** GET — только кнопка: по ссылке из письма ходят и сканеры (v5.4, как /verify). */
+    public function showCancelDelete(string $token): never
+    {
+        if (!OneTimeToken::peek($token, 'account_delete')) ErrorPage::render(404);
+        \App\Core\View::render('auth/confirm', [
+            'pageTitle' => t('Отмена удаления'),
+            'title' => t('Оставить аккаунт?'),
+            'lead' => t('Удаление будет отменено, аккаунт снова станет активным.'),
+            'button' => t('Отменить удаление'),
+            'action' => '/delete/cancel/' . $token,
+        ], 'layouts/auth');
+    }
+
     /** Отмена удаления аккаунта из письма. */
     public function cancelDelete(string $token): never
     {
@@ -437,7 +444,7 @@ final class AuthController
     /** GET — только кнопка: по ссылке из письма ходят и сканеры (см. /verify). */
     public function showRevertEmailChange(string $token): never
     {
-        $row = OneTimeToken::peek($token, 'email_change');
+        $row = OneTimeToken::peek($token, 'email_revert') ?? OneTimeToken::peek($token, 'email_change');
         if (!$row || ($row['payload']['kind'] ?? '') !== 'revert') ErrorPage::render(404);
         \App\Core\View::render('auth/confirm', [
             'pageTitle' => t('Отмена смены почты'),
@@ -450,7 +457,8 @@ final class AuthController
 
     public function revertEmailChange(string $token): never
     {
-        $row = OneTimeToken::consume($token, 'email_change');
+        /* email_change — ссылки, выданные до v5.4: неделю они ещё живы. */
+        $row = OneTimeToken::consume($token, 'email_revert') ?? OneTimeToken::consume($token, 'email_change');
         if (!$row || ($row['payload']['kind'] ?? '') !== 'revert') ErrorPage::render(404);
         $user = User::find((int)$row['user_id']);
         if ($user) {
@@ -459,6 +467,7 @@ final class AuthController
                 User::update((int)$user['id'], ['email' => $old]);
             }
             OneTimeToken::cancelByTypeForUser((int)$user['id'], 'email_change');
+            OneTimeToken::cancelByTypeForUser((int)$user['id'], 'email_revert');
             SessionModel::revokeAllForUser((int)$user['id']);
             \App\Models\RefreshToken::revokeAllForUser((int)$user['id']);
             Audit::log('email.change_revert', ['actor' => null, 'on' => (int)$user['id']]);
@@ -480,7 +489,12 @@ final class AuthController
             Flash::info('Войдите, чтобы получить права администратора портала.');
             redirect('/login');
         }
-        OneTimeToken::consume($token, 'client_setup');
+        /* v5.4: гасит тот, кому досталась строка, — два одновременных
+           открытия ссылки делали администраторами портала двоих. */
+        if (!OneTimeToken::consume($token, 'client_setup')) {
+            ErrorPage::render(404, ['title' => 'Ссылка недействительна',
+                'message' => 'Setup-ссылка использована или устарела. Попросите новую в админке SSO.']);
+        }
         $clientDbId = (int)($row['payload']['client_id'] ?? 0);
         $client = Client::find($clientDbId);
         if (!$client) ErrorPage::render(404);

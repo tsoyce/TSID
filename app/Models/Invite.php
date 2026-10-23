@@ -52,9 +52,16 @@ final class Invite
         DB::tx(function () use ($invite, $userId) {
             Access::grant($userId, (int)$invite['client_id'], $invite['created_by'] !== null
                 ? (int)$invite['created_by'] : null, 'active');
-            if ($invite['role_id'] !== null) {
-                Role::assign($userId, (int)$invite['role_id'], $invite['created_by'] !== null
-                    ? (int)$invite['created_by'] : null);
+            /* v5.4: роль — только в области портала и только из тех, что там
+               можно выдать. Role::assign() выдавал роль без client_id на всю
+               систему, и админ портала приглашением делал себя суперадмином.
+               Проверка и здесь, а не только при создании: живут инвайты,
+               созданные до починки. */
+            $scope = \App\Core\Scope::client((int)$invite['client_id']);
+            if ($invite['role_id'] !== null
+                && \App\Core\RoleOffer::allows($scope, (int)$invite['role_id'])) {
+                Role::assignScoped($userId, (int)$invite['role_id'], $scope,
+                    $invite['created_by'] !== null ? (int)$invite['created_by'] : null);
             }
             DB::run('UPDATE {invites} SET used = used + 1 WHERE id = ?', [(int)$invite['id']]);
         });

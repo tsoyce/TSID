@@ -38,20 +38,4 @@ final class Dsn
         );
     }
 
-    /**
-     * Настройки PDO, общие для всех подключений.
-     *
-     * Исключения вместо кодов ошибок и ассоциативные массивы — то, на что
-     * рассчитан весь остальной код. Разойдись это между подключениями, и
-     * запрос, отработавший в одном месте, молча вернул бы не то в другом.
-     *
-     * @return array<int, mixed>
-     */
-    public static function options(): array
-    {
-        return [
-            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-            \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-        ];
-    }
 }

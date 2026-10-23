@@ -43,10 +43,14 @@ final class RefreshToken
      * Повторное использование ротированного → отзыв семьи + аудит (⚠).
      * Возвращает [row, newToken] или [null, null].
      */
-    public static function rotate(string $token): array
+    public static function rotate(string $token, int $clientDbId): array
     {
         $row = DB::row('SELECT * FROM {refresh_tokens} WHERE token_hash = ?', [Crypto::hashToken($token)]);
         if (!$row) return [null, null];
+        /* v5.4: чужой клиент токен не трогает. Сверка стояла после ротации, и
+           один запрос с утёкшим токеном помечал его использованным — следующее
+           законное обновление выглядело повтором и отзывало всю семью. */
+        if ((int)$row['client_id'] !== $clientDbId) return [null, null];
         if ($row['revoked_at'] !== null || strtotime($row['expires_at'] . ' UTC') <= time()) return [null, null];
         /* Помечаем условным UPDATE и продолжаем, только если строка досталась
            нам (v4.70). Раньше два одновременных обновления одним токеном оба
@@ -79,14 +83,6 @@ final class RefreshToken
         if (!$row || $row['revoked_at'] !== null || $row['rotated_at'] !== null) return null;
         if (strtotime($row['expires_at'] . ' UTC') <= time()) return null;
         return $row;
-    }
-
-    public static function revokeByToken(string $token): bool
-    {
-        $row = DB::row('SELECT * FROM {refresh_tokens} WHERE token_hash = ?', [Crypto::hashToken($token)]);
-        if (!$row) return false;
-        self::revokeFamily($row['family_id']);
-        return true;
     }
 
     public static function revokeAllForUser(int $userId): void

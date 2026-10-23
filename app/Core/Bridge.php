@@ -127,7 +127,7 @@ final class Bridge
         /* Перекодируем через GD. Это не только приведение к одному формату:
            перекодирование убивает всё, что не является картинкой, — SVG со
            скриптом внутри, полиглот-файлы, метаданные. */
-        $img = @imagecreatefromstring($bytes);
+        $img = Image::fromBytes($bytes);
         if ($img === false) return null;
 
         $w = imagesx($img); $h = imagesy($img);

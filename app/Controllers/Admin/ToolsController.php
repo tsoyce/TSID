@@ -366,7 +366,10 @@ final class ToolsController extends AdminBase
     public function settingsExport(): never
     {
         $this->requirePerm('settings.write');
-        $this->requireGlobalAdmin();
+        /* v5.4: как у экрана настроек (SettingsController::save) — только
+           суперадмин. Через перенос admin с settings.write менял SMTP и
+           забирал секреты соцвхода, хотя на сам экран его не пускают. */
+        $this->requireSuperadmin();
         $withSecrets = ($_GET['with_secrets'] ?? '') === '1';
         $snap = \App\Core\SettingsTransfer::export($withSecrets);
         Audit::log('admin.settings.export', ['meta' => [
@@ -391,7 +394,10 @@ final class ToolsController extends AdminBase
     public function settingsImport(): never
     {
         $this->requirePerm('settings.write');
-        $this->requireGlobalAdmin();
+        /* v5.4: как у экрана настроек (SettingsController::save) — только
+           суперадмин. Через перенос admin с settings.write менял SMTP и
+           забирал секреты соцвхода, хотя на сам экран его не пускают. */
+        $this->requireSuperadmin();
         $step = (string)($_POST['step'] ?? 'upload');
 
         if ($step === 'apply') {

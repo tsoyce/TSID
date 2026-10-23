@@ -72,7 +72,7 @@ use App\Core\Setting;
             'audit_days' => [t('Аудит, дней'), 0],
             'activity_days' => [t('Журнал активности, дней'), 30],
             'app_logs_days' => [t('Логи приложения, дней'), 30],
-            'mail_days' => [t('Отправленные письма в очереди, дней'), 30],
+            'mail_days' => [t('Письма и доставки событий, дней'), 30],
           ] as $rk => [$rlabel, $rdefault]):
             echo field_text('retention_' . $rk, $rlabel, (string)Setting::getInt('retention.' . $rk, $rdefault), [
                 'mask' => '####', 'inputmode' => 'numeric', 'mono' => true, 'max' => 4,

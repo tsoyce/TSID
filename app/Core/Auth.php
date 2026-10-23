@@ -201,12 +201,6 @@ final class Auth
         return in_array($perm, self::$permsCache['perms'], true);
     }
 
-    /** Нет права — 403. Отдельным методом, чтобы вызов читался одной строкой. */
-    public static function requirePermission(string $perm): void
-    {
-        if (!self::can($perm)) ErrorPage::render(403);
-    }
-
     /** Уровень доступа текущего пользователя (сводка для сервисов). */
     public static function level(): int
     {

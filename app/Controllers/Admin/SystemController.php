@@ -243,18 +243,19 @@ final class SystemController extends AdminBase
 
     public function acceptOwner(string $token): never
     {
-        $row = \App\Models\OneTimeToken::consume($token, 'owner_transfer');
+        /* v5.4: сначала сверка, потом гашение. Открытая в чужой сессии
+           ссылка сгорала, и владение приходилось передавать заново. */
+        $row = \App\Models\OneTimeToken::peek($token, 'owner_transfer');
+        if ($row && \App\Core\Auth::id() !== (int)$row['user_id']) {
+            Flash::error('Войдите под аккаунтом, которому предложили владение.');
+            redirect('/login');
+        }
+        $row = $row ? \App\Models\OneTimeToken::consume($token, 'owner_transfer') : null;
         if (!$row) {
             Flash::error('Ссылка устарела или уже использована.');
             redirect('/admin');
         }
         $target = (int)$row['user_id'];
-        /* Подтверждает именно тот, кому предложили: ссылка из чужого письма
-           не должна работать в чужой сессии. */
-        if (\App\Core\Auth::id() !== $target) {
-            Flash::error('Войдите под аккаунтом, которому предложили владение.');
-            redirect('/login');
-        }
         if (!Owner::set($target, (int)($row['payload']['from'] ?? 0) ?: null, 'transfer')) {
             Flash::error('Передать владение не удалось: аккаунт больше не суперадмин.');
             redirect('/admin');

@@ -70,6 +70,13 @@ final class InviteController
             Flash::error('Приглашение выписано на другой адрес.');
             redirect('/profile/services');
         }
+        /* v5.4: именное — только на подтверждённый адрес. Подтверждение почты
+           по умолчанию выключено, и чужой адрес можно было вписать себе при
+           регистрации — вместе с доступом и ролью, выписанными его хозяину. */
+        if ($invite['email'] !== null && empty($user['email_verified_at'])) {
+            Flash::error(t('Сначала подтвердите адрес почты: приглашение выписано на него.'));
+            redirect('/profile/settings');
+        }
 
         Invite::accept($invite, (int)$user['id']);
         Audit::log('access.granted', [

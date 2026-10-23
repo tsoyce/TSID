@@ -30,12 +30,6 @@ final class Crypto
         return hash('sha256', $token);
     }
 
-    /** Хэш-префикс (8 hex) для аудита — сам токен в логи не попадает никогда. */
-    public static function tokenPrefix(string $token): string
-    {
-        return substr(self::hashToken($token), 0, 8);
-    }
-
     private static function key(): string
     {
         $key = base64_decode((string)Config::get('app.key'), true);

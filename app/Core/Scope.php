@@ -126,22 +126,6 @@ final class Scope
         return false;
     }
 
-    /**
-     * Области, покрывающие портал, от широкой к узкой.
-     *
-     * Ровно тот список, по которому резолвер собирает роли: выдача действует
-     * в портале тогда и только тогда, когда её область есть в этом списке.
-     *
-     * @return list<self>
-     */
-    public static function chainForClient(int $clientDbId, ?int $orgId): array
-    {
-        $chain = [self::system()];
-        if ($orgId !== null && $orgId > 0) $chain[] = self::org($orgId);
-        $chain[] = self::client($clientDbId);
-        return $chain;
-    }
-
     /** Подпись для интерфейса. Имена объектов резолвер подставляет сам. */
     public function label(): string
     {

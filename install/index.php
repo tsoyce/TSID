@@ -38,6 +38,17 @@ if (is_file(SSO_ROOT . '/config/installed.lock')) {
     exit('<meta charset="utf-8">Установка уже завершена. <a href="/login">Войти</a>');
 }
 
+/* v5.4: конфиг есть, а замка нет — это не «не установлено», а установка,
+   потерявшая замок (восстановление из бэкапа, неполная заливка). Раньше
+   инсталлятор открывался любому посетителю: переписать config.php и завести
+   своего суперадмина. Переустановка — только руками: убрать config.php. */
+if (is_file(SSO_ROOT . '/config/config.php')) {
+    http_response_code(403);
+    exit('<meta charset="utf-8">Найден config/config.php, но нет config/installed.lock. '
+        . 'Если установка уже была — создайте installed.lock рядом с конфигом. '
+        . 'Если нужна новая установка — удалите config/config.php.');
+}
+
 $_SESSION['install'] = $_SESSION['install'] ?? ['step_done' => -1, 'data' => []];
 $st =& $_SESSION['install'];
 
