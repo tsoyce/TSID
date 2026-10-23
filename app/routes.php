@@ -190,6 +190,7 @@ $router->get('/offline', [PwaController::class, 'offline'], ['api']);
 $router->post('/admin/context', [DashboardController::class, 'context'], ['admin']);
 $router->get('/admin', [DashboardController::class, 'index'], ['admin']);
 $router->get('/admin/analytics', [DashboardController::class, 'analytics'], ['admin']);
+$router->get('/admin/analytics/system', [DashboardController::class, 'system'], ['admin']);
 $router->post('/admin/onboarding/hide', [DashboardController::class, 'hideOnboarding'], ['admin']);
 $router->get('/admin/users', [UsersController::class, 'index'], ['admin']);
 /* Похоже на ботов (v4.95) — до /admin/users/{id}, иначе {id} перехватит «bots». */
@@ -225,6 +226,7 @@ $router->get("/admin/clients/{id}/people", [ClientsController::class, "people"],
 $router->post("/admin/clients/{id}/people", [ClientsController::class, "grantAccess"], ["admin"]);
 $router->get("/admin/clients/{id}/roles", [ClientsController::class, "rolesSection"], ["admin"]);
 $router->get("/admin/clients/{id}/invites", [ClientsController::class, "invites"], ["admin"]);
+$router->get("/admin/clients/{id}/analytics", [ClientsController::class, "analytics"], ["admin"]);
 $router->get("/admin/clients/{id}/events", [ClientsController::class, "events"], ["admin"]);
 $router->get('/admin/clients/{id}/look', [ClientsController::class, 'look'], ['admin']);
 $router->post('/admin/clients/{id}/look', [ClientsController::class, 'lookSave'], ['admin']);

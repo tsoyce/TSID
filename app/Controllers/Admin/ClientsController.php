@@ -680,6 +680,17 @@ final class ClientsController extends AdminBase
         \App\Core\LoginLook::renderPreview($client, $_GET);
     }
 
+    /** Аналитика сервиса (v5.2): тот же период, что на пульте, — по одному порталу. */
+    public function analytics(string $id): never
+    {
+        $client = $this->client($id);
+        $days = \App\Core\Stats::period($_GET['p'] ?? null);
+        $this->clientPage($client, 'analytics', [
+            'days' => $days,
+            'a' => \App\Core\Stats::portal((int)$client['id'], $days),
+        ]);
+    }
+
     public function events(string $id): never
     {
         $client = $this->client($id);

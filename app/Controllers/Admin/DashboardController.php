@@ -121,6 +121,29 @@ final class DashboardController extends AdminBase
     }
 
     /**
+     * «Система» (v5.2): сколько запросов, как быстро и с какими ошибками
+     * отвечает приложение, как уходит почта. Источник — журнал запросов
+     * (activity_log): он и так пишет время и ответ каждого запроса.
+     */
+    public function system(): never
+    {
+        $this->requireGlobalAdmin();
+        $days = Stats::period($_GET['p'] ?? null);
+        [$since] = Stats::bounds($days);
+        /* Стук сканеров — не нагрузка приложения: в «Запросах» его нет. */
+        $human = 'NOT (user_id IS NULL AND status IN (404, 405))';
+        View::render('admin/analytics_system', [
+            'pageTitle' => t('Система'),
+            'days' => $days,
+            'requests' => Stats::series('activity_log', $human, [], $days),
+            'errors' => Stats::series('activity_log', 'status >= ?', [500], $days),
+            'speed' => Stats::speed($since),
+            'slow' => Stats::slowPaths($since),
+            'mail' => Stats::byStatus('mail_queue', '1 = 1', [], $since),
+        ]);
+    }
+
+    /**
      * «Требует внимания» (v4.99): только то, что не в порядке, — со ссылкой,
      * куда идти. Раньше здоровье стояло списком из шести зелёных строк, и
      * единственная красная терялась среди них.

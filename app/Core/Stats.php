@@ -251,4 +251,94 @@ final class Stats
         arsort($o);
         return ['browsers' => $b, 'systems' => $o];
     }
+
+    /** Сколько в каком состоянии: [status => n] за [с, …). */
+    public static function byStatus(string $table, string $where, array $params, string $since): array
+    {
+        $out = [];
+        foreach (DB::all('SELECT status, COUNT(*) AS n FROM {' . $table . '} WHERE ' . $where . ' AND created_at >= ? GROUP BY status',
+            array_merge($params, [$since])) as $r) $out[(string)$r['status']] = (int)$r['n'];
+        return $out;
+    }
+
+    /**
+     * Портал за период (v5.2): входы и прошлый такой же период, ряд, активные
+     * за день, неделю и месяц, токены, доставка событий и отказы.
+     *
+     * «Активные» — по last_login_at доступа: это последний вход человека в
+     * портал, и за месяц он один на человека, — без отдельной таблицы визитов.
+     */
+    public static function portal(int $cid, int $days, ?int $now = null): array
+    {
+        [$since, $prev] = self::bounds($days, $now);
+        $access = static fn(int $d): int => (int)DB::val('SELECT COUNT(*) FROM {user_client_access} WHERE client_id = ? AND last_login_at >= ?',
+            [$cid, self::dayStart($d, $now)]);
+        $audit = static fn(string $e): int => self::count('audit_log', 'event = ? AND client_id = ?', [$e, $cid], $since);
+        return [
+            'logins' => [self::count('session_clients', 'client_id = ?', [$cid], $since),
+                         self::count('session_clients', 'client_id = ?', [$cid], $prev, $since)],
+            'series' => self::series('session_clients', 'client_id = ?', [$cid], $days, $now),
+            'active' => ['day' => $access(0), 'week' => $access(6), 'month' => $access(29)],
+            'refresh' => $audit('token.refresh'),
+            'reuse' => $audit('token.refresh_reuse'),
+            'delivery' => self::byStatus('client_events', 'client_id = ?', [$cid], $since),
+            'errors' => array_map(static fn($r) => ['error' => (string)$r['last_error'], 'n' => (int)$r['n']],
+                DB::all('SELECT last_error, COUNT(*) AS n FROM {client_events} WHERE client_id = ? AND created_at >= ? AND last_error IS NOT NULL
+                         GROUP BY last_error ORDER BY n DESC LIMIT 3', [$cid, $since])),
+            'refusals' => ['access.requested' => $audit('access.requested'), 'access.denied' => $audit('access.denied'),
+                           'consent.denied' => $audit('consent.denied')],
+        ];
+    }
+
+    /** Границы корзин скорости ответа, мс. Последняя — «дольше». */
+    public const SPEED = [50, 100, 200, 500, 1000, 2000];
+
+    /**
+     * Скорость ответа (v5.2): сколько запросов в какой корзине и в какую
+     * корзину попадают медиана и 95-й процентиль.
+     *
+     * Корзины, а не точный процентиль: точный требует сортировки всех строк
+     * периода (за 90 дней — сотни тысяч), корзины база считает одним проходом.
+     * Ответ «95 % быстрее 200 мс» точен ровно настолько, насколько нужен.
+     * Стук сканеров (гость, 404/405) не считается: это не работа приложения.
+     * @return array{buckets: list<int>, total:int, p50:?int, p95:?int} p — индекс корзины
+     */
+    public static function speed(string $since): array
+    {
+        $case = 'CASE';
+        foreach (self::SPEED as $i => $b) $case .= ' WHEN ms < ' . $b . ' THEN ' . $i;
+        $case .= ' ELSE ' . count(self::SPEED) . ' END';
+        $buckets = array_fill(0, count(self::SPEED) + 1, 0);
+        foreach (DB::all('SELECT ' . $case . ' AS b, COUNT(*) AS n FROM {activity_log}
+                          WHERE created_at >= ? AND NOT (user_id IS NULL AND status IN (404, 405)) GROUP BY ' . $case, [$since]) as $r) {
+            $buckets[(int)$r['b']] += (int)$r['n'];
+        }
+        return ['buckets' => $buckets, 'total' => array_sum($buckets),
+                'p50' => self::quantileBucket($buckets, 0.5), 'p95' => self::quantileBucket($buckets, 0.95)];
+    }
+
+    /** В какую корзину попадает доля $q запросов; null — запросов не было. */
+    public static function quantileBucket(array $buckets, float $q): ?int
+    {
+        $total = array_sum($buckets);
+        if ($total === 0) return null;
+        $acc = 0;
+        foreach ($buckets as $i => $n) {
+            $acc += $n;
+            if ($acc >= $q * $total) return $i;
+        }
+        return count($buckets) - 1;
+    }
+
+    /**
+     * Самые медленные адреса: среднее время, от пяти запросов — единичный
+     * долгий запрос говорит о случае, а не об адресе.
+     * @return list<array{path:string, n:int, ms:int}>
+     */
+    public static function slowPaths(string $since, int $limit = 5): array
+    {
+        return array_map(static fn($r) => ['path' => (string)$r['path'], 'n' => (int)$r['n'], 'ms' => (int)round((float)$r['a'])],
+            DB::all('SELECT path, COUNT(*) AS n, AVG(ms) AS a FROM {activity_log} WHERE created_at >= ?
+                     GROUP BY path HAVING COUNT(*) >= 5 ORDER BY a DESC LIMIT ' . $limit, [$since]));
+    }
 }

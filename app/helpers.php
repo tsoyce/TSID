@@ -2000,24 +2000,46 @@ function logs_tabs(string $current): string
 }
 
 /**
- * Вкладки «Пульт | Аналитика» и переключатель периода (v5.1). Период едет
+ * Разница к прошлому периоду у плитки (v4.99; общий с v5.2). Рост неудач —
+ * плохо, рост входов — хорошо: цвет говорит «хорошо/плохо», а не «вверх/вниз».
+ */
+function kpi_delta(array $pair, bool $upIsGood, string $prevLabel): string
+{
+    $d = App\Core\Stats::delta($pair[0], $pair[1]);
+    if ($d === null) return '';
+    $good = $upIsGood ? $d >= 0 : $d <= 0;
+    return ' · <span class="kpi-delta ' . ($d === 0 ? '' : ($good ? 'is-good' : 'is-bad')) . '">'
+        . ($d > 0 ? '+' : '') . $d . ' %</span> ' . esc($prevLabel);
+}
+
+/**
+ * Переключатель периода ссылками (v4.99; общий с v5.2): адрес можно отправить,
+ * «назад» работает. Один на пульт, аналитику и карточку портала.
+ */
+function period_switch(string $base, int $days): string
+{
+    $out = '<nav class="period-switch" aria-label="' . esc(t('Период')) . '">';
+    foreach (App\Core\Stats::PERIODS as $p) {
+        $out .= '<a href="' . esc($base) . '?p=' . $p . '"' . ($p === $days ? ' aria-current="true"' : '') . '>'
+            . esc($p === 1 ? t('Сегодня') : t(':n дн.', ['n' => $p])) . '</a>';
+    }
+    return $out . '</nav>';
+}
+
+/**
+ * Вкладки «Пульт | Аналитика | Система» и период (v5.1). Период едет
  * с вкладки на вкладку: смотрел «30 дн.» на пульте — и аналитика за 30.
  */
 function dash_head(string $current, int $days, string $title): string
 {
-    $base = $current === 'analytics' ? '/admin/analytics' : '/admin';
-    /* Период ссылками, а не формой: адрес можно отправить, «назад» работает. */
-    $out = '<div class="page-head"><h1>' . esc($title) . '</h1><nav class="period-switch" aria-label="' . esc(t('Период')) . '">';
-    foreach (App\Core\Stats::PERIODS as $p) {
-        $out .= '<a href="' . $base . '?p=' . $p . '"' . ($p === $days ? ' aria-current="true"' : '') . '>'
-            . esc($p === 1 ? t('Сегодня') : t(':n дн.', ['n' => $p])) . '</a>';
+    $tabs = ['pult' => ['/admin', t('Пульт')], 'analytics' => ['/admin/analytics', t('Аналитика')],
+             'system' => ['/admin/analytics/system', t('Система')]];
+    $out = '<div class="page-head"><h1>' . esc($title) . '</h1>' . period_switch($tabs[$current][0], $days) . '</div>'
+        . '<div class="tabs mb-16">';
+    foreach ($tabs as $key => [$href, $label]) {
+        $out .= '<a' . ($key === $current ? ' class="active" aria-current="page"' : '') . ' href="' . $href . '?p=' . $days . '">' . esc($label) . '</a>';
     }
-    $out .= '</nav>';
-    $tabs = '<div class="tabs mb-16">';
-    foreach (['pult' => ['/admin', t('Пульт')], 'analytics' => ['/admin/analytics', t('Аналитика')]] as $key => [$href, $label]) {
-        $tabs .= '<a' . ($key === $current ? ' class="active" aria-current="page"' : '') . ' href="' . $href . '?p=' . $days . '">' . esc($label) . '</a>';
-    }
-    return $out . '</div>' . $tabs . '</div>';
+    return $out . '</div>';
 }
 
 /**

@@ -2845,7 +2845,7 @@ $mutations = [
     ],
     [
         'why'   => 'падение неудачных входов снова красное',
-        'file'  => 'templates/admin/dashboard.php',
+        'file'  => 'app/helpers.php',
         'from'  => "\$good = \$upIsGood ? \$d >= 0 : \$d <= 0;",
         'to'    => "\$good = \$d >= 0;",
         'check' => 'tests/dashboard_stats.php',
@@ -2953,8 +2953,8 @@ $mutations = [
     [
         'why'   => 'период снова уводит с аналитики на пульт',
         'file'  => 'app/helpers.php',
-        'from'  => "\$base = \$current === 'analytics' ? '/admin/analytics' : '/admin';",
-        'to'    => "\$base = '/admin';",
+        'from'  => "period_switch(\$tabs[\$current][0], \$days)",
+        'to'    => "period_switch('/admin', \$days)",
         'check' => 'tests/analytics.php',
     ],
     [
@@ -2977,6 +2977,77 @@ $mutations = [
         'from'  => "(int)ceil(\$n / \$heatMax * 4)",
         'to'    => "min(4, \$n)",
         'check' => 'tests/analytics.php',
+    ],
+    /* v5.2: аналитика портала и системы. */
+    [
+        'why'   => 'входы портала снова без прошлого периода',
+        'file'  => 'app/Core/Stats.php',
+        'from'  => "self::count('session_clients', 'client_id = ?', [\$cid], \$prev, \$since)],",
+        'to'    => "self::count('session_clients', 'client_id = ?', [\$cid], \$prev)],",
+        'check' => 'tests/analytics_portal.php',
+    ],
+    [
+        'why'   => '«активные за неделю» снова считают с сегодняшней полуночи',
+        'file'  => 'app/Core/Stats.php',
+        'from'  => "'week' => \$access(6)",
+        'to'    => "'week' => \$access(0)",
+        'check' => 'tests/analytics_portal.php',
+    ],
+    [
+        'why'   => 'обновления токенов снова считаются по всей установке',
+        'file'  => 'app/Core/Stats.php',
+        'from'  => "\$audit = static fn(string \$e): int => self::count('audit_log', 'event = ? AND client_id = ?', [\$e, \$cid], \$since);",
+        'to'    => "\$audit = static fn(string \$e): int => self::count('audit_log', 'event = ?', [\$e], \$since);",
+        'check' => 'tests/analytics_portal.php',
+    ],
+    [
+        'why'   => 'стук сканеров снова считается в скорости',
+        'file'  => 'app/Core/Stats.php',
+        'from'  => "WHERE created_at >= ? AND NOT (user_id IS NULL AND status IN (404, 405)) GROUP BY ' . \$case",
+        'to'    => "WHERE created_at >= ? GROUP BY ' . \$case",
+        'check' => 'tests/analytics_portal.php',
+    ],
+    [
+        'why'   => 'процентиль снова берётся не по накопленной доле',
+        'file'  => 'app/Core/Stats.php',
+        'from'  => "            \$acc += \$n;\n            if (\$acc >= \$q * \$total) return \$i;",
+        'to'    => "            if (\$n >= \$q * \$total) return \$i;",
+        'check' => 'tests/analytics_portal.php',
+    ],
+    [
+        'why'   => 'единичный долгий запрос снова в «медленных»',
+        'file'  => 'app/Core/Stats.php',
+        'from'  => "GROUP BY path HAVING COUNT(*) >= 5 ORDER BY a DESC",
+        'to'    => "GROUP BY path ORDER BY a DESC",
+        'check' => 'tests/analytics_portal.php',
+    ],
+    [
+        'why'   => '«Система» снова открыта любому админу',
+        'file'  => 'app/Controllers/Admin/DashboardController.php',
+        'from'  => "    public function system(): never\n    {\n        \$this->requireGlobalAdmin();\n",
+        'to'    => "    public function system(): never\n    {\n",
+        'check' => 'tests/analytics_portal.php',
+    ],
+    [
+        'why'   => 'корзины снова «1000–2 с»',
+        'file'  => 'templates/admin/analytics_system.php',
+        'from'  => "    if ((\$lo >= 1000) === (\$hi >= 1000)) return (\$lo >= 1000 ? \$lo / 1000 : \$lo) . '–' . \$ms(\$hi);",
+        'to'    => "    return \$lo . '–' . \$ms(\$hi);",
+        'check' => 'tests/analytics_portal.php',
+    ],
+    [
+        'why'   => 'доля доставленных снова округляется до успеха',
+        'file'  => 'templates/admin/client/analytics.php',
+        'from'  => "(int)floor(\$sent / \$events * 100)",
+        'to'    => "(int)round(\$sent / \$events * 100)",
+        'check' => 'tests/analytics_portal.php',
+    ],
+    [
+        'why'   => 'у портала снова нет раздела «Аналитика»',
+        'file'  => 'app/Core/ClientMap.php',
+        'from'  => "            ['key' => 'analytics', 'group' => 'watch',",
+        'to'    => "            ['key' => 'analytics-off', 'group' => 'watch',",
+        'check' => 'tests/analytics_portal.php',
     ],
 ];
 

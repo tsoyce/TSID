@@ -6,13 +6,7 @@ use App\Core\Stats;
    говорили про один и тот же срок. */
 $periodLabel = $days === 1 ? t('сегодня') : t('за :n дней', ['n' => $days]);
 $prevLabel = $days === 1 ? t('ко вчера') : t('к прошлым :n дням', ['n' => $days]);
-$delta = static function (array $pair, bool $upIsGood) use ($prevLabel): string {
-    $d = Stats::delta($pair[0], $pair[1]);
-    if ($d === null) return '';
-    $good = $upIsGood ? $d >= 0 : $d <= 0;
-    return ' · <span class="kpi-delta ' . ($d === 0 ? '' : ($good ? 'is-good' : 'is-bad')) . '">'
-        . ($d > 0 ? '+' : '') . $d . ' %</span> ' . esc($prevLabel);
-};
+$delta = static fn(array $pair, bool $upIsGood): string => kpi_delta($pair, $upIsGood, $prevLabel);
 $fmt = static fn(int $n): string => number_format($n, 0, '', ' ');
 $methods = Stats::methods();
 ?>
