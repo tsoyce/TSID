@@ -105,6 +105,9 @@ final class CronTasks
                 /* Журнал активности (v4.72) — самый объёмный: запись на каждый запрос. */
                 $n = ActivityLog::purge(Setting::getInt('retention.activity_days', 30));
                 if ($n > 0) $out .= ", активности: $n";
+                /* Архив антифрода (v5.5): обезличен, но и ему нужен срок. */
+                $n = FraudArchive::purge(Setting::getInt('retention.fraud_days', FraudArchive::KEEP_DAYS));
+                if ($n > 0) $out .= ", образцов антифрода: $n";
                 $mailDays = Setting::getInt('retention.mail_days', 30);
                 if ($mailDays > 0) {
                     /* v5.4: и неотправленные, и доставки событий и вебхуков —

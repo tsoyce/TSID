@@ -283,6 +283,9 @@ $router->get('/admin/logs/errors', [LogsController::class, 'errors'], ['admin'])
 $router->get('/admin/logs/requests', [LogsController::class, 'requests'], ['admin']);
 $router->get('/admin/ip/{ip}', [LogsController::class, 'ip'], ['admin']);
 /* Блокировка адресов (v4.72). */
+/* Антифрод (v5.5): сводка, архив образцов ботов, выгрузка. */
+$router->get('/admin/fraud', [\App\Controllers\Admin\FraudController::class, 'index'], ['admin']);
+$router->get('/admin/fraud/samples.json', [\App\Controllers\Admin\FraudController::class, 'export'], ['admin']);
 $router->get('/admin/blocks', [\App\Controllers\Admin\BlocksController::class, 'index'], ['admin']);
 $router->post('/admin/blocks', [\App\Controllers\Admin\BlocksController::class, 'add'], ['admin']);
 $router->post('/admin/blocks/{id}/remove', [\App\Controllers\Admin\BlocksController::class, 'remove'], ['admin']);

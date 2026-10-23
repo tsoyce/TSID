@@ -37,6 +37,47 @@ final class BotSignal
     public const CROWD = 3;
 
     /**
+     * Вес признака в оценке риска (v5.5). Галочка «удалить» ставится от
+     * SURE: каждый сильный признак весит не меньше порога и один решает дело,
+     * слабые (отказы и подбор с той же подсети, браузер из архива) — только
+     * вместе. Одна шкала вместо «сильный/слабый» — чтобы признаки из архива
+     * встали в тот же ряд, а не рядом вторым правилом.
+     */
+    public const WEIGHT = [
+        'outdated' => 60, 'blocked' => 60, 'known_net' => 50, 'crowd' => 40,
+        'refused_net' => 30, 'fails_net' => 20, 'known_ua' => 20,
+    ];
+
+    /** С какой оценки аккаунт отмечен к удалению сразу. */
+    public const SURE = 40;
+
+    /** Сколько неудачных входов с подсети за месяц — признак подбора. */
+    public const FAILS = 5;
+
+    /** Признак словами — для сводки архива, где кода мало. */
+    public static function signalLabel(string $code): string
+    {
+        return match ($code) {
+            'outdated' => t('устаревший браузер'),
+            'blocked' => t('адрес закрыт'),
+            'known_net' => t('подсеть уже была у ботов'),
+            'crowd' => t('толпа с одной подсети'),
+            'refused_net' => t('с подсети отказано ботам'),
+            'fails_net' => t('подбор паролей с подсети'),
+            'known_ua' => t('браузер как у бота из архива'),
+            default => $code,
+        };
+    }
+
+    /** Оценка риска 0–100 по кодам признаков. */
+    public static function score(array $codes): int
+    {
+        $sum = 0;
+        foreach (array_unique($codes) as $c) $sum += self::WEIGHT[$c] ?? 0;
+        return min(100, $sum);
+    }
+
+    /**
      * Устаревший браузер — словами («Chrome 39», «Internet Explorer»), или null.
      *
      * Пустая строка признаком не считается: в замере её не было ни у одного
@@ -90,9 +131,9 @@ final class BotSignal
      * подтверждал, но ботами они от этого не становятся. Владелец и
      * суперадмины не попадают сюда никогда.
      *
-     * У каждого — причины словами и `sure`: сильный признак (устаревший
-     * браузер, закрытый адрес, толпа с одной подсети) — такие отмечены
-     * галочкой сразу; без сильного признака — только показаны.
+     * У каждого — причины словами, коды признаков `signals`, оценка `score`
+     * (0–100, см. WEIGHT) и `sure`: от SURE — отмечены галочкой сразу, ниже —
+     * только показаны.
      *
      * @return list<array>
      */
@@ -117,24 +158,64 @@ final class BotSignal
             $rows[$i]['net'] = $net;
             if ($net !== null) $crowd[$net] = ($crowd[$net] ?? 0) + 1;
         }
+        $noise = self::noiseByNet();
+        $known = FraudArchive::known();
         $out = [];
         foreach ($rows as $r) {
             $why = [];
-            $sure = false;
+            $codes = [];
+            $net = $r['net'];
             $old = self::outdated((string)($r['reg_ua'] ?? ''));
-            if ($old !== null) { $why[] = t('браузер: :b', ['b' => $old]); $sure = true; }
-            if ($r['reg_ip'] !== null && IpBlock::match((string)$r['reg_ip']) !== null) { $why[] = t('адрес закрыт'); $sure = true; }
-            if ($r['net'] !== null && ($crowd[$r['net']] ?? 0) >= self::CROWD) {
-                $why[] = t('с подсети ещё :n', ['n' => $crowd[$r['net']] - 1]);
-                $sure = true;
+            if ($old !== null) { $why[] = t('браузер: :b', ['b' => $old]); $codes[] = 'outdated'; }
+            if ($r['reg_ip'] !== null && IpBlock::match((string)$r['reg_ip']) !== null) { $why[] = t('адрес закрыт'); $codes[] = 'blocked'; }
+            if ($net !== null && ($crowd[$net] ?? 0) >= self::CROWD) {
+                $why[] = t('с подсети ещё :n', ['n' => $crowd[$net] - 1]);
+                $codes[] = 'crowd';
             }
+            /* Из архива (v5.5): подсеть и браузер удалённых раньше ботов. Так
+               удаление пачкой учит следующий разбор, а не стирает его. */
+            if ($net !== null && isset($known['nets'][$net])) { $why[] = t('подсеть уже была у ботов'); $codes[] = 'known_net'; }
+            if ((string)($r['reg_ua'] ?? '') !== '' && isset($known['agents'][(string)$r['reg_ua']])) {
+                $why[] = t('браузер как у бота из архива');
+                $codes[] = 'known_ua';
+            }
+            if ($net !== null && ($noise[$net]['refused'] ?? 0) > 0) {
+                $why[] = t('с подсети отказано ботам: :n', ['n' => $noise[$net]['refused']]);
+                $codes[] = 'refused_net';
+            }
+            if ($net !== null && ($noise[$net]['fails'] ?? 0) >= self::FAILS) {
+                $why[] = t('с подсети неудачных входов: :n', ['n' => $noise[$net]['fails']]);
+                $codes[] = 'fails_net';
+            }
+            $score = self::score($codes);
             /* «Почта не подтверждена» верно для всех в списке — плашкой на каждой
                строке это ничего не различает. Без сильных признаков так и говорим. */
-            $out[] = $r + ['why' => $why, 'sure' => $sure];
+            $out[] = $r + ['why' => $why, 'signals' => $codes, 'score' => $score, 'sure' => $score >= self::SURE];
         }
         /* Уверенные — сверху: их удаляют, остальных разглядывают. */
-        usort($out, static fn(array $a, array $b): int => [$b['sure'], (int)$b['id']] <=> [$a['sure'], (int)$a['id']]);
+        usort($out, static fn(array $a, array $b): int => [$b['score'], (int)$b['id']] <=> [$a['score'], (int)$a['id']]);
         return $out;
+    }
+
+    /**
+     * Отказы ботам и неудачные входы по подсетям за месяц — для признаков
+     * refused_net и fails_net. Свою подсеть администратора не считаем: его
+     * опечатки в пароле — не подбор.
+     *
+     * @return array<string, array{refused:int, fails:int}>
+     */
+    private static function noiseByNet(int $days = 30): array
+    {
+        $mine = self::subnet(ip_bin());
+        $by = [];
+        foreach (DB::all("SELECT event, ip FROM {audit_log} WHERE event IN ('register.refused', 'login.fail')
+                          AND created_at >= ? AND ip IS NOT NULL", [now_plus(-$days * 86400)]) as $r) {
+            $net = self::subnet((string)$r['ip']);
+            if ($net === null || $net === $mine) continue;
+            $by[$net] ??= ['refused' => 0, 'fails' => 0];
+            $by[$net][$r['event'] === 'login.fail' ? 'fails' : 'refused']++;
+        }
+        return $by;
     }
 
     /**
