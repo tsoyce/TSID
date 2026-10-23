@@ -171,7 +171,7 @@ final class ProfileSecurityController
         $this->denyOnImpersonation();
         $password = (string)($_POST['password'] ?? '');
         /* Без пароля (соцвход, ссылка из письма) — текущий код из приложения
-           (v5.5). Раньше форма требовала пароль, которого нет, и выключить 2FA
+           (v5.6). Раньше форма требовала пароль, которого нет, и выключить 2FA
            такой человек не мог вовсе. */
         if (empty($user['password_hash'])) {
             RateLimiter::guard('reauth:' . (int)$user['id'], 10, 3600);

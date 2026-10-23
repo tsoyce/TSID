@@ -124,7 +124,7 @@ final class PasskeyController
 
         $remember = !empty($_POST['remember']);
         /* Ключ с проверкой пользователя (PIN, биометрия) — два фактора сразу,
-           код 2FA не переспрашиваем. Без неё (v5.5) ключ — только «владею», и
+           код 2FA не переспрашиваем. Без неё (v5.6) ключ — только «владею», и
            при включённой 2FA он её не заменяет: раньше флаг UV не смотрели. */
         if ($user['totp_enabled_at'] !== null && !((int)$flags & 0x04)) {
             json_response(['ok' => true, 'redirect' => LoginFlow::stage2fa($user, $remember)]);

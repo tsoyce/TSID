@@ -104,7 +104,7 @@ final class SettingsController extends AdminBase
                 Setting::set('policy.lockout_minutes', (string)max(1, min(1440, (int)($_POST['lockout_minutes'] ?? 15))));
                 Setting::set('policy.lock_minutes', (string)max(0, min(1440, (int)($_POST['lock_minutes'] ?? 0))));
                 // Сроки хранения: 0 = хранить вечно
-                foreach (['audit_days', 'activity_days', 'app_logs_days', 'mail_days'] as $k) {
+                foreach (['audit_days', 'activity_days', 'app_logs_days', 'mail_days', 'fraud_days'] as $k) {
                     Setting::set('retention.' . $k, (string)max(0, min(3650, (int)($_POST['retention_' . $k] ?? 0))));
                 }
                 break;

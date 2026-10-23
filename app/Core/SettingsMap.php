@@ -74,6 +74,11 @@ final class SettingsMap
              'title' => 'Блокировки', 'route' => '/admin/blocks',
              'desc' => 'Адреса и подсети, с которых доступ закрыт',
              'perm' => 'settings.read', 'owner' => false],
+            /* Антифрод (v5.5): находится поиском, живёт вкладкой журналов. */
+            ['key' => 'fraud', 'group' => 'auth', 'icon' => 'shield-check',
+             'title' => 'Антифрод', 'route' => '/admin/fraud',
+             'desc' => 'Боты и подбор: признаки, оценка риска, архив образцов',
+             'perm' => 'settings.read', 'owner' => false],
             ['key' => 'keys', 'group' => 'auth', 'icon' => 'key',
              'title' => 'Ключи', 'route' => '/admin/settings/section/keys',
              'desc' => 'Подписи токенов, ротация JWKS',

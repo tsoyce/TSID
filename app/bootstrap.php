@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 define('SSO_ROOT', dirname(__DIR__));
 define('SSO_START', microtime(true));
-define('SSO_VERSION', '5.5.0');
+define('SSO_VERSION', '5.6.0');
 /* Прежние имена (до 4.89) — для сторонних скриптов выкладки и проверок, что
    могли на них опираться. Переходный период: уберутся в 5.0. */
 define('TSOY_ROOT', SSO_ROOT);

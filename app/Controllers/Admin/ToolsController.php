@@ -343,7 +343,7 @@ final class ToolsController extends AdminBase
             redirect('/admin/tools');
         }
         /* Архив с ключами подписи не остаётся во временной папке, даже если
-           скачивание оборвали (v5.5): раньше обрыв убивал скрипт до unlink. */
+           скачивание оборвали (v5.6): раньше обрыв убивал скрипт до unlink. */
         register_shutdown_function(static fn() => @unlink($path));
         ignore_user_abort(true);
         Audit::log('admin.backup.download', ['meta' => ['size' => filesize($path)]]);
@@ -356,7 +356,7 @@ final class ToolsController extends AdminBase
         flush();
         /* Отметка для системного раздела: сброс не отпирается, пока бэкап не
            сделан. Именно факт скачивания, а не галочка «я сделал» — и
-           скачивания до конца (v5.5): оборванный архив отметку не ставит. */
+           скачивания до конца (v5.6): оборванный архив отметку не ставит. */
         if (!connection_aborted()) \App\Core\Setting::set('system.backup_at', now());
         exit;
     }
