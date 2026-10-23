@@ -10,6 +10,7 @@ use App\Core\Crypto;
 use App\Core\DB;
 use App\Core\Flash;
 use App\Core\LoginFlow;
+use App\Core\RateLimiter;
 use App\Core\Setting;
 use App\Core\Totp;
 use App\Core\View;
@@ -55,7 +56,7 @@ final class ProfileSecurityController
            пароль было невозможно в принципе. Теперь: пусто — значит человек
            ставит первый пароль, и спрашивать нечего (он уже в своей сессии). */
         $hasPassword = !empty($user['password_hash']);
-        if ($hasPassword && !password_verify($current, (string)$user['password_hash'])) {
+        if ($hasPassword && !Auth::passwordOk($user, $current)) {
             Flash::error('Текущий пароль не подошёл.');
             redirect('/profile/security');
         }
@@ -169,8 +170,21 @@ final class ProfileSecurityController
         $user = Auth::user();
         $this->denyOnImpersonation();
         $password = (string)($_POST['password'] ?? '');
-        if (empty($user['password_hash']) || !password_verify($password, (string)$user['password_hash'])) {
-            Flash::error('Пароль не подошёл — 2FA осталась включённой.');
+        /* Без пароля (соцвход, ссылка из письма) — текущий код из приложения
+           (v5.6). Раньше форма требовала пароль, которого нет, и выключить 2FA
+           такой человек не мог вовсе. */
+        if (empty($user['password_hash'])) {
+            RateLimiter::guard('reauth:' . (int)$user['id'], 10, 3600);
+            $secret = Crypto::decrypt((string)$user['totp_secret']);
+            $step = Totp::matchStep($secret, preg_replace('~\D~', '', $password));
+            $ok = $step !== null && User::claimTotpStep((int)$user['id'], $step);
+        } else {
+            $ok = Auth::passwordOk($user, $password);
+        }
+        if (!$ok) {
+            Flash::error(empty($user['password_hash'])
+                ? t('Код не подошёл — 2FA осталась включённой.')
+                : t('Пароль не подошёл — 2FA осталась включённой.'));
             redirect('/profile/security');
         }
         User::update((int)$user['id'], ['totp_secret' => null, 'totp_enabled_at' => null]);

@@ -126,6 +126,7 @@ final class AuthController
             RateLimiter::guard('login:acct:' . $user['id'], 10, 3600);
         }
         if (!\App\Models\User::canSignIn($user) || empty($user['password_hash'])) {
+            password_verify($password, User::DUMMY_HASH);
             Audit::log('login.fail', ['actor' => null, 'on' => $user['id'] ?? null, 'meta' => ['reason' => 'identity']]);
             \App\Core\Captcha::noteFailure();
             $fail();

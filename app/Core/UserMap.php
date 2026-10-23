@@ -78,18 +78,18 @@ final class UserMap extends ObjectMap
             ['key' => 'sessions', 'group' => 'access', 'icon' => 'desktop',
              'title' => 'Сессии', 'path' => '/sessions',
              'desc' => 'Живые входы и устройства',
-             'perm' => 'users.read'],
+             'perm' => 'users.read', 'global' => true],
 
             ['key' => 'audit', 'group' => 'watch', 'icon' => 'log',
              'title' => 'Журнал', 'path' => '/audit',
              'desc' => 'Что происходило с этим человеком и что делал он сам',
-             'perm' => 'logs.read'],
+             'perm' => 'logs.read', 'global' => true],
             /* Активность (v4.72): не события, а каждый запрос — какие страницы
                открывал, куда стучался без прав, откуда приходил. */
             ['key' => 'activity', 'group' => 'watch', 'icon' => 'activity',
              'title' => 'Активность', 'path' => '/activity',
              'desc' => 'Откуда приходил и что открывал: каждый запрос',
-             'perm' => 'logs.read'],
+             'perm' => 'logs.read', 'global' => true],
 
             /* Действия и опасная зона — разное. Первое повседневно: заблокировать,
                выдать ссылку для входа, посмотреть систему его глазами. Второе за

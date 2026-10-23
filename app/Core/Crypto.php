@@ -40,7 +40,7 @@ final class Crypto
     }
 
     /** Шифрование секретов at rest (TOTP и т.п.). Формат: v1|base64(nonce.cipher). */
-    public static function encrypt(string $plain): string
+    public static function encrypt(#[\SensitiveParameter] string $plain): string
     {
         $key = self::key();
         if (function_exists('sodium_crypto_secretbox')) {

@@ -3722,6 +3722,9 @@ return [
     'Неудачи' => 'Failures',
     'Неудачных попыток не было' => 'No failed attempts',
     'Раньше' => 'Earlier',
+    /* v5.6: мелкие находки ревизии */
+    'Код не подошёл — 2FA осталась включённой.' => 'Wrong code — 2FA stays on.',
+    'Код из приложения' => 'Code from the app',
     /* v5.5: антифрод */
     'Антифрод' => 'Anti-fraud',
     'Архив антифрода, дней' => 'Anti-fraud archive, days',

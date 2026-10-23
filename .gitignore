@@ -12,6 +12,7 @@ Thumbs.db
 tests/tmp*
 storage/*.sqlite
 /storage/cron.lock
+/storage/migrate.lock
 /tests/rp/
 /dist/
 /config/config.php.bak-*

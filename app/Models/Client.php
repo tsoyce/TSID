@@ -213,7 +213,7 @@ final class Client
     }
 
     /** Проверка секрета: актуальный или ещё живой старый. */
-    public static function verifySecret(array $client, string $secret): bool
+    public static function verifySecret(array $client, #[\SensitiveParameter] string $secret): bool
     {
         if ($secret === '') return false;
         if (password_verify($secret, (string)$client['client_secret_hash'])) return true;

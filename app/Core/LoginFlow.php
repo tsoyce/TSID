@@ -83,6 +83,18 @@ final class LoginFlow
            вход — после неё. Одна проверка на все пути сюда: пароль, второй
            фактор, соцвход, регистрация. */
         if (EmailGate::holds($user)) EmailGate::stop($user, $remember);
+        redirect(self::finish($user, $remember, $auditEvent));
+    }
+
+    /**
+     * Сам вход после всех проверок; возвращает, куда идти дальше.
+     *
+     * v5.6: отдельно от complete() ради входа по ключу — он отвечает JSON, а не
+     * редиректом, и поэтому шёл своей дорогой: мимо «войти и привязать» и мимо
+     * вебхука login.success. Теперь дорога одна.
+     */
+    public static function finish(array $user, bool $remember, string $auditEvent = 'login.success'): string
+    {
         EmailGate::forget();
         User::resetLockout((int)$user['id']);
         Auth::login($user, $remember);
@@ -97,7 +109,7 @@ final class LoginFlow
         ]);
         unset($_SESSION['pending_2fa']);
         self::markFresh();
-        redirect(self::nextUrl());
+        return self::nextUrl();
     }
 
     /** Куда идти после входа: отложенный OAuth → ключ возврата → return_to → профиль. */
@@ -138,13 +150,19 @@ final class LoginFlow
     /** Шаг 2FA: пароль верен, ждём TOTP. */
     public static function require2fa(array $user, bool $remember): never
     {
+        redirect(self::stage2fa($user, $remember));
+    }
+
+    /** Отложить вход до кода 2FA; возвращает адрес шага с кодом. */
+    public static function stage2fa(array $user, bool $remember): string
+    {
         $_SESSION['pending_2fa'] = [
             'user_id' => (int)$user['id'],
             'remember' => $remember,
             'attempts' => 0,
             'issued_at' => time(),
         ];
-        redirect('/login/2fa');
+        return '/login/2fa';
     }
 
     public static function pending2faUser(): ?array

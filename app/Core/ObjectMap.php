@@ -84,6 +84,9 @@ abstract class ObjectMap
         $out = [];
         foreach (static::sections() as $s) {
             if (($s['perm'] ?? '') !== '' && !Auth::can($s['perm'])) continue;
+            /* Раздел про всю систему (v5.6) — только глобальному админу: админ
+               портала видел там сессии и журнал человека за пределами портала. */
+            if (!empty($s['global']) && !Auth::isAdmin()) continue;
             $out[$s['group']][] = $s;
         }
         return $out;

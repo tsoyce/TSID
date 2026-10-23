@@ -57,6 +57,20 @@ final class Migrations
      */
     public static function apply(): array
     {
+        /* Один прогон за раз (v5.6): выкладка и кнопка в админке могли
+           запустить миграции одновременно, и вторая применяла ту же версию
+           поверх первой. Второй ждёт замка и видит, что делать уже нечего. */
+        $lock = @fopen(SSO_ROOT . '/storage/migrate.lock', 'c');
+        if ($lock !== false) flock($lock, LOCK_EX);
+        try {
+            return self::applyUnlocked();
+        } finally {
+            if ($lock !== false) { flock($lock, LOCK_UN); fclose($lock); }
+        }
+    }
+
+    private static function applyUnlocked(): array
+    {
         $done = [];
         $skipped = [];
         foreach (self::pending() as $version) {
