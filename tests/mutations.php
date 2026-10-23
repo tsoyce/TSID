@@ -2764,6 +2764,49 @@ $mutations = [
         'to'    => "return \$base;",
         'check' => 'tests/login_swap.php',
     ],
+    /* v4.98: цифры дашборда. */
+    [
+        'why'   => 'вход по passkey снова не считается входом',
+        'file'  => 'app/Core/Stats.php',
+        'from'  => "public const LOGIN_EVENTS = ['login.success', 'login.magic_link', 'login.passkey', 'login.social'];",
+        'to'    => "public const LOGIN_EVENTS = ['login.success', 'login.magic_link', 'login.social'];",
+        'check' => 'tests/dashboard_stats.php',
+    ],
+    [
+        'why'   => 'дашборд снова считает входы своим списком',
+        'file'  => 'app/Controllers/Admin/DashboardController.php',
+        'from'  => "'logins_today' => Stats::logins(\$today),",
+        'to'    => "'logins_today' => (int)DB::val('SELECT COUNT(*) FROM {audit_log} WHERE event IN (?, ?) AND created_at >= ?', ['login.success', 'login.magic_link', \$today]),",
+        'check' => 'tests/dashboard_stats.php',
+    ],
+    [
+        'why'   => 'профиль снова не показывает входы по passkey и соцсетям',
+        'file'  => 'app/Controllers/ProfileController.php',
+        'from'  => "AND ' . \\App\\Core\\Stats::loginIn() . ' ORDER BY id DESC LIMIT 5',",
+        'to'    => "AND event IN (?, ?) ' . ' ORDER BY id DESC LIMIT 5',",
+        'check' => 'tests/dashboard_stats.php',
+    ],
+    [
+        'why'   => 'сутки снова режутся по UTC',
+        'file'  => 'app/Core/Stats.php',
+        'from'  => "\$local = (new DateTimeImmutable('@' . (\$now ?? time())))->setTimezone(self::tz())",
+        'to'    => "\$local = (new DateTimeImmutable('@' . (\$now ?? time())))->setTimezone(new DateTimeZone('UTC'))",
+        'check' => 'tests/dashboard_stats.php',
+    ],
+    [
+        'why'   => 'час из базы кладётся в UTC-день, а не в местный',
+        'file'  => 'app/Core/Stats.php',
+        'from'  => "\$d = (new DateTimeImmutable(\$r['h'] . ':00:00', new DateTimeZone('UTC')))->setTimezone(\$tz)->format('Y-m-d');",
+        'to'    => "\$d = substr(\$r['h'], 0, 10);",
+        'check' => 'tests/dashboard_stats.php',
+    ],
+    [
+        'why'   => 'событие установки снова без подписи',
+        'file'  => 'app/Core/Audit.php',
+        'from'  => "        'install.done' => 'Установка завершена',\n",
+        'to'    => "",
+        'check' => 'tests/dashboard_stats.php',
+    ],
 ];
 
 if (in_array('--list', $argv, true)) {

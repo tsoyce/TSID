@@ -28,8 +28,8 @@ final class ProfileController
         $services = Access::forUser((int)$user['id']);
         $logins = DB::all(
             'SELECT created_at, ip, user_agent, client_id FROM {audit_log}
-             WHERE on_user_id = ? AND event IN (?, ?) ORDER BY id DESC LIMIT 5',
-            [(int)$user['id'], 'login.success', 'login.magic_link']);
+             WHERE on_user_id = ? AND ' . \App\Core\Stats::loginIn() . ' ORDER BY id DESC LIMIT 5',
+            array_merge([(int)$user['id']], \App\Core\Stats::LOGIN_EVENTS));
         View::render('profile/index', [
             'pageTitle' => 'Профиль',
             'user' => $user,

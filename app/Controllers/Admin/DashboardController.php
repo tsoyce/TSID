@@ -6,6 +6,7 @@ namespace App\Controllers\Admin;
 
 use App\Core\Auth;
 use App\Core\DB;
+use App\Core\Stats;
 use App\Core\View;
 
 /** Админ-дашборд (§5.2): KPI, график регистраций (SVG), лента аудита, здоровье. */
@@ -45,12 +46,12 @@ final class DashboardController extends AdminBase
             redirect('/admin/clients/' . $scope[0]);
         }
 
-        $today = gmdate('Y-m-d 00:00:00');
+        /* Сутки — местные, вход — любой из LOGIN_EVENTS (v4.98): см. Stats. */
+        $today = Stats::dayStart();
         $kpi = [
             'users_total' => (int)DB::val('SELECT COUNT(*) FROM {users} WHERE status != ?', ['deleted']),
-            'users_new_7d' => (int)DB::val('SELECT COUNT(*) FROM {users} WHERE created_at >= ?', [now_plus(-7 * 86400)]),
-            'logins_today' => (int)DB::val('SELECT COUNT(*) FROM {audit_log} WHERE event IN (?, ?) AND created_at >= ?',
-                ['login.success', 'login.magic_link', $today]),
+            'users_new_7d' => (int)DB::val('SELECT COUNT(*) FROM {users} WHERE created_at >= ?', [Stats::dayStart(6)]),
+            'logins_today' => Stats::logins($today),
             'fails_today' => (int)DB::val('SELECT COUNT(*) FROM {audit_log} WHERE event = ? AND created_at >= ?',
                 ['login.fail', $today]),
             'sessions_active' => (int)DB::val('SELECT COUNT(*) FROM {sessions} WHERE revoked_at IS NULL AND expires_at > ?', [now()]),
@@ -58,30 +59,14 @@ final class DashboardController extends AdminBase
         ];
 
         // Регистрации за 30 дней — для SVG-графика без чарт-библиотек (§5.2)
-        $regRows = DB::all(
-            'SELECT SUBSTR(created_at, 1, 10) AS d, COUNT(*) AS n FROM {users} WHERE created_at >= ? GROUP BY SUBSTR(created_at, 1, 10)',
-            [now_plus(-30 * 86400)]);
-        $byDay = array_column($regRows, 'n', 'd');
-        $registrations = [];
-        for ($i = 29; $i >= 0; $i--) {
-            $d = gmdate('Y-m-d', time() - $i * 86400);
-            $registrations[$d] = (int)($byDay[$d] ?? 0);
-        }
+        $registrations = Stats::perDay('users', '1 = 1', [], 30);
 
         /* Кривые за 14 дней — у каждой плитки своя (v4.84): под числом стояла
            одна кривая неудачных входов, три соседние плитки кончались пустым
            полем. Ряд — по дням, пустой день — ноль, а не пропуск. */
-        $perDay = static function (string $table, string $where, array $params): array {
-            $rows = DB::all('SELECT SUBSTR(created_at, 1, 10) AS d, COUNT(*) AS n FROM {' . $table . '} WHERE ' . $where
-                . ' AND created_at >= ? GROUP BY SUBSTR(created_at, 1, 10)', array_merge($params, [now_plus(-14 * 86400)]));
-            $byDay = array_column($rows, 'n', 'd');
-            $out = [];
-            for ($i = 13; $i >= 0; $i--) $out[] = (int)($byDay[gmdate('Y-m-d', time() - $i * 86400)] ?? 0);
-            return $out;
-        };
-        $failSpark = $perDay('audit_log', 'event = ?', ['login.fail']);
-        $loginSpark = $perDay('audit_log', 'event IN (?, ?)', ['login.success', 'login.magic_link']);
-        $sessionSpark = $perDay('sessions', '1 = 1', []);
+        $failSpark = array_values(Stats::perDay('audit_log', 'event = ?', ['login.fail'], 14));
+        $loginSpark = array_values(Stats::perDay('audit_log', Stats::loginIn(), Stats::LOGIN_EVENTS, 14));
+        $sessionSpark = array_values(Stats::perDay('sessions', '1 = 1', [], 14));
         $regSpark = array_slice(array_values($registrations), -14);
 
         $audit = DB::all(

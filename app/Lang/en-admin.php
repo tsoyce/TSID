@@ -38,6 +38,7 @@ return [
     'Вы смотрите как :who (вы — :real)' => 'You are viewing as :who (you are :real)',
     'Вернуться к себе' => 'Back to my account',
     'Дашборд' => 'Dashboard',
+    'активных сессий · кривая — новые за день' => 'active sessions · line shows new per day',
     'Пользователи' => 'Users',
     'Пользователь' => 'User',
     'Пользователей' => 'Users',
@@ -582,7 +583,6 @@ return [
 
     /* --- Remaining fragments --- */
     'Первые шаги · :done из :total' => 'First steps · :done of :total',
-    'активных сессий · порталов: :n' => 'active sessions · portals: :n',
     'Создать организацию' => 'Create organisation',
     'Добавить' => 'Add',
     'Добавить webhook' => 'Add webhook',
@@ -2496,6 +2496,8 @@ return [
     'Вход выполнен' => 'Signed in',
     'Вход по ключу устройства' => 'Signed in with a passkey',
     'Вход по ссылке из письма' => 'Signed in via email link',
+    'Вход через внешний сервис' => 'Signed in via an external provider',
+    'Установка завершена' => 'Installation completed',
     'Неверный код второго фактора' => 'Wrong second-factor code',
     'Вход заблокирован после попыток' => 'Sign-in locked after attempts',
     'Выход' => 'Signed out',

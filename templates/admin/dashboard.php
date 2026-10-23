@@ -51,7 +51,9 @@ use App\Controllers\Admin\DashboardController; ?>
     <div class="sparkline"><?= DashboardController::sparkSvg($failSpark, 120, 36, t('Неудачные входы за 14 дней')) ?></div></div>
   <div class="bento-card col-3"><div class="bc-title"><?= esc(t('Сейчас в сети')) ?></div>
     <div class="kpi-value"><?= number_format($kpi['sessions_active'], 0, '', ' ') ?></div>
-    <div class="kpi-sub"><?= esc(t('активных сессий · порталов: :n', ['n' => (int)$kpi['clients_total']])) ?></div>
+    <?php /* Число — живые сессии, кривая — новые по дням (v4.98): подпись
+             говорит про обе, иначе кривая читалась как «онлайн по дням». */ ?>
+    <div class="kpi-sub"><?= esc(t('активных сессий · кривая — новые за день')) ?></div>
     <div class="sparkline"><?= DashboardController::sparkSvg($sessionSpark, 120, 36, t('Новые сессии за 14 дней')) ?></div></div>
 
   <div class="bento-card col-8">
