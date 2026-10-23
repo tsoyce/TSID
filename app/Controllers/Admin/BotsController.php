@@ -8,6 +8,7 @@ use App\Core\Auth;
 use App\Core\BotSignal;
 use App\Core\BulkPurge;
 use App\Core\Flash;
+use App\Core\FraudArchive;
 use App\Core\IpBlock;
 use App\Core\View;
 
@@ -48,9 +49,13 @@ final class BotsController extends AdminBase
             redirect('/admin/users/bots');
         }
         $nets = array_values(array_unique(array_filter(array_column($pick, 'net'))));
+        /* Образцы — до удаления (v4.98): журнал активности уходит вместе с
+           аккаунтом, а без образца удалённый бот неотличим от человека. */
+        $kept = FraudArchive::keep($pick);
         $done = BulkPurge::purge($pick, 'bots');
         $msg = t('Удалено :n :word.', ['n' => $done['users'],
             'word' => plural($done['users'], 'аккаунт', 'аккаунта', 'аккаунтов')]);
+        if ($kept > 0) $msg .= ' ' . t('В архив антифрода — образцов: :n.', ['n' => $kept]);
         if (($_POST['block'] ?? '') === '1') {
             [$closed, $skipped] = IpBlock::addMany($nets, t('Боты: регистрации без подтверждения'), 0,
                 (int)(Auth::realUser()['id'] ?? 0) ?: null);

@@ -2794,8 +2794,8 @@ $mutations = [
     [
         'why'   => 'толпа с одной подсети снова не сильный признак',
         'file'  => 'app/Core/BotSignal.php',
-        'from'  => "(\$crowd[\$r['net']] ?? 0) >= self::CROWD",
-        'to'    => "(\$crowd[\$r['net']] ?? 0) > 99",
+        'from'  => "(\$crowd[\$net] ?? 0) >= self::CROWD",
+        'to'    => "(\$crowd[\$net] ?? 0) > 99",
         'check' => 'tests/admin_bots.php',
     ],
     [
@@ -2825,6 +2825,77 @@ $mutations = [
         'from'  => "foreach (\$ids as \$id) IpBlock::remove(\$id);",
         'to'    => "",
         'check' => 'tests/admin_bots.php',
+    ],
+    /* v4.98: антифрод — оценка риска, архив образцов, раздел. */
+    [
+        'why'   => 'архив снова не учит: подсеть удалённых ботов не признак',
+        'file'  => 'app/Core/BotSignal.php',
+        'from'  => "if (\$net !== null && isset(\$known['nets'][\$net]))",
+        'to'    => "if (false)",
+        'check' => 'tests/fraud.php',
+    ],
+    [
+        'why'   => 'удаление как бота снова не оставляет образца',
+        'file'  => 'app/Controllers/Admin/BotsController.php',
+        'from'  => "\$kept = FraudArchive::keep(\$pick);",
+        'to'    => "\$kept = 0;",
+        'check' => 'tests/fraud.php',
+    ],
+    [
+        'why'   => 'в образец снова попадает почта целиком',
+        'file'  => 'app/Core/FraudArchive.php',
+        'from'  => "'email_domain' => \$at !== false ? mb_strtolower(mb_substr(\$email, \$at + 1, 128)) : null,",
+        'to'    => "'email_domain' => \$email,",
+        'check' => 'tests/fraud.php',
+    ],
+    [
+        'why'   => 'в образец снова попадает адрес вместо подсети',
+        'file'  => 'app/Core/FraudArchive.php',
+        'from'  => "'net' => \$s['net'] ?? BotSignal::subnet(\$ip),",
+        'to'    => "'net' => \$ip !== null ? inet_ntop(\$ip) : null,",
+        'check' => 'tests/fraud.php',
+    ],
+    [
+        'why'   => 'поведение до регистрации снова не считается',
+        'file'  => 'app/Core/FraudArchive.php',
+        'from'  => "if (\$opened !== null) \$out['form_s'] = max(0, \$reg - \$opened);",
+        'to'    => "",
+        'check' => 'tests/fraud.php',
+    ],
+    [
+        'why'   => 'отказы ботам с той же подсети снова не признак',
+        'file'  => 'app/Core/BotSignal.php',
+        'from'  => "if (\$net !== null && (\$noise[\$net]['refused'] ?? 0) > 0) {",
+        'to'    => "if (false) {",
+        'check' => 'tests/fraud.php',
+    ],
+    [
+        'why'   => 'слабые признаки снова не складываются в галочку',
+        'file'  => 'app/Core/BotSignal.php',
+        'from'  => "'sure' => \$score >= self::SURE];",
+        'to'    => "'sure' => \$score >= 60];",
+        'check' => 'tests/fraud.php',
+    ],
+    [
+        'why'   => 'антифрод снова не вкладка журналов',
+        'file'  => 'app/helpers.php',
+        'from'  => "\$tabs['fraud'] = ['/admin/fraud', t('Антифрод')];",
+        'to'    => "",
+        'check' => 'tests/fraud.php',
+    ],
+    [
+        'why'   => 'выгрузка архива снова мимо аудита',
+        'file'  => 'app/Controllers/Admin/FraudController.php',
+        'from'  => "Audit::log('admin.fraud.export', ['meta' => ['samples' => count(\$rows)]]);",
+        'to'    => "",
+        'check' => 'tests/fraud.php',
+    ],
+    [
+        'why'   => 'у архива снова нет срока хранения',
+        'file'  => 'app/Core/FraudArchive.php',
+        'from'  => "return DB::run('DELETE FROM {fraud_samples} WHERE archived_at < ?',",
+        'to'    => "return 0 * DB::run('SELECT 1 FROM {fraud_samples} WHERE archived_at < ?',",
+        'check' => 'tests/fraud.php',
     ],
     /* v4.96: регистрация по шагам. */
     [
