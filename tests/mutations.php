@@ -2335,6 +2335,63 @@ $mutations = [
         'to'    => "\$ext = str_starts_with(\$href, 'http');",
         'check' => 'tests/infra_bounds.php',
     ],
+    /* v5.5: мелкие находки ревизии */
+    [
+        'why'   => 'вход без аккаунта снова отвечает в разы быстрее неверного пароля',
+        'file'  => 'app/Controllers/AuthController.php',
+        'from'  => "            password_verify(\$password, User::DUMMY_HASH);\n",
+        'to'    => "",
+        'check' => 'tests/small_bounds.php',
+    ],
+    [
+        'why'   => 'пароль в профиле снова проверяется без лимита попыток',
+        'file'  => 'app/Core/Auth.php',
+        'from'  => "        RateLimiter::guard('reauth:' . (int)\$user['id'], 10, 3600);\n        return password_verify",
+        'to'    => "        return password_verify",
+        'check' => 'tests/small_bounds.php',
+    ],
+    [
+        'why'   => 'пароль снова попадает в трассировки ошибок',
+        'file'  => 'app/Core/Auth.php',
+        'from'  => "public static function passwordOk(array \$user, #[\\SensitiveParameter] string \$password)",
+        'to'    => "public static function passwordOk(array \$user, string \$password)",
+        'check' => 'tests/small_bounds.php',
+    ],
+    [
+        'why'   => 'человек без пароля снова не может выключить 2FA',
+        'file'  => 'app/Controllers/ProfileSecurityController.php',
+        'from'  => "        if (empty(\$user['password_hash'])) {\n            RateLimiter::guard",
+        'to'    => "        if (false) {\n            RateLimiter::guard",
+        'check' => 'tests/small_bounds.php',
+    ],
+    [
+        'why'   => 'архив бэкапа с ключами снова остаётся во временной папке',
+        'file'  => 'app/Controllers/Admin/ToolsController.php',
+        'from'  => "        register_shutdown_function(static fn() => @unlink(\$path));\n",
+        'to'    => "",
+        'check' => 'tests/small_bounds.php',
+    ],
+    [
+        'why'   => 'миграции снова идут двумя прогонами сразу',
+        'file'  => 'app/Core/Migrations.php',
+        'from'  => "        if (\$lock !== false) flock(\$lock, LOCK_EX);\n",
+        'to'    => "",
+        'check' => 'tests/small_bounds.php',
+    ],
+    [
+        'why'   => 'ключ без проверки пользователя снова заменяет включённую 2FA',
+        'file'  => 'app/Controllers/PasskeyController.php',
+        'from'  => "if (\$user['totp_enabled_at'] !== null && !((int)\$flags & 0x04)) {",
+        'to'    => "if (false) {",
+        'check' => 'tests/small_bounds.php',
+    ],
+    [
+        'why'   => 'вход по ключу снова идёт мимо общей дороги и вебхука login.success',
+        'file'  => 'app/Core/LoginFlow.php',
+        'from'  => "        WebhookDispatcher::emit('login.success', [",
+        'to'    => "        if (\$auditEvent !== 'login.passkey') WebhookDispatcher::emit('login.success', [",
+        'check' => 'tests/small_bounds.php',
+    ],
     /* v4.87: окно входа без лишних окон — Telegram переходом, вкладка вместо окна, раскладка. */
     [
         'why'   => 'Telegram снова открывается страницей с виджетом, которая открывает ещё окно',

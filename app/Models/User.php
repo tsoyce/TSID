@@ -22,6 +22,14 @@ final class User
      */
     public const SIGN_IN_STATUSES = ['active', 'pending'];
 
+    /**
+     * Хэш-пустышка для входа без аккаунта (v5.5). Без проверки пароля ответ
+     * «нет такого» приходил в 15 раз быстрее «неверный пароль» (19 мс против
+     * 320), и по времени перебирались чужие адреса — хотя регистрация их
+     * нарочно не выдаёт. Параметры — те же, что у настоящих хэшей.
+     */
+    public const DUMMY_HASH = '$argon2id$v=19$m=65536,t=4,p=1$RHdoMmcxOUdWMG53Q2JDOQ$i6RLMeQm/bVuToG3VDAb5AM19m/JpAzz5Pi288X2uU8';
+
     public static function canSignIn(?array $user): bool
     {
         return $user !== null && in_array($user['status'] ?? '', self::SIGN_IN_STATUSES, true);
@@ -53,7 +61,7 @@ final class User
      * гашение — один шаг, и одноразовый код не проходит дважды наперегонки.
      * Регистр, пробелы и дефисы не важны — код диктуют с бумаги.
      */
-    public static function useRecoveryCode(int $userId, string $code): bool
+    public static function useRecoveryCode(int $userId, #[\SensitiveParameter] string $code): bool
     {
         $hash = hash('sha256', strtoupper(str_replace([' ', '-'], '', $code)));
         return DB::update('recovery_codes', ['used_at' => now()],

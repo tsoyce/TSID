@@ -40,7 +40,7 @@ final class DangerZone
      *
      * @return array{ok: bool, error: string}
      */
-    public static function unlock(string $scope, string $password): array
+    public static function unlock(string $scope, #[\SensitiveParameter] string $password): array
     {
         RateLimiter::guard('danger:' . (Auth::id() ?? 0), self::ATTEMPTS, self::ATTEMPTS_WINDOW);
 

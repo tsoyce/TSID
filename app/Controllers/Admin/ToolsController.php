@@ -342,17 +342,22 @@ final class ToolsController extends AdminBase
             Flash::error(t('Бэкап не собрался: :why', ['why' => $e->getMessage()]));
             redirect('/admin/tools');
         }
+        /* Архив с ключами подписи не остаётся во временной папке, даже если
+           скачивание оборвали (v5.5): раньше обрыв убивал скрипт до unlink. */
+        register_shutdown_function(static fn() => @unlink($path));
+        ignore_user_abort(true);
         Audit::log('admin.backup.download', ['meta' => ['size' => filesize($path)]]);
-        /* Отметка для системного раздела: сброс не отпирается, пока бэкап не
-           сделан. Именно факт скачивания, а не галочка «я сделал». */
-        \App\Core\Setting::set('system.backup_at', now());
         $name = 'backup-' . \App\Core\Translit::slug(\App\Core\Setting::appName(), 'sso')
             . '-' . gmdate('Ymd-Hi') . '.zip';
         header('Content-Type: application/zip');
         header('Content-Disposition: attachment; filename="' . $name . '"');
         header('Content-Length: ' . (string)filesize($path));
         readfile($path);
-        @unlink($path);
+        flush();
+        /* Отметка для системного раздела: сброс не отпирается, пока бэкап не
+           сделан. Именно факт скачивания, а не галочка «я сделал» — и
+           скачивания до конца (v5.5): оборванный архив отметку не ставит. */
+        if (!connection_aborted()) \App\Core\Setting::set('system.backup_at', now());
         exit;
     }
 

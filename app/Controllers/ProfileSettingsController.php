@@ -164,7 +164,7 @@ final class ProfileSettingsController
         $this->denyOnImpersonation('/profile/settings');
         $newEmail = mb_strtolower(trim((string)($_POST['new_email'] ?? '')));
         $password = (string)($_POST['password'] ?? '');
-        if (empty($user['password_hash']) || !password_verify($password, (string)$user['password_hash'])) {
+        if (!Auth::passwordOk($user, $password)) {
             Flash::error('Пароль не подошёл.');
             redirect('/profile/settings');
         }
@@ -251,7 +251,7 @@ final class ProfileSettingsController
         $user = Auth::user();
         $this->denyOnImpersonation('/profile/settings');
         $password = (string)($_POST['password'] ?? '');
-        if (empty($user['password_hash']) || !password_verify($password, (string)$user['password_hash'])) {
+        if (!Auth::passwordOk($user, $password)) {
             Flash::error('Пароль не подошёл — аккаунт не тронут.');
             redirect('/profile/settings');
         }

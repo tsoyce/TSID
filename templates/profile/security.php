@@ -94,8 +94,13 @@
         </div>
         <form method="post" action="/profile/security/2fa/disable" class="row" data-confirm="<?= esc(t('Выключить 2FA? Вход станет менее защищённым, а админка — недоступной.')) ?>">
           <?= csrf_field() ?>
+          <?php if ($hasPassword): ?>
           <input class="input mw-xs" type="password" name="password" placeholder="<?= esc(t('Пароль для подтверждения')) ?>"
                  aria-label="<?= esc(t('Пароль для подтверждения')) ?>" required>
+          <?php else: ?>
+          <input class="input mw-xs" type="text" name="password" inputmode="numeric" autocomplete="one-time-code"
+                 placeholder="<?= esc(t('Код из приложения')) ?>" aria-label="<?= esc(t('Код из приложения')) ?>" required>
+          <?php endif; ?>
           <button class="btn btn-danger-ghost" type="submit"><?= esc(t('Выключить')) ?></button>
         </form>
       </div>

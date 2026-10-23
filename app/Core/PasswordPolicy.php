@@ -11,7 +11,7 @@ namespace App\Core;
 final class PasswordPolicy
 {
     /** null — пароль проходит; иначе текст ошибки для пользователя. */
-    public static function check(string $pw): ?string
+    public static function check(#[\SensitiveParameter] string $pw): ?string
     {
         $min = max(1, Setting::passwordMin());
         if (mb_strlen($pw) < $min) {

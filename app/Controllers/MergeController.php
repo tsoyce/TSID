@@ -67,7 +67,7 @@ final class MergeController
            с паролем и своими данными; одного OAuth для него мало. */
         if (!empty($dup['password_hash'])) {
             $password = (string)($_POST['dup_password'] ?? '');
-            if (!password_verify($password, (string)$dup['password_hash'])) {
+            if (!\App\Core\Auth::passwordOk($dup, $password)) {
                 Flash::error(t('Пароль второго аккаунта не подошёл.'));
                 redirect('/profile/merge');
             }

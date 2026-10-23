@@ -105,7 +105,8 @@ final class PasskeyController
                 (string)($_POST['signature'] ?? ''),
                 (string)Crypto::b64urlDecode($stored['c']),
                 (string)$passkey['public_key'],
-                (int)$passkey['sign_count']
+                (int)$passkey['sign_count'],
+                $flags
             );
         } catch (\Throwable $e) {
             Audit::log('login.fail', ['actor' => null, 'on' => (int)$passkey['user_id'],
@@ -121,12 +122,13 @@ final class PasskeyController
         }
         Passkey::recordUse((int)$passkey['id'], $newCount);
 
-        // Passkey = фишинго-устойчивый фактор владения (+биометрия) — TOTP не переспрашиваем
-        User::resetLockout((int)$user['id']);
-        Auth::login($user, !empty($_POST['remember']));
-        Audit::log('login.passkey', ['actor' => (int)$user['id'], 'on' => (int)$user['id']]);
-        LoginFlow::markFresh();
-        \App\Core\Notify::afterLogin($user);
-        json_response(['ok' => true, 'redirect' => LoginFlow::nextUrl()]);
+        $remember = !empty($_POST['remember']);
+        /* Ключ с проверкой пользователя (PIN, биометрия) — два фактора сразу,
+           код 2FA не переспрашиваем. Без неё (v5.5) ключ — только «владею», и
+           при включённой 2FA он её не заменяет: раньше флаг UV не смотрели. */
+        if ($user['totp_enabled_at'] !== null && !((int)$flags & 0x04)) {
+            json_response(['ok' => true, 'redirect' => LoginFlow::stage2fa($user, $remember)]);
+        }
+        json_response(['ok' => true, 'redirect' => LoginFlow::finish($user, $remember, 'login.passkey')]);
     }
 }

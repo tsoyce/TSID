@@ -99,6 +99,19 @@ final class Auth
         return self::$session !== null && QuickUnlock::locked(self::$session);
     }
 
+    /**
+     * Пароль аккаунта ещё раз — перед сменой пароля, почты, удалением,
+     * выключением 2FA, слиянием (v5.5). Раньше эти формы проверяли пароль без
+     * всякого лимита: укравший сессию подбирал пароль прямо из профиля, и
+     * блокировка входа этого не видела. 10 попыток в час на аккаунт, дальше 429.
+     */
+    public static function passwordOk(array $user, #[\SensitiveParameter] string $password): bool
+    {
+        if (empty($user['password_hash'])) return false;
+        RateLimiter::guard('reauth:' . (int)$user['id'], 10, 3600);
+        return password_verify($password, (string)$user['password_hash']);
+    }
+
     /** Вход: создаёт запись сессии, ставит cookie, регенерирует PHP-сессию. */
     public static function login(array $user, bool $remember): void
     {

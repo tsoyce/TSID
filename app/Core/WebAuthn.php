@@ -101,7 +101,7 @@ final class WebAuthn
      */
     public static function verifyAssertion(string $clientDataJsonB64, string $authenticatorDataB64,
                                            string $signatureB64, string $expectedChallenge,
-                                           string $storedPem, int $storedSignCount): int
+                                           string $storedPem, int $storedSignCount, ?int &$flags = null): int
     {
         self::checkClientData($clientDataJsonB64, 'webauthn.get', $expectedChallenge);
         $authData = Crypto::b64urlDecode($authenticatorDataB64);
@@ -120,6 +120,7 @@ final class WebAuthn
         }
         // signCount: синхронизируемые passkeys (iCloud/Google) часто держат 0 — это норма.
         // Ненулевой счётчик, который не вырос, — возможный клон: наверх, пусть аудитят.
+        $flags = $parsed['flags'];
         $new = $parsed['sign_count'];
         if ($new !== 0 && $storedSignCount !== 0 && $new <= $storedSignCount) {
             throw new \RuntimeException('sign_count не вырос — возможное клонирование ключа');

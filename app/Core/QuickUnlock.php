@@ -99,7 +99,7 @@ final class QuickUnlock
     /* ---- PIN ---- */
 
     /** Годится ли код. Возвращает текст ошибки или null. */
-    public static function checkPinFormat(string $pin): ?string
+    public static function checkPinFormat(#[\SensitiveParameter] string $pin): ?string
     {
         $len = strlen($pin);
         if ($len < self::PIN_MIN || $len > self::PIN_MAX || !ctype_digit($pin)) {
@@ -115,7 +115,7 @@ final class QuickUnlock
         return null;
     }
 
-    public static function setPin(int $userId, string $pin): void
+    public static function setPin(int $userId, #[\SensitiveParameter] string $pin): void
     {
         User::update($userId, ['pin_hash' => password_hash($pin, PASSWORD_ARGON2ID)]);
         Audit::log('pin.set', ['actor' => $userId, 'on' => $userId]);
@@ -131,7 +131,7 @@ final class QuickUnlock
      * Проверить PIN. Верный — отпираем; неверный — считаем попытки и на пятой
      * гасим сессию: дальше только полный вход.
      */
-    public static function tryPin(array $user, array $session, string $pin): bool
+    public static function tryPin(array $user, array $session, #[\SensitiveParameter] string $pin): bool
     {
         $hash = (string)($user['pin_hash'] ?? '');
         if ($hash !== '' && password_verify($pin, $hash)) {
