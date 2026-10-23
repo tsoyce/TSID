@@ -97,8 +97,9 @@ $dc = $src('app/Controllers/Admin/DashboardController.php');
 ok(substr_count($dash, '<div class="sparkline"><?= DashboardController::sparkSvg(') === 4
     && str_contains($dash, "sparkSvg(\$regSpark, 120, 36,") && str_contains($dash, "sparkSvg(\$loginSpark, 120, 36,")
     && str_contains($dash, "sparkSvg(\$sessionSpark, 120, 36,"), 'у каждой из четырёх плиток — своя кривая за 14 дней');
-ok(str_contains($dc, "\$loginSpark = \$perDay('audit_log', 'event IN (?, ?)', ['login.success', 'login.magic_link']);")
-    && str_contains($dc, 'for ($i = 13; $i >= 0; $i--) $out[] = (int)($byDay[gmdate(\'Y-m-d\', time() - $i * 86400)] ?? 0);'),
+/* v4.98: ряд и число берут вход из одного списка — Stats::LOGIN_EVENTS. */
+ok(str_contains($dc, "\$loginSpark = array_values(Stats::perDay('audit_log', Stats::loginIn(), Stats::LOGIN_EVENTS, 14));")
+    && str_contains($src('app/Core/Stats.php'), "->format('Y-m-d')] = 0;"),
     'входы считаются теми же событиями, что число над кривой; пустой день — ноль, а не пропуск');
 
 echo "\n── Полоса «Сохранить изменения» (v4.89) ──\n";

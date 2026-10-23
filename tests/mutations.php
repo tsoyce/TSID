@@ -2063,8 +2063,8 @@ $mutations = [
     [
         'why'   => 'кривая входов снова считает не те события, что число над ней',
         'file'  => 'app/Controllers/Admin/DashboardController.php',
-        'from'  => "\$loginSpark = \$perDay('audit_log', 'event IN (?, ?)', ['login.success', 'login.magic_link']);",
-        'to'    => "\$loginSpark = \$perDay('audit_log', 'event = ?', ['login.success']);",
+        'from'  => "\$loginSpark = array_values(Stats::perDay('audit_log', Stats::loginIn(), Stats::LOGIN_EVENTS, 14));",
+        'to'    => "\$loginSpark = array_values(Stats::perDay('audit_log', 'event = ?', ['login.success'], 14));",
         'check' => 'tests/ui_fixes.php',
     ],
     /* v4.86: кнопки сервисов входа — знак, «Продолжить с …», idp_hint, порядок. */
