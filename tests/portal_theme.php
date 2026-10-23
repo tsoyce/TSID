@@ -162,12 +162,15 @@ try {
     ok(str_contains($login, 'connector-node'), 'связка «портал — SSO» над формой на месте');
     [, $register] = http('GET', SSO . '/register');
     ok(str_contains($register, '--bg:#F1ECDC'), 'регистрация в том же потоке — в той же теме');
-    /* «Не помню» портал в шаблон не передаёт вовсе — только на нём и видно,
-       что тема берётся из потока. Регистрация передаёт сама, и проверка по
-       ней была слепа к этому дефекту (мутация 49, 12.09). */
     [, $recover] = http('GET', SSO . '/recover');
-    ok(str_contains($recover, '--bg:#F1ECDC'),
-        '«не помню» в том же потоке — в той же теме: портал берётся из потока, а не из экрана');
+    ok(str_contains($recover, '--bg:#F1ECDC'), '«не помню» в том же потоке — в той же теме');
+    /* Возврат из Telegram портал в шаблон не передаёт вовсе — только на нём и
+       видно, что тема берётся из потока. Регистрация передаёт сама, и проверка
+       по ней была слепа к этому дефекту (мутация 49, 12.09); с 5.3.1 передаёт и
+       «Не помню». */
+    [, $tgBack] = http('GET', SSO . '/social/telegram/return');
+    ok(str_contains($tgBack, '--bg:#F1ECDC'),
+        'возврат из Telegram в том же потоке — в той же теме: портал берётся из потока, а не из экрана');
     [, $plain, , , $plainHeaders] = http('GET', SSO . '/login', [], [], sys_get_temp_dir() . '/portal-theme-plain.txt');
     ok(!str_contains($plain, '--bg:#F1ECDC') && !str_contains($plain, 'portal-pane'),
         'без портала экран входа — родной');

@@ -180,18 +180,24 @@
     var dark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
     /* Сайт под окном размыт заметно (v4.86, было 3px) — как у X: окно входа
        главное на экране, а страница под ним только угадывается. */
+    /* Верхний край окна стоит на месте (v5.3.1): по центру окно на каждой
+       вкладке входа прыгало вверх-вниз на сотни пикселей — высота у вкладок
+       разная (замер в Chrome: вход 830, регистрация 400, «Не помню» 360). */
+    var top = Math.max(16, Math.round(innerHeight * 0.08));
     var wrap = set(document.createElement('div'), {
       position: 'fixed', inset: '0', zIndex: '2147483646', display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '16px',
+      alignItems: 'center', justifyContent: 'flex-start', gap: '12px', padding: top + 'px 16px 16px',
       background: 'rgba(10,12,16,.55)', backdropFilter: 'blur(8px)', webkitBackdropFilter: 'blur(8px)'
     });
     wrap.setAttribute('role', 'dialog');
     wrap.setAttribute('aria-modal', 'true');
     wrap.setAttribute('aria-label', t.title || 'Вход');
     var card = set(document.createElement('div'), {
-      position: 'relative', width: '100%', maxWidth: '440px', height: Math.min(620, innerHeight - 32) + 'px',
+      position: 'relative', width: '100%', maxWidth: '440px', height: Math.min(620, innerHeight - top - 16) + 'px',
       borderRadius: '16px', overflow: 'hidden', background: dark ? '#1b1d22' : '#fff',
-      boxShadow: '0 24px 70px rgba(0,0,0,.4)'
+      boxShadow: '0 24px 70px rgba(0,0,0,.4)',
+      /* Вкладки во фрейме меняют высоту окна (v5.3.1) — плавно, а не рывком. */
+      transition: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'none' : 'height .2s ease'
     });
     var frame = set(document.createElement('iframe'), { width: '100%', height: '100%', border: '0', display: 'block' });
     frame.title = t.title || 'Вход';
@@ -235,7 +241,7 @@
       downOnVeil = false;
     });
     modal = {
-      wrap: wrap, card: card, frame: frame, url: url, btn: btn, ready: false, esc: esc,
+      wrap: wrap, card: card, frame: frame, url: url, btn: btn, ready: false, esc: esc, top: top,
       overflow: document.documentElement.style.overflow,
       slow: setTimeout(function () { if (modal && !modal.ready) slowBox.style.display = 'flex'; }, 8000),
       slowBox: slowBox
@@ -262,7 +268,7 @@
       modal.slowBox.style.display = 'none';
     } else if (d.state === 'size' && d.h > 0) {
       /* Окно — по содержимому, от 360px (v4.87; было от 480 и только росло). */
-      modal.card.style.height = Math.min(Math.max(d.h, 360), innerHeight - 32) + 'px';
+      modal.card.style.height = Math.min(Math.max(d.h, 360), innerHeight - modal.top - 16) + 'px';
     } else if (d.state === 'window') {
       /* В адрес — только имя сервиса из латинских букв. */
       if (typeof d.social === 'string' && /^[a-z]{2,20}$/.test(d.social)) toService(d.social);

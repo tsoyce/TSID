@@ -1453,6 +1453,24 @@ function auth_head(string $title, string $sub = '', bool $center = false): strin
 }
 
 /**
+ * Шапка экранов входа с портала: два знака связки и «Вы входите в X» (v5.3.1).
+ *
+ * Стояла только на «Вход»; «Регистрация» показывала плашку другого вида, а «Не
+ * помню» — знак установки вместо портала. Вкладки переключаются без нового
+ * документа, и шапка прыгала на каждом щелчке, а во фрейме на странице
+ * портала «Не помню» выглядела чужой. Теперь шапка одна на три вкладки и
+ * меняется только подпись.
+ */
+function auth_portal_head(array $client, string $lead): string
+{
+    $bridge = App\Core\Bridge::brandingOf($client);
+    return '<div class="connector-head mb-24">' . portal_connector($client)
+        . '<div class="connector-caption">' . esc($lead) . ' <b>' . esc((string)($client['name'] ?? '')) . '</b>'
+        . ($bridge && $bridge['tagline'] ? '<div class="hint">' . esc($bridge['tagline']) . '</div>' : '')
+        . '</div></div>';
+}
+
+/**
  * Два знака связки: портал слева, SSO справа, пунктир между ними (v4.4.6).
  *
  * $done — вход состоялся (экран «Вы вошли», v4.72): точка на стыке

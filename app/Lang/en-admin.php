@@ -774,7 +774,6 @@ return [
     'Владелец' => 'Holder',
 
     /* --- Вход, регистрация, выход (v4.0) --- */
-    'Аккаунт для входа в' => 'An account to sign in to',
     'Создать аккаунт' => 'Create account',
     'Создавая аккаунт, вы принимаете политику обработки персональных данных.'
         => 'By creating an account you accept the personal data processing policy.',

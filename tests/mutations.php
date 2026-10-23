@@ -3282,6 +3282,56 @@ $mutations = [
         'to'    => "",
         'check' => 'tests/profile_history.php',
     ],
+    /* v5.3.1: окно входа на странице портала — все три вкладки. */
+    [
+        'why'   => 'во фрейме снова View Transitions — Chrome 156 роняет фрейм на «Регистрация»',
+        'file'  => 'public/assets/js/app.js',
+        'from'  => "    if (framed) {\n      fn();\n      var shown",
+        'to'    => "    if (false) {\n      fn();\n      var shown",
+        'check' => 'tests/frame.php',
+    ],
+    [
+        'why'   => '«Не помню» снова без шапки портала — знак установки вместо него',
+        'file'  => 'app/Controllers/RegistrationController.php',
+        'from'  => "            'client' => LoginFlow::pendingClient(), 'popup' => LoginFlow::pendingIsPopup(),\n            'captcha' => \\App\\Core\\Captcha::requiredForRecover()]",
+        'to'    => "            'captcha' => \\App\\Core\\Captcha::requiredForRecover()]",
+        'check' => 'tests/frame.php',
+    ],
+    [
+        'why'   => '«Не помню» снова теряет ключ возврата в форме',
+        'file'  => 'templates/auth/recover.php',
+        'from'  => "<?= csrf_field() ?><?= App\\Core\\Resume::field() ?>",
+        'to'    => "<?= csrf_field() ?>",
+        'check' => 'tests/frame.php',
+    ],
+    [
+        'why'   => '«Не помню» после отправки снова возвращает без ключа возврата',
+        'file'  => 'app/Controllers/RegistrationController.php',
+        'from'  => "redirect('/recover' . (\$rt !== '' ? '?rt=' . urlencode(\$rt) : ''));",
+        'to'    => "redirect('/recover');",
+        'check' => 'tests/frame.php',
+    ],
+    [
+        'why'   => '«Регистрация» снова со своей плашкой вместо шапки портала — шапка прыгает',
+        'file'  => 'templates/auth/register.php',
+        'from'  => "<?= auth_portal_head(\$client, t('register.context')) ?>",
+        'to'    => "<?= auth_context(\$client, t('register.context'), false) ?>",
+        'check' => 'tests/frame.php',
+    ],
+    [
+        'why'   => 'окно входа на портале снова по центру — прыгает вверх-вниз между вкладками',
+        'file'  => 'public/assets/js/sso.js',
+        'from'  => "justifyContent: 'flex-start', gap: '12px', padding: top + 'px 16px 16px',",
+        'to'    => "justifyContent: 'center', gap: '12px', padding: '16px',",
+        'check' => 'tests/frame.php',
+    ],
+    [
+        'why'   => 'во фрейме снова постоянная полоса прокрутки — лента вдоль края окна',
+        'file'  => 'public/assets/css/identity.css',
+        'from'  => "html[data-frame-origin] { overflow-y: auto; }",
+        'to'    => "",
+        'check' => 'tests/frame.php',
+    ],
 ];
 
 if (in_array('--list', $argv, true)) {
