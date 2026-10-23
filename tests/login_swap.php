@@ -37,7 +37,7 @@ ok(str_contains($app, "var TABS = ['/login', '/register', '/recover'];")
 ok(str_contains($app, "document.getElementById('main').innerHTML = next.getElementById('main').innerHTML;"),
     'подменяется колонка формы — панель с обложкой и видео не начинается заново');
 ok(str_contains($app, "if (push) history.pushState({ sso: 1 }, '', url);")
-    && str_contains($app, "if (e.state && e.state.sso && tabOf(location.pathname) !== -1) go(location.href, null, false);"),
+    && str_contains($app, "if (appShell ? appPath(location.pathname) : tabOf(location.pathname) !== -1) go(location.href, null, false);"),
     'адрес настоящий и в истории: «назад» возвращает вкладку');
 ok(str_contains($app, "if (!framed && (to === -1 || !/class=\"auth-tabs/.test(res.html))) { leave(res.r.url); return; }"),
     'ответ без вкладок (вошёл и уехал в кабинет) — обычным переходом');
@@ -55,7 +55,7 @@ ok(str_contains($app, "document.addEventListener('pointerover', warm, { passive:
     && str_contains($app, "early[key].at > Date.now() - 15000"),
     'вкладка подгружается при наведении — к щелчку ответ уже здесь');
 ok(str_contains($app, "animate(function () { swapPage(res.html, res.r.url, push); },"),
-    'подмена идёт через animate() — и во фрейме (там без View Transitions, v4.98)');
+    'подмена идёт через animate() — и во фрейме (там без View Transitions, v5.3.1)');
 
 echo "\n── Вход на алиасе портала ──\n";
 ok(str_contains($sso, "if (back && back !== 'null' && back !== location.origin && !e.auto) {")

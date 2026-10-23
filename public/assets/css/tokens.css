@@ -85,6 +85,11 @@
   --success: #15803D; --success-bg: #F0FDF4; --on-success: #FFFFFF;
   --warning: #B45309; --warning-bg: #FFFBEB; --on-warning: #FFFFFF;
   --danger:  #B91C1C; --danger-bg:  #FEF2F2; --on-danger:  #FFFFFF;
+  /* Ряды графиков (v4.99): различимы и при нарушениях цветового зрения
+     (палитра проверена по ΔE для протанопии, дейтеранопии и тританопии).
+     Акцент установки сюда не идёт: перекрась его владелец в оранжевый — и
+     «пароль» слился бы с «ссылкой из письма». */
+  --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #eda100;
 
   --focus: 0 0 0 3px color-mix(in srgb, var(--ink) 30%, transparent);
 
@@ -137,6 +142,7 @@
   --success: #4ADE80; --success-bg: rgb(74 222 128 / .10); --on-success: #12100E;
   --warning: #FBBF24; --warning-bg: rgb(251 191 36 / .10); --on-warning: #12100E;
   --danger:  #F87171; --danger-bg:  rgb(248 113 113 / .10); --on-danger:  #12100E;
+  --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
   --shadow-1: 0 1px 2px rgb(0 0 0 / .3);
   --shadow-2: 0 1px 3px rgb(0 0 0 / .35), 0 4px 12px rgb(0 0 0 / .35);
   --shadow-3: 0 4px 8px rgb(0 0 0 / .4), 0 12px 32px rgb(0 0 0 / .5);

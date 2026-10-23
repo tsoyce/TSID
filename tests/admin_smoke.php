@@ -1304,7 +1304,8 @@ http('GET', SSO . '/lang/en');
 ok($st === 200 && str_contains($enAdmin, '<html lang="en">'), 'админка отдаётся на английском');
 ok(str_contains($enAdmin, '>Users</a>') && str_contains($enAdmin, '>Portals</a>')
     && str_contains($enAdmin, '>Organisations</a>'), 'навигация переведена');
-ok(str_contains($enAdmin, 'Failed sign-ins') && str_contains($enAdmin, 'Sign-ins today'),
+/* v4.99: плитки — за выбранный период, «сегодня» ушло из подписи в переключатель. */
+ok(str_contains($enAdmin, 'Failed sign-ins') && str_contains($enAdmin, '>Sign-ins<') && str_contains($enAdmin, '>Today</a>'),
     'плитки дашборда переведены');
 ok(str_contains($enAdmin, '<title>Dashboard'), 'заголовок вкладки переведён');
 

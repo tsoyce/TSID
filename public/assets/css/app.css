@@ -121,7 +121,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }
 @keyframes swap-out-end { to { opacity: 0; transform: translateX(24px); } }
 @keyframes swap-in-end { from { opacity: 0; transform: translateX(24px); } }
 @keyframes swap-in-start { from { opacity: 0; transform: translateX(-24px); } }
-/* Во фрейме на странице портала View Transitions нет (v4.98, см. app.js):
+/* Во фрейме на странице портала View Transitions нет (v5.3.1, см. app.js):
    новое содержимое окна входа проявляется само. */
 .auth-card.is-swapped-in { animation: fade var(--dur-base) var(--ease-out); }
 /* Просили меньше движения — значит меньше движения, а не «чуть-чуть». */
@@ -283,7 +283,6 @@ img, svg, video { max-width: 100%; }
 .btn-icon:disabled { color: var(--text-3); cursor: not-allowed; background: none; }
 .btn-icon.is-active, .btn-icon[aria-expanded="true"] { background: var(--ink-soft); color: var(--ink-text); }
 .btn-icon-s { width: var(--control-h-s); height: var(--control-h-s); }
-.btn-icon-danger:hover { background: var(--danger-bg); color: var(--danger); }
 
 /* ---------- Формы ---------- */
 /* 16px, а не 14: четырнадцати в шкале нет вовсе, а это самый частый отступ
@@ -631,31 +630,6 @@ input[type="file"]::file-selector-button:hover { border-color: var(--text-3); ba
   .set-rail.has-head .set-rail-links::-webkit-scrollbar { display: none; }
 }
 
-/* ---------- Указатель разделов настроек ----------
-   Настройки лежали в шести местах, и найти нужное можно было только перебором
-   экранов. Указатель отвечает на «где это» до того, как человек начнёт искать:
-   группы названы по смыслу («как выглядит», «как входят»), у каждого раздела —
-   строка о том, что внутри. Подпись обязательна: список из одних названий
-   заставляет открывать разделы наугад. */
-.set-index { display: grid; gap: var(--s-5); }
-.set-group { min-width: 0; }
-.set-group-title {
-  font: 600 var(--fs-12)/1.2 var(--font-ui); text-transform: uppercase; letter-spacing: .06em;
-  color: var(--text-3); margin-bottom: var(--s-3);
-}
-.set-links { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--s-2); }
-.set-link {
-  display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px;
-  border: 1px solid var(--line); border-radius: var(--radius-m);
-  background: var(--surface); text-decoration: none !important; color: var(--text);
-  transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
-}
-.set-link:hover { border-color: var(--line-strong); background: var(--surface-2); }
-.set-link .icon { color: var(--ink-text); flex: none; margin-top: 1px; }
-.set-link span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.set-link b { font: 500 var(--fs-14)/1.3 var(--font-ui); }
-.set-link i { font: 400 var(--fs-12)/1.35 var(--font-ui); font-style: normal; color: var(--text-2); }
-
 /* ---------- Поле загрузки картинки ----------
    Превью и выбор файла в одном ряду. Размеры превью были зашиты в style прямо
    в шаблонах и различались от места к месту — не по замыслу, а потому что
@@ -751,6 +725,11 @@ input[type="file"]::file-selector-button:hover { border-color: var(--text-3); ba
 .act-text { flex: 1 1 220px; min-width: 0; }
 .act-name { font-weight: 500; }
 .act-item > form { flex: none; }
+/* История в кабинете (v5.3): день — заголовком, неудача — красным словом,
+   не только значком: цвет не единственный носитель смысла. */
+.history-day + .act-list { margin-bottom: 24px; }
+.history-day + .act-list:last-child { margin-bottom: 0; }
+.act-item.is-alarm .act-name { color: var(--danger); }
 
 /* Пипетка рядом с hex-полем: нативный type=color без серой рамки браузера */
 .input-color {
@@ -1015,9 +994,6 @@ input[type="file"]::file-selector-button:hover { border-color: var(--text-3); ba
   .auth-shell:not(.is-popup) {
     max-width: 840px; grid-template-columns: 1fr 420px; gap: 56px; text-align: left;
   }
-  .auth-shell:not(.is-popup) .auth-brand { text-align: left; }
-  .auth-shell:not(.is-popup) .auth-brand-logo { justify-content: flex-start; font-size: var(--fs-28); }
-  .auth-shell:not(.is-popup) .auth-brand-line { font-size: var(--fs-16); max-width: 26ch; }
 }
 /* На экранах без вкладок этот блок и есть заголовок страницы — там он
    размечен как h1 (согласие, приглашение). Поэтому вес и отступы задаём явно:
@@ -1039,11 +1015,6 @@ input[type="file"]::file-selector-button:hover { border-color: var(--text-3); ba
    style: так видно, что переменная существует и чем она становится, если
    портал цвета не прислал. */
 :root { --bridge: var(--ink); }
-.auth-context.has-bridge {
-  border-color: color-mix(in srgb, var(--bridge, var(--ink)) 45%, transparent);
-  background: color-mix(in srgb, var(--bridge, var(--ink)) 8%, var(--surface-2));
-  text-align: left; align-items: center;
-}
 .bridge-logo { flex: none; width: 32px; height: 32px; object-fit: contain; border-radius: var(--radius-s); }
 /* .bridge-text удалён в v4.4.6: подпись мостика теперь .connector-caption. */
 
@@ -1366,9 +1337,6 @@ table.table { width: 100%; border-collapse: collapse; font-size: var(--fs-14); }
 .modal-s { max-width: 460px; }
 .modal-m { max-width: 520px; }
 .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.wizard-dots { display: flex; gap: 6px; align-items: center; }
-.wizard-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong); }
-.wizard-dots i.active { background: var(--ink); }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
 /* ---------- Drawer: выдвижная панель справа ---------- */
@@ -1718,6 +1686,111 @@ table.table { width: 100%; border-collapse: collapse; font-size: var(--fs-14); }
 .sparkline svg { display: block; width: 100%; height: 36px; }
 .chart svg { width: 100%; height: auto; display: block; }
 
+/* ---------- Пульт (v4.99) ---------- */
+/* Период — ряд ссылок-пилюль: адрес можно отправить, «назад» работает. */
+.period-switch { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); }
+.period-switch a { padding: 4px 12px; border-radius: 999px; font-size: var(--fs-13); font-weight: 500; color: var(--text-2); text-decoration: none; white-space: nowrap; transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
+.period-switch a:hover { color: var(--text); }
+.period-switch a[aria-current] { background: var(--surface); color: var(--ink-text); box-shadow: var(--shadow-1); }
+.kpi-delta.is-good { color: var(--success); }
+.kpi-delta.is-bad { color: var(--danger); }
+.onboarding-fold > summary { cursor: pointer; list-style: none; gap: 12px; }
+.onboarding-fold > summary::-webkit-details-marker { display: none; }
+
+/* Столбцы по способам входа. Цвета рядов — свои токены, не акцент: акцент
+   перекрашивает владелец, а ряды обязаны различаться всегда. */
+.s1 { fill: var(--series-1); background: var(--series-1); }
+.s2 { fill: var(--series-2); background: var(--series-2); }
+.s3 { fill: var(--series-3); background: var(--series-3); }
+.s4 { fill: var(--series-4); background: var(--series-4); }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: var(--fs-13); color: var(--text-2); }
+.chart-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.chart-bars { position: relative; margin-top: 12px; }
+.chart-grid { stroke: var(--line); stroke-width: 1; }
+.chart-axis { fill: var(--text-3); font-size: 11px; font-variant-numeric: tabular-nums; }
+.bar-hit { fill: transparent; }
+.bar-col:hover rect:not(.bar-hit) { opacity: .8; }
+.chart-tip { position: absolute; z-index: 2; pointer-events: none; transform: translate(-50%, -100%); min-width: 160px; padding: 8px 12px; border-radius: var(--radius-s); background: var(--surface); border: 1px solid var(--line-strong); box-shadow: var(--shadow-2); font-size: var(--fs-12); white-space: nowrap; }
+.chart-tip div { display: flex; justify-content: space-between; gap: 12px; color: var(--text-2); }
+.chart-tip .chart-dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+.chart-tip b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.chart-table { margin-top: 8px; font-size: var(--fs-13); color: var(--text-2); }
+.chart-table summary { cursor: pointer; }
+
+/* «Требует внимания»: только то, что не в порядке. */
+.attention { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.attention li { display: flex; gap: 8px; align-items: flex-start; padding: 8px 12px; border-radius: var(--radius-s); background: var(--surface-2); font-size: var(--fs-14); }
+.attention li > .icon { flex: none; margin-top: 2px; }
+.attention a, .attention li > span { display: grid; color: inherit; text-decoration: none; min-width: 0; }
+.attention a:hover .cell-main { color: var(--ink-text); }
+.attention .is-fail { background: var(--danger-bg); }
+.attention .is-warn { background: var(--warning-bg); }
+.attention .is-ok { background: var(--success-bg); }
+
+.rank-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.rank-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; font-size: var(--fs-14); }
+.rank-list a { color: inherit; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank-n { font-variant-numeric: tabular-nums; }
+.rank-track { grid-column: 1 / -1; height: 4px; border-radius: 2px; background: var(--surface-2); overflow: hidden; }
+.rank-track i { display: block; height: 100%; border-radius: 2px; background: var(--series-1); transform-origin: left; }
+
+/* Аналитика (v5.1). Подпись строки без ссылки — тот же обрез, что у ссылки. */
+.rank-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank-label .chart-dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 8px; }
+.rank-track i.s2 { background: var(--series-2); } .rank-track i.s3 { background: var(--series-3); }
+.rank-track i.s4 { background: var(--series-4); }
+
+.funnel { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+.funnel li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; font-size: var(--fs-14); }
+.funnel-conv { color: var(--text-3); font-size: var(--fs-13); margin-left: 8px; }
+.funnel-bar { grid-column: 1 / -1; height: 12px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+/* Шаги — одна величина на убыль, а не разные ряды: один цвет. */
+.funnel-bar i { display: block; height: 100%; border-radius: 4px; background: var(--series-1); transform-origin: left; }
+
+/* Тепловая карта: один оттенок, пять ступеней от фона к --series-1.
+   Ступени — смесь с фоном, поэтому тёмная тема получает свои сами. */
+.heat-wrap { overflow-x: auto; }
+.heat { display: grid; grid-template-columns: 28px repeat(24, minmax(16px, 1fr)); gap: 4px; min-width: 560px; }
+.heat-h { font-size: var(--fs-12); color: var(--text-3); text-align: left; }
+.heat-d { font-size: var(--fs-12); color: var(--text-2); align-self: center; }
+.heat-cell { display: block; height: 20px; border-radius: 4px; background: var(--surface-2); }
+.heat-cell.l1 { background: color-mix(in srgb, var(--series-1) 22%, var(--surface-2)); }
+.heat-cell.l2 { background: color-mix(in srgb, var(--series-1) 45%, var(--surface-2)); }
+.heat-cell.l3 { background: color-mix(in srgb, var(--series-1) 70%, var(--surface-2)); }
+.heat-cell.l4 { background: var(--series-1); }
+.heat-legend { display: flex; align-items: center; gap: 4px; margin-top: 12px; flex-wrap: wrap; }
+.heat-legend .heat-cell { width: 12px; height: 12px; border-radius: 2px; }
+
+.ring-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.ring { width: 112px; height: 112px; flex: none; }
+.ring circle { fill: none; stroke-width: 12; }
+.ring-track { stroke: var(--surface-2); }
+.ring-value { stroke: var(--series-3); stroke-linecap: round; }
+.ring text { fill: var(--text); font-size: 20px; font-weight: 600; }
+.ring-text { display: grid; gap: 4px; font-size: var(--fs-14); min-width: 0; flex: 1; }
+
+/* Появление: столбцы растут, полосы тянутся, кольцо дорисовывается. Один раз,
+   из видимого конечного состояния назад — без JS страница уже полная. */
+@media (prefers-reduced-motion: no-preference) {
+  .chart-bars .bar-col { animation: bar-rise var(--dur-slow) var(--ease-out) both; transform-box: fill-box; transform-origin: bottom; }
+  .rank-track i, .funnel-bar i { animation: bar-grow 600ms var(--ease-out) both; }
+  .ring-value { animation: ring-draw 900ms var(--ease-out) both; }
+}
+@keyframes bar-rise { from { transform: scaleY(0); } }
+@keyframes bar-grow { from { transform: scaleX(0); } }
+@keyframes ring-draw { from { stroke-dasharray: 0 100; } }
+@media (max-width: 640px) {
+  .period-switch { width: 100%; justify-content: space-between; }
+  .period-switch a { padding: 4px 8px; }
+  /* Плитки — по две в ряд: по одной четыре числа занимали весь экран. */
+  .bento > .kpi-tile { grid-column: span 6; padding: 16px; }
+  .kpi-tile .kpi-value { font-size: var(--fs-28); }
+  /* График не сжимается до нечитаемых подписей — листается вбок. */
+  .chart-bars { overflow-x: auto; }
+  .chart-bars svg { min-width: 560px; }
+  .hide-narrow { display: none; }
+}
+
 /* ---------- Разное ---------- */
 .grid-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
@@ -1725,7 +1798,6 @@ table.table { width: 100%; border-collapse: collapse; font-size: var(--fs-14); }
 @media (max-width: 640px) { .grid-2, .grid-3 { grid-template-columns: minmax(0, 1fr); } }
 /* Числовое поле не должно растягиваться на всю колонку — «10» в поле
    шириной 500px выглядит нелепо и мешает читать форму */
-.input-num { max-width: 160px; }
 .stack > * + * { margin-top: 12px; }
 .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .row-between { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
@@ -1734,24 +1806,21 @@ table.table { width: 100%; border-collapse: collapse; font-size: var(--fs-14); }
    инлайн обязателен), потому что утилит было шесть. Значения — по шкале --s-*. */
 .mt-4 { margin-top: var(--s-1); } .mt-8 { margin-top: var(--s-2); }
 .mt-12 { margin-top: var(--s-3); } .mt-16 { margin-top: var(--s-4); }
-.mt-24 { margin-top: var(--s-6); } .mt-32 { margin-top: var(--s-8); }
+.mt-24 { margin-top: var(--s-6); }
 .mb-0 { margin-bottom: 0; } .mb-4 { margin-bottom: var(--s-1); }
 .mb-8 { margin-bottom: var(--s-2); } .mb-12 { margin-bottom: var(--s-3); }
 .mb-16 { margin-bottom: var(--s-4); } .mb-24 { margin-bottom: var(--s-6); }
 .gap-4 { gap: var(--s-1); } .gap-8 { gap: var(--s-2); }
-.gap-12 { gap: var(--s-3); } .gap-16 { gap: var(--s-4); }
 .pad-16 { padding: var(--s-4) 0; }
-.w-100 { width: 100%; }
 /* flex:1 без min-width:0 не даёт тексту сжиматься — в вёрстке они всегда парой */
 .flex-1 { flex: 1; min-width: 0; }
-.flex-none { flex: none; }
 .text-center { text-align: center; }
 .text-right { text-align: right; }
-.fs-12 { font-size: var(--fs-12); } .fs-13 { font-size: var(--fs-13); }
+.fs-13 { font-size: var(--fs-13); }
 .fs-18 { font-size: var(--fs-18); } .fs-22 { font-size: var(--fs-22); }
 .fs-28 { font-size: var(--fs-28); }
 .break-any { overflow-wrap: anywhere; }
-.fw-400 { font-weight: 400; } .fw-500 { font-weight: 500; }
+.fw-400 { font-weight: 400; }
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .pre-wrap { white-space: pre-wrap; }
 .pointer { cursor: pointer; }
@@ -1816,7 +1885,6 @@ table.table { width: 100%; border-collapse: collapse; font-size: var(--fs-14); }
    красилось в обычный цвет с v4.6. Оставлено одно имя, то, которым пишут. */
 .text-warning { color: var(--warning); } .text-success { color: var(--success); }
 .nowrap { white-space: nowrap; }
-.mx-auto { margin-left: auto; margin-right: auto; }
 /* Сетка прав: клетки узкие, галочка по центру — раскладка читается разом.
    Дальше — слой карточки роли из передачи дизайна (patch.css, блоки 2–7).
    Единственное изменённое правило во всём слое — ширина клетки ниже. */
@@ -2140,8 +2208,6 @@ input:focus-visible + .perm-box { box-shadow: var(--focus); }
 .choices-seg .choice-title { white-space: nowrap; }
 /* Образцы узора фона. */
 .pattern-sample { display: block; width: 100%; height: 34px; border-radius: 6px; border: 1px solid var(--line); background-color: var(--surface-2); }
-.ps-grid { background-image: repeating-linear-gradient(0deg, var(--line-strong) 0 1px, transparent 1px 8px), repeating-linear-gradient(90deg, var(--line-strong) 0 1px, transparent 1px 8px); }
-.ps-lines { background-image: repeating-linear-gradient(-45deg, var(--line-strong) 0 1px, transparent 1px 6px); }
 .choice-title { font-size: var(--fs-13); font-weight: 500; color: var(--text); overflow-wrap: anywhere; }
 .choice-hint { font-size: var(--fs-12); color: var(--text-3); line-height: 1.35; }
 /* Варианты строками — для узкой колонки: плотнее, подпись над пояснением.

@@ -11,7 +11,7 @@ $n = ['email' => 1, 'code' => 2, 'profile' => $steps][$step] ?? 1;
 $inv = App\Core\Signup::inviteFromRequest();
 $keep = Resume::field() . ($inv !== null ? '<input type="hidden" name="invite" value="' . esc($inv['token']) . '">' : ''); ?>
 <?php if ($client): ?>
-<?php /* Та же шапка, что на «Вход» (v4.98): вкладки переключаются без нового
+<?php /* Та же шапка, что на «Вход» (v5.3.1): вкладки переключаются без нового
          документа, и шапка не должна прыгать. */ ?>
 <?= auth_portal_head($client, t('register.context')) ?>
 <?php endif; ?>

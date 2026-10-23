@@ -127,8 +127,8 @@ try {
         && !preg_match('~\.is-popup \.auth-brandline \{[^}]*justify-content: center~', $css),
         'знак в окне — слева, как над основной формой');
     ok(str_contains($css, 'html[data-frame-origin] body, html[data-frame-origin] .auth-wrap { min-height: 0; }')
-        && str_contains($js, 'toPortal({ state: \'size\', h: wrap ? Math.ceil(wrap.getBoundingClientRect().height)')
-        && str_contains($sso, 'Math.min(Math.max(d.h, 360), innerHeight - 32)'),
+        && str_contains($js, 'toPortal({ state: \'size\', h: w ? Math.ceil(w.getBoundingClientRect().height)')
+        && str_contains($sso, 'Math.min(Math.max(d.h, 360), innerHeight - modal.top - 16)'),
         'окно по высоте содержимого — и растёт, и сжимается');
 } finally {
     foreach ($was as $k => $v) $v === null ? Setting::delete($k) : Setting::set($k, (string)$v);
