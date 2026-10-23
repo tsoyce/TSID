@@ -20,75 +20,252 @@ use App\Models\User;
 /** Регистрация, подтверждение почты, восстановление и установка пароля. */
 final class RegistrationController
 {
+    /*
+     * Регистрация по шагам (v4.96): почта → код из письма → имя и пароль.
+     *
+     * Было: одна форма из четырёх полей, аккаунт заводился сразу, а почту
+     * подтверждали потом. Боты заполняли форму с чужими адресами — и в базе
+     * копились аккаунты, которых никто не подтвердит. Теперь аккаунт рождается
+     * последним шагом и уже с подтверждённой почтой; до того есть только
+     * запрос в сессии и одноразовый код в письме.
+     *
+     * Шаг с кодом — только когда подтверждение почты включено (настройка
+     * «Регистрация → подтверждать почту»). Выключено — после почты сразу имя:
+     * механизм один, в нём просто нет второго шага.
+     *
+     * Состояние — в сессии: ['email', 'stage' => code|profile, 'token',
+     * 'invite', 'verified', 'at']. Код и ссылка — одна строка одноразовых
+     * токенов без владельца: ссылка — сам токен, код — его хэш в payload.
+     */
+    private const SIGNUP_TTL = 3600;
+
+    /** Запрос регистрации этой сессии, если он ещё живой. */
+    private static function pending(): ?array
+    {
+        $s = $_SESSION['signup'] ?? null;
+        if (!is_array($s) || (int)($s['at'] ?? 0) < time() - self::SIGNUP_TTL) {
+            unset($_SESSION['signup']);
+            return null;
+        }
+        return $s;
+    }
+
+    /** На экран регистрации — с приглашением и ключом возврата, если они есть. */
+    private static function back(): never
+    {
+        $q = array_filter([
+            'invite' => (string)(self::pending()['invite'] ?? \App\Core\Signup::inviteFromRequest()['token'] ?? ''),
+            'rt' => \App\Core\Resume::fromRequest(),
+        ]);
+        redirect('/register' . ($q !== [] ? '?' . http_build_query($q) : ''));
+    }
+
+    private static function render(string $step, array $data = []): never
+    {
+        View::render('auth/register', $data + [
+            'pageTitle' => 'Регистрация',
+            'client' => LoginFlow::pendingClient(),
+            'popup' => LoginFlow::pendingIsPopup(),
+            'step' => $step,
+            'steps' => \App\Core\EmailGate::active() ? 3 : 2,
+            'email' => (string)(self::pending()['email'] ?? ''),
+            'old' => [],
+            'errors' => [],
+            'captcha' => $step === 'email' && \App\Core\Captcha::requiredForRegister(),
+        ], 'layouts/auth');
+    }
+
     public function showRegister(): never
     {
         /* Дверь закрыта и ключа нет — говорим об этом сразу, а не после того,
-           как человек заполнил четыре поля. Приглашение с привязкой к почте
+           как человек начал заполнять. Приглашение с привязкой к почте
            подставляет её в форму: спрашивать адрес, который мы уже знаем, —
            лишний шаг там, где мы шаги убираем. */
         $invite = \App\Core\Signup::inviteFromRequest();
-        if (!\App\Core\Signup::open() && $invite === null) {
+        $pending = self::pending();
+        if (!\App\Core\Signup::open() && $invite === null && $pending === null) {
             View::render('auth/register_closed', [
                 'pageTitle' => t('Регистрация закрыта'),
                 'client' => LoginFlow::pendingClient(),
             ], 'layouts/auth');
         }
-        View::render('auth/register', [
-            'pageTitle' => 'Регистрация',
-            'client' => LoginFlow::pendingClient(),
-            'popup' => LoginFlow::pendingIsPopup(),
-            'old' => ['email' => (string)($invite['payload']['email'] ?? '')],
-            'errors' => [],
-        ], 'layouts/auth');
+        if ($pending !== null) self::render((string)$pending['stage']);
+        self::render('email', ['old' => ['email' => (string)($_SESSION['signup_retry'] ?? $invite['payload']['email'] ?? '')]]);
     }
 
+    /** Шаг 1: почта. */
     public function doRegister(): never
     {
         RateLimiter::guard('register:ip:' . RateLimiter::ipKey(), 3, 3600);
-        $old = [
-            'first_name' => trim((string)($_POST['first_name'] ?? '')),
-            'last_name' => trim((string)($_POST['last_name'] ?? '')),
-            'email' => mb_strtolower(trim((string)($_POST['email'] ?? ''))),
-        ];
-        $password = (string)($_POST['password'] ?? '');
-        $errors = [];
+        $email = mb_strtolower(trim((string)($_POST['email'] ?? '')));
+        $fail = static fn(string $why) => self::render('email', ['old' => ['email' => $email], 'errors' => ['email' => $why]]);
         /* v4.95: боты регистрировались с браузеров, которых у людей давно нет, —
            64 из 64, а у людей ни разу (см. App\Core\BotSignal). Отказ до всего
-           остального: аккаунт не заводится и письмо чужому ящику не уходит. */
+           остального: письмо чужому ящику не уходит. */
         $outdated = \App\Core\BotSignal::refuseOutdated() ? \App\Core\BotSignal::outdated(request_ua()) : null;
         if ($outdated !== null) {
             Audit::log('register.refused', ['actor' => null, 'meta' => ['why' => $outdated]]);
-            View::render('auth/register', [
-                'pageTitle' => 'Регистрация',
-                'client' => LoginFlow::pendingClient(),
-                'popup' => LoginFlow::pendingIsPopup(),
-                'old' => $old,
-                'errors' => ['form' => t('Ваш браузер устарел (:b) — с него зарегистрироваться не получится. Обновите браузер или откройте эту страницу в другом.', ['b' => $outdated])],
-            ], 'layouts/auth');
+            self::render('email', ['old' => ['email' => $email],
+                'errors' => ['form' => t('Ваш браузер устарел (:b) — с него зарегистрироваться не получится. Обновите браузер или откройте эту страницу в другом.', ['b' => $outdated])]]);
+        }
+        /* v4.96: переключатель «Требовать при регистрации» был в настройках с
+           v4.0, а регистрация его не спрашивала — включённый, он не делал ничего. */
+        if (\App\Core\Captcha::requiredForRegister() && !\App\Core\Captcha::verify((string)($_POST['captcha'] ?? ''))) {
+            self::render('email', ['old' => ['email' => $email], 'errors' => ['form' => t('Проверка не пройдена. Попробуйте ещё раз.')]]);
         }
         /* Проверяем на отправке тоже, а не только при показе формы: форму
            присылают и мимо браузера, а закрытая дверь, которую открывает
            лишний POST, — не закрытая дверь. */
-        if (!\App\Core\Signup::allowed($old['email'])) {
-            $errors['email'] = t('Регистрация закрыта. Нужна ссылка-приглашение, а если она у вас есть — откройте её целиком: приглашение может быть выдано на другой адрес.');
+        if (!\App\Core\Signup::allowed($email)) {
+            $fail(t('Регистрация закрыта. Нужна ссылка-приглашение, а если она у вас есть — откройте её целиком: приглашение может быть выдано на другой адрес.'));
         }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $fail(t('Похоже, в адресе опечатка.'));
+        /* Ограничение по домену — только для самостоятельной регистрации.
+           Приглашение, импорт, SCIM и API его не спрашивают: там аккаунт
+           заводит хозяин установки, и он уже решил. */
+        if (!\App\Core\EmailDomains::allows($email)) $fail(\App\Core\EmailDomains::refusal());
+        unset($_SESSION['signup_retry']);
+        $invite = (string)(\App\Core\Signup::inviteFromRequest()['token'] ?? '');
+        $gated = \App\Core\EmailGate::active();
+        $taken = User::emailTaken($email);
+        /* Антиперебор: занятый адрес не называем занятым — владельцу уходит
+           письмо «кто-то пытался зарегистрироваться», а на экране то же, что
+           у всех: «введите код». Код не подойдёт: его нет. */
+        if ($taken) {
+            $existing = User::findByEmail($email);
+            if ($existing) {
+                Mailer::send($email, t('Попытка регистрации в :app', ['app' => Setting::appName()]), 'register_existing', [
+                    'name' => user_name($existing),
+                ]);
+            }
+            if (!$gated) {
+                Flash::success('Проверьте почту: мы отправили письмо со следующим шагом.');
+                redirect('/login');
+            }
+        }
+        $_SESSION['signup'] = ['email' => $email, 'stage' => $gated ? 'code' : 'profile', 'token' => null,
+            'invite' => $invite ?: null, 'verified' => false, 'at' => time()];
+        if ($gated && !$taken) self::sendCode();
+        self::back();
+    }
+
+    /** Письмо с кодом и ссылкой; прежний запрос этой сессии гаснет. */
+    private static function sendCode(): void
+    {
+        $s = self::pending();
+        if ($s === null) return;
+        if (!empty($s['token'])) {
+            $old = OneTimeToken::peek((string)$s['token'], 'email_code');
+            if ($old !== null) OneTimeToken::claim((int)$old['id']);
+        }
+        $code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $token = OneTimeToken::issue(null, 'email_code', [
+            'email' => $s['email'], 'code' => \App\Core\Crypto::hashToken($s['email'] . ':' . $code),
+            'invite' => $s['invite'],
+        ]);
+        $_SESSION['signup']['token'] = $token;
+        Mailer::sendLetter((string)$s['email'], 'verify_code', [
+            'name' => '', 'code' => $code, 'url' => base_url('/register/continue/' . $token),
+        ]);
+    }
+
+    /** Шаг 2: код из письма. */
+    public function code(): never
+    {
+        $s = self::pending();
+        if ($s === null || $s['stage'] !== 'code') self::back();
+        /* Шесть цифр — миллион вариантов. Десять попыток за четверть часа на
+           запрос и тридцать на адрес машины: опечатка проходит, перебор нет. */
+        RateLimiter::guard('signup:code:' . substr(hash('sha256', (string)$s['email']), 0, 16), 10, 900);
+        RateLimiter::guard('signup:code:ip:' . RateLimiter::ipKey(), 30, 900);
+        $code = (string)preg_replace('~\D~', '', (string)($_POST['code'] ?? ''));
+        $row = !empty($s['token']) ? OneTimeToken::peek((string)$s['token'], 'email_code') : null;
+        if ($row !== null && $code !== ''
+            && hash_equals((string)($row['payload']['code'] ?? ''), \App\Core\Crypto::hashToken($s['email'] . ':' . $code))
+            && OneTimeToken::claim((int)$row['id'])) {
+            $_SESSION['signup'] = ['stage' => 'profile', 'verified' => true, 'token' => null, 'at' => time()] + $s;
+            self::back();
+        }
+        Audit::log('email.code_fail', ['actor' => null, 'meta' => ['signup' => true]]);
+        Flash::error(t('Код не подошёл. Нужен код из последнего письма — прежние гаснут, когда приходит новый.'));
+        self::back();
+    }
+
+    /** Прислать код ещё раз. */
+    public function resend(): never
+    {
+        $s = self::pending();
+        if ($s === null || $s['stage'] !== 'code') self::back();
+        RateLimiter::guard('signup:resend:' . substr(hash('sha256', (string)$s['email']), 0, 16), 5, 3600);
+        if (!User::emailTaken((string)$s['email'])) self::sendCode();
+        Flash::success(t('Отправили ещё раз. Загляните и в «Спам» — туда такие письма попадают чаще всего.'));
+        self::back();
+    }
+
+    /** Другой адрес: назад к первому шагу, с прежним адресом в поле — поправить опечатку. */
+    public function restart(): never
+    {
+        $s = self::pending();
+        if ($s !== null && !empty($s['token'])) {
+            $row = OneTimeToken::peek((string)$s['token'], 'email_code');
+            if ($row !== null) OneTimeToken::claim((int)$row['id']);
+        }
+        $_SESSION['signup_retry'] = (string)($s['email'] ?? '');
+        unset($_SESSION['signup']);
+        self::back();
+    }
+
+    /**
+     * GET /register/continue/{token} — ссылка из письма. Только кнопка: ссылку
+     * открывают и сканеры почты, и превью мессенджеров (см. showVerifyEmail).
+     * Открыть её можно и в другом браузере — регистрация продолжится там.
+     */
+    public function showContinue(string $token): never
+    {
+        if (OneTimeToken::peek($token, 'email_code') === null) {
+            Flash::error(t('Ссылка устарела. Начните регистрацию заново — это одно поле.'));
+            redirect('/register');
+        }
+        View::render('auth/confirm', [
+            'pageTitle' => 'Регистрация',
+            'title' => t('Подтвердите почту'),
+            'lead' => t('Остался один шаг — имя и пароль.'),
+            'button' => t('Подтвердить'),
+            'action' => '/register/continue/' . $token,
+        ], 'layouts/auth');
+    }
+
+    public function continueByLink(string $token): never
+    {
+        $row = OneTimeToken::consume($token, 'email_code');
+        $email = (string)($row['payload']['email'] ?? '');
+        if ($row === null || $email === '') {
+            Flash::error(t('Ссылка устарела. Начните регистрацию заново — это одно поле.'));
+            redirect('/register');
+        }
+        $invite = $row['payload']['invite'] ?? null;
+        $_SESSION['signup'] = ['email' => $email, 'stage' => 'profile', 'token' => null,
+            'invite' => is_string($invite) && $invite !== '' ? $invite : null, 'verified' => true, 'at' => time()];
+        self::back();
+    }
+
+    /** Шаг 3: имя и пароль — и только теперь аккаунт. */
+    public function finish(): never
+    {
+        $s = self::pending();
+        if ($s === null || $s['stage'] !== 'profile') self::back();
+        $email = (string)$s['email'];
+        $old = [
+            'first_name' => trim((string)($_POST['first_name'] ?? '')),
+            'last_name' => trim((string)($_POST['last_name'] ?? '')),
+        ];
+        $password = (string)($_POST['password'] ?? '');
+        $errors = [];
         if ($old['first_name'] === '') $errors['first_name'] = t('Как к вам обращаться?');
-        if (!filter_var($old['email'], FILTER_VALIDATE_EMAIL)) {
-            $errors['email'] = 'Похоже, в адресе опечатка.';
-        } elseif (!\App\Core\EmailDomains::allows($old['email'])) {
-            /* Ограничение по домену — только для самостоятельной регистрации.
-               Приглашение, импорт, SCIM и API его не спрашивают: там аккаунт
-               заводит хозяин установки, и он уже решил. */
-            $errors['email'] = \App\Core\EmailDomains::refusal();
-        }
         $pwError = \App\Core\PasswordPolicy::check($password);
-        if ($pwError !== null) {
-            $errors['password'] = $pwError;
-        }
-        /* Согласие — явными галочками, как на экране соцвхода. До v4.2 здесь
-           стояла пассивная строка «создавая аккаунт, вы принимаете…»: клик она
-           экономила, но согласием не является, и с обычной регистрацией
-           расходилась с соцвходом, где галочки были с v3.9. */
+        if ($pwError !== null) $errors['password'] = $pwError;
+        /* Согласие — явными галочками, как на экране соцвхода (v4.2): согласие,
+           проставленное за человека, — не согласие. */
         $docs = \App\Core\Legal::requiringConsent();
         $accepted = (array)($_POST['accept'] ?? []);
         foreach (array_keys($docs) as $key) {
@@ -97,64 +274,57 @@ final class RegistrationController
                 break;
             }
         }
-        // Антиперебор: занятый email не палим — говорим то же самое, но письмом
-        $emailTaken = $errors === [] && User::emailTaken($old['email']);
-        if ($errors !== []) {
-            View::render('auth/register', [
-                'pageTitle' => 'Регистрация',
-                'client' => LoginFlow::pendingClient(),
-                'popup' => LoginFlow::pendingIsPopup(),
-                'old' => $old, 'errors' => $errors,
-            ], 'layouts/auth');
-        }
-        if ($emailTaken) {
-            Flash::success('Проверьте почту: мы отправили письмо со следующим шагом.');
-            $existing = User::findByEmail($old['email']);
-            if ($existing) {
-                Mailer::send($old['email'], t('Попытка регистрации в :app', ['app' => Setting::appName()]), 'register_existing', [
-                    'name' => user_name($existing),
-                ]);
-            }
+        if ($errors !== []) self::render('profile', ['old' => $old, 'errors' => $errors]);
+        /* Пока человек вводил имя, адрес мог занять другой — тем же путём или
+           администратор. Второго аккаунта на одну почту не будет. */
+        if (User::emailTaken($email)) {
+            unset($_SESSION['signup']);
+            Flash::error(t('Аккаунт с этой почтой уже есть — войдите в него.'));
             redirect('/login');
         }
+        /* Приглашение — из запроса регистрации: на третьем шаге его в адресе
+           уже может не быть (ссылка из письма открыта в другом браузере). */
+        if (!empty($s['invite'])) $_POST['invite'] = $s['invite'];
+        if (!\App\Core\Signup::allowed($email)) {
+            unset($_SESSION['signup']);
+            Flash::error(t('Регистрация закрыта. Нужна ссылка-приглашение, а если она у вас есть — откройте её целиком: приглашение может быть выдано на другой адрес.'));
+            redirect('/register');
+        }
 
+        $verified = !empty($s['verified']);
         $fields = [
-            'email' => $old['email'],
+            'email' => $email,
             'first_name' => $old['first_name'],
             'last_name' => $old['last_name'] ?: null,
             'password_hash' => password_hash($password, PASSWORD_ARGON2ID),
-            'status' => 'pending',
+            'status' => $verified ? 'active' : 'pending',
+            'email_verified_at' => $verified ? now() : null,
             /* Язык интерфейса, в котором человек регистрировался (v4.74): на нём
-               придёт письмо с кодом и все следующие. */
+               придут все следующие письма. */
             'locale' => \App\Core\Lang::current(),
         ];
-        /* Подтверждение почты обязательно (v4.72) — флаг только у тех, кто
-           заведён регистрацией сейчас. На отставшей схеме колонки нет: такая
-           установка живёт по-старому, а не падает на каждой регистрации. */
-        $gated = \App\Core\EmailGate::active() && \App\Core\DB::columnExists('users', 'email_gate');
-        if ($gated) $fields['email_gate'] = 1;
         $uid = User::create($fields);
+        unset($_SESSION['signup']);
         \App\Core\Legal::record($uid, array_keys($docs));
         \App\Core\Signup::grantDefaultRole($uid);
         /* Приглашение гасим только теперь: аккаунт уже есть. Погасив раньше, мы
-           сожгли бы ключ на любой ошибке в форме — и человек остался бы перед
-           закрытой дверью с недействительной ссылкой. */
+           сожгли бы ключ на любой ошибке в форме. */
         \App\Core\Signup::consumeInvite();
-        Audit::log('register', ['actor' => $uid, 'on' => $uid]);
+        Audit::log('register', ['actor' => $uid, 'on' => $uid, 'meta' => $verified ? ['email' => 'verified'] : null]);
         \App\Core\WebhookDispatcher::emit('user.created', [
-            'sub' => User::find($uid)['public_id'], 'email' => $old['email'], 'name' => $old['first_name'],
+            'sub' => User::find($uid)['public_id'], 'email' => $email, 'name' => $old['first_name'],
         ]);
         \App\Core\AdminNotify::say('user.registered',
-            fn() => t('Новый аккаунт: :who.', ['who' => $old['email']]),
+            fn() => t('Новый аккаунт: :who.', ['who' => $email]),
             fn() => [t('Имя') => trim($old['first_name'] . ' ' . $old['last_name']),
              t('Когда') => fmt_dt(now()), t('IP') => ip_str(ip_bin())]);
-        /* Дверь закрыта до подтверждения: письмо (ссылкой или кодом) и экран
-           ожидания вместо входа. */
-        if ($gated) \App\Core\EmailGate::stop(User::find($uid), false);
-        $this->sendVerifyEmail(User::find($uid));
-        $user = User::find($uid);
-        Flash::success('Аккаунт создан. Мы отправили письмо — подтвердите почту.');
-        LoginFlow::complete($user, false, 'login.success');
+        /* Подтверждение выключено — письмо со ссылкой уходит как раньше, а
+           вход сразу: почту человек подтвердит, когда дойдёт до неё. */
+        if (!$verified) {
+            $this->sendVerifyEmail(User::find($uid));
+            Flash::success('Аккаунт создан. Мы отправили письмо — подтвердите почту.');
+        }
+        LoginFlow::complete(User::find($uid), false, 'login.success');
     }
 
     private function sendVerifyEmail(array $user): void
@@ -296,12 +466,19 @@ final class RegistrationController
 
     public function showRecover(): never
     {
-        View::render('auth/recover', ['pageTitle' => 'Восстановление доступа'], 'layouts/auth');
+        View::render('auth/recover', ['pageTitle' => 'Восстановление доступа',
+            'captcha' => \App\Core\Captcha::requiredForRecover()], 'layouts/auth');
     }
 
     public function doRecover(): never
     {
         RateLimiter::guard('recover:ip:' . RateLimiter::ipKey(), 3, 3600);
+        /* v4.96: «Требовать при восстановлении» было в настройках, а экран его
+           не спрашивал — как и регистрация. */
+        if (\App\Core\Captcha::requiredForRecover() && !\App\Core\Captcha::verify((string)($_POST['captcha'] ?? ''))) {
+            Flash::error(t('Проверка не пройдена. Попробуйте ещё раз.'));
+            redirect('/recover');
+        }
         $email = mb_strtolower(trim((string)($_POST['email'] ?? '')));
         if (filter_var($email, FILTER_VALIDATE_EMAIL)
             && RateLimiter::hit('recover:email:' . substr(hash('sha256', $email), 0, 16), 3, 3600)) {

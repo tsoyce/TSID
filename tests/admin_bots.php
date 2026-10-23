@@ -41,7 +41,8 @@ $nets = ['192.0.2.0/24', '203.0.113.0/24', '198.51.100.0/24'];
 $audit = [];
 
 $was = [];
-foreach (['policy.signup_open' => '1', 'policy.refuse_outdated' => '1', 'policy.welcome_screen' => '0'] as $k => $v) {
+foreach (['policy.signup_open' => '1', 'policy.refuse_outdated' => '1', 'policy.welcome_screen' => '0',
+          'policy.verify_email' => 'off'] as $k => $v) {
     $was[$k] = Setting::get($k);
     Setting::set($k, $v);
 }
@@ -107,12 +108,9 @@ try {
         DB::run("DELETE FROM {rate_limits} WHERE bucket LIKE 'register:%'");
         $jar = sys_get_temp_dir() . '/admin-bots-reg.txt';
         @unlink($jar);
-        [, $rp] = http('GET', SSO . '/register', [], ['User-Agent: ' . $ua], $jar);
-        preg_match_all('~name="accept\[\]" value="([^"]+)"~', $rp, $am);
-        $r = http('POST', SSO . '/register', ['_csrf' => csrfOf($rp), 'first_name' => 'Проба', 'email' => $email,
-            'password' => 'very-long-password-1', 'accept' => $am[1] ?? []], ['User-Agent: ' . $ua], $jar);
+        [$st, , $id, $body] = signup(SSO, $email, [], $jar, ['User-Agent: ' . $ua]);
         @unlink($jar);
-        return [$r[0], $r[1], (int)DB::val('SELECT id FROM {users} WHERE email = ?', [$email])];
+        return [$st, $body, $id];
     };
     $refusedBefore = (int)DB::val("SELECT COUNT(*) FROM {audit_log} WHERE event = 'register.refused'");
     [$st, $body, $id] = $signup("old-$stamp@example.com", OLD_UA[0]);

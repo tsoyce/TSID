@@ -431,20 +431,19 @@ echo "═══ 10. Регистрация + подтверждение почт
 $csrf = csrfOf($regPage);
 $email = 'user' . time() . '@test.local';
 
-/* Галочки согласия обязательны: сначала пробуем без них — форма должна отказать. */
-preg_match_all('~name="accept\[\]" value="([^"]+)"~', $regPage, $am);
+/* Галочки согласия обязательны: сначала пробуем без них — форма должна отказать.
+   С v4.96 регистрация по шагам, галочки — на последнем, вместе с именем. */
+$noAgreeJar = __DIR__ . '/tmp/noagree-jar.txt';
+@unlink($noAgreeJar);
+[$st, , $noAgreeId, $noAgree] = signup(SSO, 'noagree' . time() . '@test.local', ['first_name' => 'Пётр', 'accept' => []], $noAgreeJar);
+[, $finishPage] = http('GET', SSO . '/register', [], [], $noAgreeJar);
+preg_match_all('~name="accept\[\]" value="([^"]+)"~', $finishPage, $am);
 $acceptKeys = $am[1] ?? [];
 ok($acceptKeys !== [], 'в форме регистрации есть галочки согласия');
-[$st, $noAgree] = http('POST', SSO . '/register', [
-    '_csrf' => $csrf, 'first_name' => 'Пётр', 'email' => 'noagree' . time() . '@test.local',
-    'password' => 'very-long-password-1',
-]);
-ok($st === 200 && str_contains($noAgree, 'нужно принять'), 'без галочек аккаунт не создаётся');
+ok($st === 200 && $noAgreeId === 0 && str_contains($noAgree, 'нужно принять'), 'без галочек аккаунт не создаётся');
+@unlink($noAgreeJar);
 
-[$st, , $loc] = http('POST', SSO . '/register', [
-    '_csrf' => $csrf, 'first_name' => 'Пётр', 'last_name' => 'Тестов',
-    'email' => $email, 'password' => 'very-long-password-1', 'accept' => $acceptKeys,
-]);
+[$st, $loc] = signup(SSO, $email, ['first_name' => 'Пётр', 'last_name' => 'Тестов']);
 ok($st === 302 && str_contains($loc, '/profile'), 'регистрация сразу логинит (pending)');
 
 /* Ошибка поля показывается У ПОЛЯ и красит его. Раньше `is-invalid` ставили
@@ -454,10 +453,7 @@ ok($st === 302 && str_contains($loc, '/profile'), 'регистрация сра
 
    Берём опечатку в адресе, а не занятый адрес: занятый нарочно не подсвечивается
    — иначе форма регистрации становится проверялкой «есть у вас такой человек». */
-[, $badPage] = http('POST', SSO . '/register', [
-    '_csrf' => $csrf, 'first_name' => 'Пётр', 'email' => 'не-адрес',
-    'password' => 'very-long-password-1', 'accept' => $acceptKeys,
-]);
+[, $badPage] = http('POST', SSO . '/register', ['_csrf' => $csrf, 'email' => 'не-адрес']);
 ok((bool)preg_match('~<input class="input is-invalid" type="email" id="email"~', $badPage),
    'ошибка в адресе красит своё поле');
 /* Не строка, а правило: объяснение есть, оно привязано к своему полю и
@@ -479,10 +475,7 @@ ok(preg_match('~id="email"[^>]*aria-describedby="email-error"~', $badPage) === 1
 ok(str_contains($closedPage, 'Регистрация закрыта'),
     'закрытая регистрация встречает отдельным экраном, а не пустой формой');
 $deniedEmail = 'denied' . time() . '@test.local';
-[, $deniedPost] = http('POST', SSO . '/register', [
-    '_csrf' => $csrf, 'first_name' => 'Никто', 'email' => $deniedEmail,
-    'password' => 'very-long-password-1', 'accept' => $acceptKeys,
-]);
+[, , $deniedId] = signup(SSO, $deniedEmail, ['first_name' => 'Никто'], __DIR__ . '/tmp/denied-jar.txt');
 ok(\App\Models\User::findByEmail($deniedEmail) === null,
     'и не пускает даже отправкой формы мимо экрана');
 
@@ -491,17 +484,11 @@ ok(\App\Models\User::findByEmail($deniedEmail) === null,
 $invEmail = 'invited' . time() . '@test.local';
 $inv = \App\Core\Signup::issueInvite($invEmail, null);
 $wrongEmail = 'wrong' . time() . '@test.local';
-http('POST', SSO . '/register', [
-    '_csrf' => $csrf, 'first_name' => 'Чужой', 'email' => $wrongEmail,
-    'password' => 'very-long-password-1', 'accept' => $acceptKeys, 'invite' => $inv['token'],
-]);
+signup(SSO, $wrongEmail, ['first_name' => 'Чужой', 'invite' => $inv['token']], __DIR__ . '/tmp/wrong-jar.txt');
 ok(\App\Models\User::findByEmail($wrongEmail) === null,
     'приглашение на чужой адрес не срабатывает');
 \App\Core\DB::run('DELETE FROM {rate_limits}');
-[$stInv] = http('POST', SSO . '/register', [
-    '_csrf' => $csrf, 'first_name' => 'Званый', 'email' => $invEmail,
-    'password' => 'very-long-password-1', 'accept' => $acceptKeys, 'invite' => $inv['token'],
-]);
+[$stInv] = signup(SSO, $invEmail, ['first_name' => 'Званый', 'invite' => $inv['token']], __DIR__ . '/tmp/invited-jar.txt');
 $invited = \App\Models\User::findByEmail($invEmail);
 ok($invited !== null, 'а на свой — открывает дверь', "st=$stInv");
 ok(\App\Models\OneTimeToken::peek($inv['token'], \App\Core\Signup::INVITE) === null,
@@ -516,10 +503,7 @@ $guestRole = \App\Models\Role::findBySlug('guest')
 \App\Core\Setting::flush();
 \App\Core\DB::run('DELETE FROM {rate_limits}');
 $roleEmail = 'newrole' . time() . '@test.local';
-http('POST', SSO . '/register', [
-    '_csrf' => $csrf, 'first_name' => 'Ролевой', 'email' => $roleEmail,
-    'password' => 'very-long-password-1', 'accept' => $acceptKeys,
-]);
+signup(SSO, $roleEmail, ['first_name' => 'Ролевой'], __DIR__ . '/tmp/role-jar.txt');
 $roleUser = \App\Models\User::findByEmail($roleEmail);
 $gotRoles = $roleUser ? array_column(\App\Models\Role::ofUser((int)$roleUser['id']), 'slug') : [];
 ok(in_array('guest', $gotRoles, true),
@@ -565,14 +549,8 @@ $JAR = __DIR__ . '/tmp/verify-jar.txt';
    Здесь нужен ещё один аккаунт, и это не обход защиты, а сброс стенда. */
 \App\Core\DB::run('DELETE FROM {rate_limits}');
 
-[, $regPage2] = http('GET', SSO . '/register');
-$rc2 = csrfOf($regPage2);
-preg_match_all('~name="accept\[\]" value="([^"]+)"~', $regPage2, $am2);
 $typo = 'typo' . time() . '@test.local';
-[$st] = http('POST', SSO . '/register', [
-    '_csrf' => $rc2, 'first_name' => 'Опечатка', 'email' => $typo,
-    'password' => 'very-long-password-1', 'accept' => $am2[1] ?? [],
-]);
+[$st] = signup(SSO, $typo, ['first_name' => 'Опечатка']);
 ok($st === 302, 'завели аккаунт с «неудачным» адресом', "st=$st");
 
 [, $profilePage] = http('GET', SSO . '/profile');

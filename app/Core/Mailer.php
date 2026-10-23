@@ -140,7 +140,11 @@ final class Mailer
         if ($driver === 'log') {
             $dir = SSO_ROOT . '/storage/logs/mail';
             if (!is_dir($dir)) mkdir($dir, 0750, true);
-            $fname = $dir . '/' . gmdate('Ymd-His') . '-' . substr(md5($to . $subject . microtime()), 0, 6) . '.eml';
+            /* Микросекунды в имени (v4.96): имя — порядок отправки. Два письма в
+               одну секунду (попытка регистрации и код) раньше различались только
+               случайным хвостом, и «последнее письмо» выходило наугад. */
+            $us = sprintf('%06d', (int)(fmod(microtime(true), 1) * 1e6));
+            $fname = $dir . '/' . gmdate('Ymd-His') . '-' . $us . '-' . substr(md5($to . $subject . microtime()), 0, 6) . '.eml';
             $eml = "To: $to\r\nSubject: $subject\r\nContent-Type: text/html; charset=utf-8\r\n\r\n$html";
             file_put_contents($fname, $eml);
             return;

@@ -64,6 +64,13 @@ $router->post('/magic/{token}', [AuthController::class, 'magicConfirm']);
 $router->get('/captcha.png', [AuthController::class, 'captchaImage'], ['api']);
 $router->get('/register', [RegistrationController::class, 'showRegister']);
 $router->post('/register', [RegistrationController::class, 'doRegister']);
+/* Регистрация по шагам (v4.96): почта → код → имя и пароль. */
+$router->post('/register/code', [RegistrationController::class, 'code']);
+$router->post('/register/resend', [RegistrationController::class, 'resend']);
+$router->post('/register/restart', [RegistrationController::class, 'restart']);
+$router->post('/register/finish', [RegistrationController::class, 'finish']);
+$router->get('/register/continue/{token}', [RegistrationController::class, 'showContinue']);
+$router->post('/register/continue/{token}', [RegistrationController::class, 'continueByLink']);
 /* Подтверждения по ссылке из письма: GET показывает кнопку, действие — POST.
    Сканеры ссылок ходят по GET и гасили бы одноразовый токен за человека. */
 /* Почта не подтверждена: прислать письмо ещё раз или поменять адрес. Оба

@@ -8,5 +8,6 @@
   <?= field_text('email', t('common.email'), '', [
         'id' => 'email', 'type' => 'email', 'autocomplete' => 'email',
         'required' => true, 'autofocus' => true, 'hint' => t('recover.hint')]) ?>
+  <?php if (!empty($captcha)): ?><?= captcha_field('captcha-rec', t('Проверка от ботов: так владелец сервиса настроил восстановление.')) ?><?php endif; ?>
   <button class="btn btn-primary btn-block" type="submit"><?= esc(t('recover.submit')) ?></button>
 </form>

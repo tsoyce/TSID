@@ -1062,11 +1062,15 @@ function auth_media_pane(?array $client = null): string
  *
  * $id нужен, потому что на экране входа полей два: у формы со ссылкой и у
  * формы с паролем, а одинаковые id ломают связь label с полем.
+ *
+ * $why — почему проверка тут (v4.96): на входе её вызывают неудачи, на
+ * регистрации и восстановлении — настройка владельца, и объяснение про
+ * «неудачные попытки» там было бы неправдой.
  */
-function captcha_field(string $id = 'captcha'): string
+function captcha_field(string $id = 'captcha', ?string $why = null): string
 {
     $why = '<div class="captcha-why">' . icon('info', 15, 'icon-muted')
-        . '<div>' . esc(t('Проверка появилась после нескольких неудачных попыток и снимется после успешного входа.'))
+        . '<div>' . esc($why ?? t('Проверка появилась после нескольких неудачных попыток и снимется после успешного входа.'))
         . '</div></div>';
 
     if (\App\Core\Captcha::widgetReady()) {

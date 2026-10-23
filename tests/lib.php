@@ -95,3 +95,53 @@ function pageClean(string $body): bool
     return !str_contains($body, 'Fatal error') && !str_contains($body, 'Warning:')
         && !str_contains($body, 'Uncaught') && !str_contains($body, 'Что-то сломалось');
 }
+
+/** Последнее письмо на адрес — темой и раскодированным телом (лог-драйвер почты). */
+function lastMailTo(string $email): string
+{
+    /* По имени: в нём время с микросекундами (v4.96). filemtime — целые
+       секунды, и два письма в одну секунду шли в случайном порядке. */
+    $files = (array)glob(SSO_ROOT . '/storage/logs/mail/*.eml');
+    rsort($files);
+    foreach ($files as $f) {
+        $m = (string)file_get_contents($f);
+        if (stripos($m, 'To: ' . $email) !== false || stripos($m, '<' . $email . '>') !== false) {
+            $subject = preg_match('~^Subject: ([^\r\n]+)~m', $m, $s) ? mb_decode_mimeheader($s[1]) : '';
+            return $subject . "\n" . quoted_printable_decode($m);
+        }
+    }
+    return '';
+}
+
+/**
+ * Регистрация по шагам (v4.96): почта → код из письма, если его спросили →
+ * имя и пароль. Один путь на все батареи: когда форма была одна, каждая
+ * батарея слала её по-своему, и смена формы ломала их поодиночке.
+ *
+ * $fields — поля последнего шага поверх обычных; `invite` едет с первого шага.
+ * Возвращает [статус последнего ответа, Location, id аккаунта или 0, тело].
+ *
+ * @return array{0:int,1:string,2:int,3:string}
+ */
+function signup(string $sso, string $email, array $fields = [], ?string $jar = null, array $headers = []): array
+{
+    $invite = (string)($fields['invite'] ?? '');
+    $q = $invite !== '' ? '?invite=' . urlencode($invite) : '';
+    [, $page] = http('GET', $sso . '/register' . $q, [], $headers, $jar);
+    $r = http('POST', $sso . '/register', ['_csrf' => csrfOf($page), 'email' => $email]
+        + ($invite !== '' ? ['invite' => $invite] : []), $headers, $jar);
+    $id = static fn(): int => (int)\App\Core\DB::val('SELECT id FROM {users} WHERE email = ?', [$email]);
+    if ($r[0] !== 302 || !str_contains($r[2], '/register')) return [$r[0], $r[2], $id(), $r[1]];
+    [, $page] = http('GET', $sso . '/register' . $q, [], $headers, $jar);
+    if (str_contains($page, 'action="/register/code"')) {
+        $code = preg_match('~Код подтверждения: (\d{6})~u', lastMailTo($email), $m) ? $m[1] : '';
+        http('POST', $sso . '/register/code', ['_csrf' => csrfOf($page), 'code' => $code], $headers, $jar);
+        [, $page] = http('GET', $sso . '/register' . $q, [], $headers, $jar);
+    }
+    if (!str_contains($page, 'action="/register/finish"')) return [200, '', $id(), $page];
+    preg_match_all('~name="accept\[\]" value="([^"]+)"~', $page, $am);
+    unset($fields['invite']);
+    $r = http('POST', $sso . '/register/finish', $fields + ['_csrf' => csrfOf($page), 'first_name' => 'Проба',
+        'password' => 'very-long-password-1', 'accept' => $am[1] ?? []], $headers, $jar);
+    return [$r[0], $r[2], $id(), $r[1]];
+}

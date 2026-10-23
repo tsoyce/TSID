@@ -47,31 +47,18 @@ register_shutdown_function(static function () use ($was, &$blockedRules): void {
 });
 DB::run('DELETE FROM {rate_limits}');
 
-$mailDir = SSO_ROOT . '/storage/logs/mail';
-/** Последнее письмо на адрес — раскодированным текстом. */
-function lastMailTo(string $email): string
+/**
+ * Аккаунт, который ждёт подтверждения почты, — и вход в него. С v4.96 форма
+ * регистрации таких не заводит: аккаунт рождается уже подтверждённым. Ждут
+ * подтверждения те, кого завела регистрация до 4.96, — их экран и проверяем.
+ * Возвращает [статус, Location, id].
+ */
+function held(string $email, string $jar): array
 {
-    global $mailDir;
-    $files = (array)glob($mailDir . '/*.eml');
-    usort($files, static fn($a, $b) => filemtime($b) <=> filemtime($a) ?: strcmp($b, $a));
-    foreach ($files as $f) {
-        $m = (string)file_get_contents($f);
-        if (stripos($m, 'To: ' . $email) !== false || stripos($m, '<' . $email . '>') !== false) {
-            $subject = preg_match('~^Subject: ([^\r\n]+)~m', $m, $s) ? mb_decode_mimeheader($s[1]) : '';
-            return $subject . "\n" . quoted_printable_decode($m);
-        }
-    }
-    return '';
-}
-
-/** Регистрация формой. Возвращает [статус, Location, id]. */
-function register(string $email, string $jar): array
-{
-    [, $rp] = http('GET', SSO . '/register', [], [], $jar);
-    preg_match_all('~name="accept\[\]" value="([^"]+)"~', $rp, $am);
-    [$st, , $loc] = http('POST', SSO . '/register', ['_csrf' => csrfOf($rp), 'first_name' => 'Проба',
-        'email' => $email, 'password' => 'very-long-password-1', 'accept' => $am[1] ?? []], [], $jar);
-    return [$st, $loc, (int)DB::val('SELECT id FROM {users} WHERE email = ?', [$email])];
+    $id = User::create(['email' => $email, 'first_name' => 'Проба', 'status' => 'pending', 'email_gate' => 1,
+        'password_hash' => password_hash('very-long-password-1', PASSWORD_ARGON2ID)]);
+    [$st, , $loc] = signIn($email, 'very-long-password-1', $jar);
+    return [$st, $loc, $id];
 }
 
 function signIn(string $email, string $password, string $jar): array
@@ -114,8 +101,8 @@ $gjar = sys_get_temp_dir() . '/guard-code.txt';
 @unlink($gjar);
 $email = "gate$stamp@test.local";
 DB::run('DELETE FROM {users} WHERE email = ?', [$email]);
-[$st, $loc, $gid] = register($email, $gjar);
-ok($st === 302 && str_ends_with($loc, '/verify/wait'), 'после регистрации — экран кода, не кабинет', "$st $loc");
+[$st, $loc, $gid] = held($email, $gjar);
+ok($st === 302 && str_ends_with($loc, '/verify/wait'), 'вход ждущего подтверждения — экран кода, не кабинет', "$st $loc");
 $g = User::find($gid);
 ok((int)($g['email_gate'] ?? 0) === 1 && $g['email_verified_at'] === null, 'аккаунт помечен: до подтверждения не пускать');
 [$st, , $loc] = http('GET', SSO . '/profile', [], [], $gjar);
@@ -143,7 +130,7 @@ $bjar = sys_get_temp_dir() . '/guard-brute.txt';
 @unlink($bjar);
 $bemail = "brute$stamp@test.local";
 DB::run('DELETE FROM {users} WHERE email = ?', [$bemail]);
-[, , $bid] = register($bemail, $bjar);
+[, , $bid] = held($bemail, $bjar);
 $bcode = preg_match('~Код подтверждения: (\d{6})~u', lastMailTo($bemail), $m) ? $m[1] : '';
 $wrong = $bcode === '000000' ? '111111' : '000000';
 for ($i = 0; $i < 10; $i++) {
@@ -169,8 +156,8 @@ $ljar = sys_get_temp_dir() . '/guard-link.txt';
 @unlink($ljar);
 $lemail = "link$stamp@test.local";
 DB::run('DELETE FROM {users} WHERE email = ?', [$lemail]);
-[$st, $loc, $lid] = register($lemail, $ljar);
-ok($st === 302 && str_ends_with($loc, '/verify/wait'), 'после регистрации — экран ожидания', "$st $loc");
+[$st, $loc, $lid] = held($lemail, $ljar);
+ok($st === 302 && str_ends_with($loc, '/verify/wait'), 'вход ждущего — экран ожидания', "$st $loc");
 [, $wait] = http('GET', SSO . '/verify/wait', [], [], $ljar);
 ok(str_contains($wait, 'name="code"'), 'на экране — поле для кода, ссылка из письма тоже годится');
 $lmail = lastMailTo($lemail);

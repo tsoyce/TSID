@@ -3596,4 +3596,16 @@ return [
     'с подсети ещё :n' => ':n more from the subnet',
     'Ваш браузер устарел (:b) — с него зарегистрироваться не получится. Обновите браузер или откройте эту страницу в другом.' => 'Your browser is outdated (:b) — you cannot sign up from it. Update your browser or open this page in another one.',
     'нет сильных признаков' => 'no strong signs',
+    /* v4.96: регистрация по шагам */
+    'Аккаунт с этой почтой уже есть — войдите в него.' => 'An account with this email already exists — sign in to it.',
+    'Имя и пароль — следующим шагом.' => 'Name and password come next.',
+    'Остался один шаг — имя и пароль.' => 'One step left — your name and password.',
+    'Отправили письмо на :email. Введите код из него — или нажмите в письме кнопку.' => 'We sent an email to :email. Enter the code from it — or press the button in the email.',
+    'Прислать код ещё раз' => 'Send the code again',
+    'Пришлём код — убедиться, что почта ваша. Имя и пароль — следующим шагом.' => 'We will send a code to make sure the email is yours. Name and password come next.',
+    'Проверка от ботов: так владелец сервиса настроил восстановление.' => 'A bot check: the service owner has set up recovery this way.',
+    'Проверка от ботов: так владелец сервиса настроил регистрацию.' => 'A bot check: the service owner has set up sign-up this way.',
+    'Ссылка устарела. Начните регистрацию заново — это одно поле.' => 'The link has expired. Start signing up again — it is one field.',
+    'Шаг :n из :of' => 'Step :n of :of',
+    'Изменить' => 'Change',
 ];

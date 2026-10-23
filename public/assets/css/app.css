@@ -1020,6 +1020,18 @@ input[type="file"]::file-selector-button:hover { border-color: var(--text-3); ba
 .auth-divider { display: flex; align-items: center; gap: 12px; color: var(--text-3); font-size: var(--fs-12); margin: 16px 0; }
 .auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-top: 1px solid var(--line); }
 .auth-footer { margin-top: 20px; text-align: center; font-size: var(--fs-13); color: var(--text-2); }
+/* Регистрация по шагам (v4.96): номер шага под вкладками, почта уже
+   введённая — строкой с «Изменить», запасные действия шага с кодом — столбиком. */
+.signup-step { margin: 0 0 12px; }
+.signup-alt { display: grid; gap: 8px; }
+.signup-email {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  contain: inline-size; padding: 4px 4px 4px 12px; border: 1px solid var(--line); border-radius: var(--radius-m); font-size: var(--fs-14);
+}
+/* Длинный адрес — многоточием. Своей ширины плашка не заявляет (contain):
+   иначе адрес целиком распирал колонку входа шире экрана телефона. */
+.signup-email-addr { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.signup-email .btn { flex: none; }
 body.popup .auth-wrap { min-height: 100vh; min-height: 100dvh; padding: 28px 20px; }
 body.popup .auth-card { box-shadow: none; border: 0; }
 body.popup .page-footer { display: none; }
