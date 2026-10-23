@@ -1,5 +1,5 @@
 <?php /**
- * Антифрод (v4.98). $days, $suspects, $refused, $fails, $archived, $archiveTotal,
+ * Антифрод (v5.5). $days, $suspects, $refused, $fails, $archived, $archiveTotal,
  * $blocks, $nets, $summary, $samples, $keepDays. См. FraudController.
  *
  * Сверху — числа плитками с кривой за месяц, каждая ведёт туда, где с этим
@@ -103,7 +103,7 @@ foreach ($summary['signals'] as $code => $n) $signals[BotSignal::signalLabel((st
     <?php foreach ($samples as $s): $act = $s['activity']; ?>
       <tr>
         <td data-label="<?= esc(t('Когда')) ?>" class="hint nowrap"><div class="cell-stack">
-          <span><?= esc(fmt_ago((string)$s['archived_at'])) ?></span>
+          <span><?= esc(fmt_ago((string)$s['created_at'])) ?></span>
           <?php if (!empty($s['registered_at'])): ?><span><?= esc(t('завёлся :d', ['d' => fmt_dt((string)$s['registered_at'])])) ?></span><?php endif; ?>
         </div></td>
         <td data-label="<?= esc(t('Откуда')) ?>" class="hint"><div class="cell-stack">

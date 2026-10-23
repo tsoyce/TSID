@@ -6,13 +6,13 @@ namespace App\Controllers\Admin;
 
 use App\Core\Audit;
 use App\Core\BotSignal;
-use App\Core\DB;
 use App\Core\FraudArchive;
 use App\Core\IpBlock;
+use App\Core\Stats;
 use App\Core\View;
 
 /**
- * /admin/fraud — «Антифрод» (v4.98).
+ * /admin/fraud — «Антифрод» (v5.5).
  *
  * Боты и подбор разбирались на трёх экранах — «Похоже на ботов», «Адреса»,
  * журнал аудита, — и ни один не отвечал на вопрос «что происходит в целом»:
@@ -29,13 +29,12 @@ final class FraudController extends AdminBase
     {
         $this->requirePerm('settings.read');
         $this->requireGlobalAdmin();
-        $since = now_plus(-self::DAYS * 86400);
         View::render('admin/fraud', [
             'pageTitle' => t('Антифрод'),
             'days' => self::DAYS,
             'suspects' => BotSignal::suspectCount(),
-            'refused' => self::perDay('register.refused', $since),
-            'fails' => self::perDay('login.fail', $since),
+            'refused' => self::perDay('register.refused'),
+            'fails' => self::perDay('login.fail'),
             'archived' => FraudArchive::perDay(self::DAYS),
             'archiveTotal' => FraudArchive::count(),
             'blocks' => count(IpBlock::all()),
@@ -65,14 +64,9 @@ final class FraudController extends AdminBase
         exit;
     }
 
-    /** События аудита по дням за окно, старые слева; пустой день — ноль. */
-    private static function perDay(string $event, string $since): array
+    /** События аудита по местным суткам за окно — тем же счётом, что пульт (Stats). */
+    private static function perDay(string $event): array
     {
-        $rows = DB::all('SELECT SUBSTR(created_at, 1, 10) AS d, COUNT(*) AS n FROM {audit_log}
-                         WHERE event = ? AND created_at >= ? GROUP BY SUBSTR(created_at, 1, 10)', [$event, $since]);
-        $by = array_column($rows, 'n', 'd');
-        $out = [];
-        for ($i = self::DAYS - 1; $i >= 0; $i--) $out[] = (int)($by[gmdate('Y-m-d', time() - $i * 86400)] ?? 0);
-        return $out;
+        return array_values(Stats::perDay('audit_log', 'event = ?', [$event], self::DAYS));
     }
 }

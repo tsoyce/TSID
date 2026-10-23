@@ -2826,7 +2826,7 @@ $mutations = [
         'to'    => "",
         'check' => 'tests/admin_bots.php',
     ],
-    /* v4.98: антифрод — оценка риска, архив образцов, раздел. */
+    /* v5.5: антифрод — оценка риска, архив образцов, раздел. */
     [
         'why'   => 'архив снова не учит: подсеть удалённых ботов не признак',
         'file'  => 'app/Core/BotSignal.php',
@@ -2893,8 +2893,8 @@ $mutations = [
     [
         'why'   => 'у архива снова нет срока хранения',
         'file'  => 'app/Core/FraudArchive.php',
-        'from'  => "return DB::run('DELETE FROM {fraud_samples} WHERE archived_at < ?',",
-        'to'    => "return 0 * DB::run('SELECT 1 FROM {fraud_samples} WHERE archived_at < ?',",
+        'from'  => "return DB::run('DELETE FROM {fraud_samples} WHERE created_at < ?',",
+        'to'    => "return 0 * DB::run('SELECT 1 FROM {fraud_samples} WHERE created_at < ?',",
         'check' => 'tests/fraud.php',
     ],
     /* v4.96: регистрация по шагам. */

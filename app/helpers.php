@@ -2009,7 +2009,7 @@ function logs_tabs(string $current): string
     if (App\Core\Auth::isAdmin()) $tabs['requests'] = ['/admin/logs/requests', t('Запросы')];
     $tabs += ['errors' => ['/admin/logs/errors', t('Журнал приложения')], 'mail' => ['/admin/logs/mail', t('Почта')]];
     /* Адреса (v4.95): их видят в журналах и закрывают, глядя на журналы.
-       Антифрод (v4.98) — рядом: сводка над теми же журналами. Не пунктом
+       Антифрод (v5.5) — рядом: сводка над теми же журналами. Не пунктом
        навигации: в доке на 360px пять мест, и все заняты. */
     if (App\Core\Auth::isAdmin() && App\Core\Auth::can('settings.read')) {
         $tabs['fraud'] = ['/admin/fraud', t('Антифрод')];

@@ -3722,7 +3722,7 @@ return [
     'Неудачи' => 'Failures',
     'Неудачных попыток не было' => 'No failed attempts',
     'Раньше' => 'Earlier',
-    /* v4.98: антифрод */
+    /* v5.5: антифрод */
     'Антифрод' => 'Anti-fraud',
     'Архив антифрода, дней' => 'Anti-fraud archive, days',
     'Архив образцов' => 'Sample archive',

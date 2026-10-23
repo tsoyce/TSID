@@ -1,4 +1,4 @@
--- SSO · 030_fraud — архив образцов ботов для антифрода (v4.98).
+-- SSO · 030_fraud — архив образцов ботов для антифрода (v5.5).
 --
 -- Живой случай 23.10: шестьдесят четыре бота удалили пачкой, и от них не
 -- осталось ничего, на чём учиться. Аудит пережил аккаунты, но в нём не
@@ -19,7 +19,7 @@
 
 CREATE TABLE {fraud_samples} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  archived_at DATETIME NOT NULL,
+  created_at DATETIME NOT NULL,
   registered_at DATETIME NULL,
   label VARCHAR(16) NOT NULL,
   net VARCHAR(64) NULL,
@@ -30,6 +30,6 @@ CREATE TABLE {fraud_samples} (
   signals JSON NULL,
   activity JSON NULL,
   PRIMARY KEY (id),
-  KEY ix_fraud_time (archived_at),
+  KEY ix_fraud_time (created_at),
   KEY ix_fraud_net (net)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -49,7 +49,7 @@ final class BotsController extends AdminBase
             redirect('/admin/users/bots');
         }
         $nets = array_values(array_unique(array_filter(array_column($pick, 'net'))));
-        /* Образцы — до удаления (v4.98): журнал активности уходит вместе с
+        /* Образцы — до удаления (v5.5): журнал активности уходит вместе с
            аккаунтом, а без образца удалённый бот неотличим от человека. */
         $kept = FraudArchive::keep($pick);
         $done = BulkPurge::purge($pick, 'bots');

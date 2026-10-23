@@ -39,7 +39,7 @@ $stamp = bin2hex(random_bytes(3));
 $src = static fn(string $rel): string => (string)file_get_contents(SSO_ROOT . '/' . $rel);
 $nets = ['192.0.2.0/24', '203.0.113.0/24', '198.51.100.0/24'];
 $audit = [];
-/* Удаление ботов откладывает образцы (v4.98) — их подсети стали бы признаком
+/* Удаление ботов откладывает образцы (v5.5) — их подсети стали бы признаком
    на следующем прогоне. Убираем свои. */
 $sampleFrom = \App\Core\FraudArchive::ready() ? (int)DB::val('SELECT COALESCE(MAX(id), 0) FROM {fraud_samples}') : 0;
 

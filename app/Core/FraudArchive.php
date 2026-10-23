@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Core;
 
 /**
- * Архив образцов ботов (v4.98).
+ * Архив образцов ботов (v5.5).
  *
  * Живой случай 23.10: шестьдесят четыре бота удалили пачкой — и вместе с
  * аккаунтами ушло всё, на чём можно учиться. Аудит пережил их, но в нём не
@@ -69,7 +69,7 @@ final class FraudArchive
         $ua = (string)($s['reg_ua'] ?? '');
         $ip = $s['reg_ip'] !== null && ($s['reg_ip'] ?? '') !== '' ? (string)$s['reg_ip'] : null;
         return [
-            'archived_at' => now(),
+            'created_at' => now(),
             'registered_at' => $s['created_at'] ?? null,
             'label' => $label,
             'net' => $s['net'] ?? BotSignal::subnet($ip),
@@ -205,26 +205,17 @@ final class FraudArchive
         return $out;
     }
 
-    /** Образцы по дням за $days дней — ряд для графика, старые слева. */
+    /** Образцы по местным суткам за $days дней — ряд для графика, старые слева. */
     public static function perDay(int $days = 30): array
     {
-        $by = [];
-        if (self::ready()) {
-            foreach (DB::all('SELECT archived_at FROM {fraud_samples} WHERE archived_at >= ?', [now_plus(-$days * 86400)]) as $r) {
-                $d = substr((string)$r['archived_at'], 0, 10);
-                $by[$d] = ($by[$d] ?? 0) + 1;
-            }
-        }
-        $out = [];
-        for ($i = $days - 1; $i >= 0; $i--) $out[] = (int)($by[gmdate('Y-m-d', time() - $i * 86400)] ?? 0);
-        return $out;
+        return self::ready() ? array_values(Stats::perDay('fraud_samples', '1 = 1', [], $days)) : array_fill(0, $days, 0);
     }
 
     /** Все образцы — для выгрузки: обезличены уже при записи. */
     public static function export(): array
     {
         if (!self::ready()) return [];
-        $rows = DB::all('SELECT archived_at, registered_at, label, net, user_agent, outdated, email_domain, score, signals, activity
+        $rows = DB::all('SELECT created_at, registered_at, label, net, user_agent, outdated, email_domain, score, signals, activity
                          FROM {fraud_samples} ORDER BY id');
         foreach ($rows as $i => $r) {
             $rows[$i]['score'] = (int)$r['score'];
@@ -238,6 +229,6 @@ final class FraudArchive
     public static function purge(int $days): int
     {
         if ($days <= 0 || !self::ready()) return 0;
-        return DB::run('DELETE FROM {fraud_samples} WHERE archived_at < ?', [now_plus(-$days * 86400)])->rowCount();
+        return DB::run('DELETE FROM {fraud_samples} WHERE created_at < ?', [now_plus(-$days * 86400)])->rowCount();
     }
 }

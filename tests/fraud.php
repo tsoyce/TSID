@@ -1,6 +1,6 @@
 <?php
 /**
- * Антифрод (v4.98).
+ * Антифрод (v5.5).
  *
  * Живой случай 23.10: шестьдесят четыре бота удалили пачкой — и от них не
  * осталось ничего, на чём учиться: аудит пережил аккаунты, но не помнил, что
@@ -144,7 +144,7 @@ try {
     ok($st !== 200, 'без входа раздела не видно', "status $st");
 
     echo "\n── Срок хранения ──\n";
-    $old = DB::insert('fraud_samples', ['archived_at' => now_plus(-3 * 86400), 'label' => 'bot', 'net' => '198.51.100.0/24', 'score' => 0]);
+    $old = DB::insert('fraud_samples', ['created_at' => now_plus(-3 * 86400), 'label' => 'bot', 'net' => '198.51.100.0/24', 'score' => 0]);
     ok(FraudArchive::purge(2) >= 1 && DB::val('SELECT id FROM {fraud_samples} WHERE id = ?', [$old]) === null,
         'старше срока — убираются');
     ok(FraudArchive::purge(0) === 0, '0 — хранить вечно');
