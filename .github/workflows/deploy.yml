@@ -2,15 +2,16 @@ name: Выкладка
 
 # Тег vX.Y.Z → батарея → сборка → архив по SSH на сервер, где его выкладывает
 # sso-deploy (принудительная команда ключа, см. .github/deploy/README.md).
-# Вручную — Actions → «Выкладка» → Run workflow, с тегом.
+# Вручную — Actions → «Выкладка» → Run workflow: поле тега пустое — последний
+# выпуск, или конкретный тег.
 on:
   push:
     tags: ['v*.*.*']
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Тег выпуска, например v4.95.0'
-        required: true
+        description: 'Тег выпуска, например v4.95.0; пусто — последний выпуск'
+        required: false
 
 # Две выкладки сразу не идут: вторая ждёт первую, а не отменяет её посреди rsync.
 concurrency:
@@ -20,18 +21,32 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  TAG: ${{ inputs.tag || github.ref_name }}
-
 jobs:
+  tag:
+    name: Какой выпуск
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.pick.outputs.tag }}
+    steps:
+      - id: pick
+        env:
+          WANT: ${{ inputs.tag || (github.ref_type == 'tag' && github.ref_name) || '' }}
+        run: |
+          tag="$WANT"
+          if [ -z "$tag" ]; then
+            tag=$(git ls-remote --tags --refs "https://github.com/${{ github.repository }}" 'v*.*.*' | awk -F/ '{print $3}' | sort -V | tail -1)
+          fi
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Тег должен быть вида v4.95.0, а не «$tag»"; exit 1; }
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "::notice title=Выкладываем::$tag"
+
   battery:
     name: Батарея перед выкладкой
+    needs: tag
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ needs.tag.outputs.tag }}
     steps:
-      - name: Тег — три числа
-        run: |
-          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Тег должен быть вида v4.95.0, а не «$TAG»"; exit 1; }
-
       - uses: actions/checkout@v5
         with:
           ref: ${{ env.TAG }}
@@ -45,6 +60,8 @@ jobs:
       - name: Прогнать всю батарею
         run: |
           set -o pipefail
+          # Выпуски до 4.95 каталоги установки сами не создают — в свежей копии их нет.
+          mkdir -p config storage/keys
           bash tests/run-all.sh 2>&1 | tee "$RUNNER_TEMP/battery.log"
 
       - name: Что упало
@@ -59,9 +76,11 @@ jobs:
 
   deploy:
     name: Выкладка на сервер
-    needs: battery
+    needs: [tag, battery]
     runs-on: ubuntu-latest
     environment: production
+    env:
+      TAG: ${{ needs.tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -95,8 +114,8 @@ jobs:
           # Адрес сервера — отдельно от user@: в сообщениях ssh он стоит без пользователя.
           echo "::add-mask::${DEPLOY_TARGET#*@}"
           install -d -m 700 ~/.ssh
-          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
-          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts && chmod 644 ~/.ssh/known_hosts
+          printf '%s\n' "$DEPLOY_SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" | tr -d '\r' > ~/.ssh/known_hosts && chmod 644 ~/.ssh/known_hosts
 
       - name: Выкладка
         env:
