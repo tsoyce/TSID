@@ -147,6 +147,7 @@ $router->post('/profile/security/2fa/confirm', [ProfileSecurityController::class
 $router->post('/profile/security/2fa/disable', [ProfileSecurityController::class, 'disable2fa'], ['auth']);
 $router->get('/profile/security/recovery.txt', [ProfileSecurityController::class, 'downloadRecovery'], ['auth']);
 $router->get('/profile/sessions', [ProfileController::class, 'sessions'], ['auth']);
+$router->get('/profile/activity', [ProfileController::class, 'activity'], ['auth']);
 $router->post('/profile/sessions/revoke', [ProfileController::class, 'revokeSession'], ['auth']);
 $router->get('/profile/services', [ProfileController::class, 'services'], ['auth']);
 $router->post('/profile/services/revoke', [ProfileController::class, 'revokeService'], ['auth']);

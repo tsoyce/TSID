@@ -722,6 +722,11 @@ input[type="file"]::file-selector-button:hover { border-color: var(--text-3); ba
 .act-text { flex: 1 1 220px; min-width: 0; }
 .act-name { font-weight: 500; }
 .act-item > form { flex: none; }
+/* История в кабинете (v5.3): день — заголовком, неудача — красным словом,
+   не только значком: цвет не единственный носитель смысла. */
+.history-day + .act-list { margin-bottom: 24px; }
+.history-day + .act-list:last-child { margin-bottom: 0; }
+.act-item.is-alarm .act-name { color: var(--danger); }
 
 /* Пипетка рядом с hex-полем: нативный type=color без серой рамки браузера */
 .input-color {

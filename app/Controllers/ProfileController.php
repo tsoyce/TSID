@@ -340,6 +340,25 @@ final class ProfileController
         ]);
     }
 
+    /**
+     * История аккаунта (v5.3): входы, неудачные попытки и изменения защиты —
+     * всё, что раньше было видно только админу в журнале.
+     */
+    public function activity(): never
+    {
+        $user = Auth::user();
+        $kind = (string)($_GET['k'] ?? 'all');
+        if (!isset(\App\Core\UserHistory::kinds()[$kind])) $kind = 'all';
+        $before = isset($_GET['before']) && ctype_digit((string)$_GET['before']) ? (int)$_GET['before'] : null;
+        View::render('profile/activity', [
+            'pageTitle' => 'История',
+            'kind' => $kind,
+            'page' => \App\Core\UserHistory::page((int)$user['id'], $kind, $before),
+            'fails' => \App\Core\UserHistory::recentFails((int)$user['id']),
+            'continued' => $before !== null,
+        ]);
+    }
+
     public function revokeSession(): never
     {
         $user = Auth::user();

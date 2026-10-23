@@ -171,6 +171,8 @@ step "Цифры дашборда: вход и сутки" php $PHP_FLAGS tests/
 step "Аналитика входа и регистрации" php $PHP_FLAGS tests/analytics.php
 # Аналитика портала и системы (v5.2): входы, активные, токены, доставка; скорость и ошибки.
 step "Аналитика портала и системы" php $PHP_FLAGS tests/analytics_portal.php
+# История аккаунта в кабинете (v5.3).
+step "История в кабинете" php $PHP_FLAGS tests/profile_history.php
 # Кабинет и админка без перезагрузки (v5.0): подмена экранов тем же механизмом, что вкладки входа.
 step "Кабинет и админка без перезагрузки" php $PHP_FLAGS tests/app_swap.php
 

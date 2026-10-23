@@ -3706,4 +3706,13 @@ return [
     'повторов refresh-токена: :n' => 'refresh token reuse: :n',
     'повторов refresh-токена не было' => 'no refresh token reuse',
     'событий порталу не было' => 'no events to the portal',
+    /* v5.3: история в кабинете. */
+    'Вся история →' => 'Full history →',
+    'Всё' => 'All',
+    'Вход: :m' => 'Sign-in: :m',
+    'Вчера' => 'Yesterday',
+    'За неделю было :n неудачных попыток войти в аккаунт. Если это были не вы — смените пароль и завершите чужие сеансы.' => 'There were :n failed attempts to sign in to your account this week. If it was not you, change your password and end unfamiliar sessions.',
+    'Неудачи' => 'Failures',
+    'Неудачных попыток не было' => 'No failed attempts',
+    'Раньше' => 'Earlier',
 ];

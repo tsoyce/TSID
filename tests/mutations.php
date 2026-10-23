@@ -3049,6 +3049,70 @@ $mutations = [
         'to'    => "            ['key' => 'analytics-off', 'group' => 'watch',",
         'check' => 'tests/analytics_portal.php',
     ],
+    /* v5.3: история в кабинете. */
+    [
+        'why'   => 'в историю снова попадают действия в админке',
+        'file'  => 'app/Core/UserHistory.php',
+        'from'  => "private const FOREIGN = ['admin.%', 'system.%',",
+        'to'    => "private const FOREIGN = ['zz.%', 'system.%',",
+        'check' => 'tests/profile_history.php',
+    ],
+    [
+        'why'   => 'обновление токена снова засоряет историю',
+        'file'  => 'app/Core/UserHistory.php',
+        'from'  => "public const NOISE = ['code.issued', 'token.refresh'];",
+        'to'    => "public const NOISE = ['code.issued'];",
+        'check' => 'tests/profile_history.php',
+    ],
+    [
+        'why'   => '«Неудачи» снова показывают всё',
+        'file'  => 'app/Core/UserHistory.php',
+        'from'  => "        } elseif (\$kind === 'alerts') {",
+        'to'    => "        } elseif (\$kind === 'alerts-off') {",
+        'check' => 'tests/profile_history.php',
+    ],
+    [
+        'why'   => 'страница снова теряет продолжение',
+        'file'  => 'app/Core/UserHistory.php',
+        'from'  => "            \$more = (int)end(\$rows)['id'];",
+        'to'    => "            \$more = null;",
+        'check' => 'tests/profile_history.php',
+    ],
+    [
+        'why'   => 'неудачи снова считаются за всё время',
+        'file'  => 'app/Core/UserHistory.php',
+        'from'  => "[\$userId, 'login.fail', now_plus(-\$days * 86400)]",
+        'to'    => "[\$userId, 'login.fail', '1970-01-01 00:00:00']",
+        'check' => 'tests/profile_history.php',
+    ],
+    [
+        'why'   => '«сегодня» снова по UTC',
+        'file'  => 'app/Core/UserHistory.php',
+        'from'  => "\$day = (new \\DateTimeImmutable(\$utc, new \\DateTimeZone('UTC')))->setTimezone(\$tz)->format('Y-m-d');",
+        'to'    => "\$day = (new \\DateTimeImmutable(\$utc, new \\DateTimeZone('UTC')))->format('Y-m-d');",
+        'check' => 'tests/profile_history.php',
+    ],
+    [
+        'why'   => 'неудача снова не выделена словами',
+        'file'  => 'templates/profile/activity.php',
+        'from'  => "<div class=\"act-item<?= \$alarm ? ' is-alarm' : '' ?>\">",
+        'to'    => "<div class=\"act-item\">",
+        'check' => 'tests/profile_history.php',
+    ],
+    [
+        'why'   => 'перебор пароля снова молчит',
+        'file'  => 'templates/profile/activity.php',
+        'from'  => "<?php if (\$fails >= 3 && !\$continued): ?>",
+        'to'    => "<?php if (false): ?>",
+        'check' => 'tests/profile_history.php',
+    ],
+    [
+        'why'   => 'у приложения снова нет ярлыка истории',
+        'file'  => 'app/Controllers/PwaController.php',
+        'from'  => "                ['name' => t('История'), 'url' => '/profile/activity'],\n",
+        'to'    => "",
+        'check' => 'tests/profile_history.php',
+    ],
 ];
 
 if (in_array('--list', $argv, true)) {
