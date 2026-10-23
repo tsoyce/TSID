@@ -15,7 +15,7 @@ jobs:
       matrix:
         php: ['8.2', '8.3', '8.4']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Установить PHP
         uses: shivammathur/setup-php@v2
@@ -26,7 +26,23 @@ jobs:
           ini-values: display_errors=On
 
       - name: Прогнать всю батарею
-        run: bash tests/run-all.sh
+        run: |
+          set -o pipefail
+          bash tests/run-all.sh 2>&1 | tee "$RUNNER_TEMP/battery.log"
+
+      # Провалы — аннотацией: она видна на странице прогона сразу, без
+      # раскрытия логов, и читается через открытый API (логи — только со
+      # входом). Строка — шаг батареи и то, что в нём упало.
+      - name: Что упало
+        if: failure()
+        run: |
+          log="$RUNNER_TEMP/battery.log"
+          [ -f "$log" ] || exit 0
+          awk '/^── .* ──$/ {step=$0} /✗|ПРОВАЛ:|не поднялся|Parse error|Fatal error/ {print step " " $0}' "$log" | head -40 > "$RUNNER_TEMP/fails.txt"
+          [ -s "$RUNNER_TEMP/fails.txt" ] || tail -40 "$log" > "$RUNNER_TEMP/fails.txt"
+          msg=$(sed 's/%/%25/g; s/\r//g' "$RUNNER_TEMP/fails.txt" | awk '{printf "%s%%0A", $0}')
+          echo "::error title=Батарея на PHP ${{ matrix.php }}::${msg}"
+          { echo "## Провалы батареи"; echo '```'; cat "$RUNNER_TEMP/fails.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Логи серверов при провале
         if: failure()
@@ -49,7 +65,7 @@ jobs:
           --health-cmd="mysqladmin ping -proot"
           --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Установить PHP
         uses: shivammathur/setup-php@v2
