@@ -1,0 +1,135 @@
+name: Выкладка
+
+# Тег vX.Y.Z → батарея → сборка → архив по SSH на сервер, где его выкладывает
+# sso-deploy (принудительная команда ключа, см. .github/deploy/README.md).
+# Вручную — Actions → «Выкладка» → Run workflow, с тегом.
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Тег выпуска, например v4.95.0'
+        required: true
+
+# Две выкладки сразу не идут: вторая ждёт первую, а не отменяет её посреди rsync.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  battery:
+    name: Батарея перед выкладкой
+    runs-on: ubuntu-latest
+    steps:
+      - name: Тег — три числа
+        run: |
+          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Тег должен быть вида v4.95.0, а не «$TAG»"; exit 1; }
+
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_sqlite, openssl, mbstring, curl, gd, sodium, zip
+          coverage: none
+
+      - name: Прогнать всю батарею
+        run: |
+          set -o pipefail
+          bash tests/run-all.sh 2>&1 | tee "$RUNNER_TEMP/battery.log"
+
+      - name: Что упало
+        if: failure()
+        run: |
+          log="$RUNNER_TEMP/battery.log"
+          [ -f "$log" ] || exit 0
+          awk '/^── .* ──$/ {step=$0} /✗|ПРОВАЛ:|не поднялся|Parse error|Fatal error/ {print step " " $0}' "$log" | head -40 > "$RUNNER_TEMP/fails.txt"
+          [ -s "$RUNNER_TEMP/fails.txt" ] || tail -40 "$log" > "$RUNNER_TEMP/fails.txt"
+          msg=$(sed 's/%/%25/g; s/\r//g' "$RUNNER_TEMP/fails.txt" | awk '{printf "%s%%0A", $0}')
+          echo "::error title=Батарея перед выкладкой $TAG::${msg}"
+
+  deploy:
+    name: Выкладка на сервер
+    needs: battery
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: openssl, mbstring, zip
+          coverage: none
+
+      - name: Версия в коде совпадает с тегом
+        run: |
+          code=$(grep -oE "define\('SSO_VERSION', '[0-9]+\.[0-9]+\.[0-9]+'" app/bootstrap.php | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
+          [ "v$code" = "$TAG" ] || { echo "::error::В коде $code, а тег $TAG — поднимите SSO_VERSION в app/bootstrap.php"; exit 1; }
+          echo "VERSION=$code" >> "$GITHUB_ENV"
+
+      - name: Сборка
+        run: |
+          php build_dist.php
+          test -s "dist/sso-v$VERSION.zip"
+
+      - name: Ключ и отпечаток сервера
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_TARGET: ${{ secrets.DEPLOY_TARGET }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          [ -n "$DEPLOY_SSH_KEY" ] && [ -n "$DEPLOY_TARGET" ] && [ -n "$DEPLOY_KNOWN_HOSTS" ] \
+            || { echo "::error::Нет секретов DEPLOY_SSH_KEY / DEPLOY_TARGET / DEPLOY_KNOWN_HOSTS — см. .github/deploy/README.md"; exit 1; }
+          # Адрес сервера — отдельно от user@: в сообщениях ssh он стоит без пользователя.
+          echo "::add-mask::${DEPLOY_TARGET#*@}"
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts && chmod 644 ~/.ssh/known_hosts
+
+      - name: Выкладка
+        env:
+          DEPLOY_TARGET: ${{ secrets.DEPLOY_TARGET }}
+        run: |
+          set -u
+          rc=1
+          for try in 1 2 3; do
+            set +e
+            ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes \
+                -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+                -o ConnectTimeout=20 -o ServerAliveInterval=15 \
+                "$DEPLOY_TARGET" "deploy $VERSION" < "dist/sso-v$VERSION.zip" 2>&1 | tee "$RUNNER_TEMP/deploy.log"
+            rc=${PIPESTATUS[0]}
+            set -e
+            # Начатую выкладку вслепую не повторяем: повтор — только если до сервера не дошли.
+            if [ $rc -eq 0 ] || grep -q "== было" "$RUNNER_TEMP/deploy.log"; then break; fi
+            echo "до сервера не дошли (попытка $try)"; sleep 5
+          done
+          exit $rc
+
+      - name: Итог — аннотацией
+        if: always()
+        run: |
+          log="$RUNNER_TEMP/deploy.log"
+          [ -s "$log" ] || exit 0
+          msg=$(grep -E "^(==|  )" "$log" | head -40 | sed 's/%/%25/g; s/\r//g' | awk '{printf "%s%%0A", $0}')
+          if grep -q "== готово" "$log"; then
+            echo "::notice title=Выложено $TAG::${msg}"
+          else
+            echo "::error title=Выкладка $TAG не завершилась::${msg}"
+          fi
+
+      - name: Убрать ключ
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

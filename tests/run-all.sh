@@ -11,7 +11,10 @@ cd "$ROOT"
 PHP_FLAGS="-d extension=pdo_sqlite"
 php -r 'exit(extension_loaded("sodium") ? 0 : 1);' 2>/dev/null || PHP_FLAGS="$PHP_FLAGS -d extension=sodium"
 
-mkdir -p tests/tmp tests/rp storage/logs
+# config/ и storage/keys/ git не хранит (в них только то, что пишет установка):
+# в свежей копии — CI, облачная сессия, новый worktree — их нет, инсталлятор
+# встаёт на первом шаге, и следом краснеет вся батарея.
+mkdir -p tests/tmp tests/rp storage/logs config storage/keys
 FAILED=0
 PIDS=()
 

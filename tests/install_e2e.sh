@@ -3,7 +3,7 @@
 set -e
 BASE="http://localhost:8710"
 JAR="tests/tmp/cookies.txt"
-mkdir -p tests/tmp
+mkdir -p tests/tmp config storage/keys
 rm -f "$JAR" storage/dev-test.sqlite config/config.php config/installed.lock
 rm -rf storage/keys/* 2>/dev/null || true
 

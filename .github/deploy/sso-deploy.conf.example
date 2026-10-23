@@ -1,0 +1,17 @@
+# /etc/sso-deploy.conf — настройки выкладки на сервере (владелец root, права 600).
+# В репозиторий настоящие значения не кладутся: здесь только пример.
+
+# Каталог установки (там лежат app/, public/, config/).
+SITE_DIR=/var/www/sso
+# Куда класть полную копию сайта перед каждой выкладкой — вне корня сайта.
+BACKUP_DIR=/var/backups/sso
+# Владелец файлов сайта и пользователь PHP-FPM: от него идут миграции.
+SITE_OWNER=www-data
+# PHP той версии, на которой работает сайт.
+PHP_BIN=/usr/bin/php8.4
+# Адрес установки — для проверки живой установки после выкладки.
+SITE_URL=https://sso.example.com
+
+# По желанию: проба входа в один портал посреди потока (form-action пускает адрес возврата).
+#PROBE_CLIENT_ID=cli_xxxxxxxxxxxxxxxx
+#PROBE_REDIRECT_URI=https://portal.example.com/sso/callback
