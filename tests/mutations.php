@@ -2233,7 +2233,7 @@ $mutations = [
     [
         'why'   => 'окно поверх сайта снова только растёт — высота по странице, а не по содержимому',
         'file'  => 'public/assets/js/app.js',
-        'from'  => "    toPortal({ state: 'size', h: frameWrap ? Math.ceil(frameWrap.getBoundingClientRect().height)\n      : document.documentElement.scrollHeight });",
+        'from'  => "    toPortal({ state: 'size', h: w ? Math.ceil(w.getBoundingClientRect().height)\n      : document.documentElement.scrollHeight });",
         'to'    => "    toPortal({ state: 'size', h: document.documentElement.scrollHeight });",
         'check' => 'tests/login_window.php',
     ],
