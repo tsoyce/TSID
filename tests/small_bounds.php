@@ -66,7 +66,7 @@ try {
     $tj = $jar('t');
     $median = static function (string $identity) use ($tj): float {
         $s = [];
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < 5; $i++) {
             DB::run('DELETE FROM {rate_limits}');
             [, $lp] = http('GET', SSO . '/login', [], [], $tj);
             $a = microtime(true);
@@ -74,13 +74,22 @@ try {
             $s[] = microtime(true) - $a;
         }
         sort($s);
-        return $s[1];
+        return $s[2];
     };
+    // v5.6: сравниваем разницу с ценой одной проверки хеша, а не доли: на быстром
+    // процессоре CI накладные расходы запроса больше хеша, и доля «не видела» пропажу.
+    $cost = [];
+    for ($i = 0; $i < 3; $i++) {
+        $a = microtime(true);
+        password_verify('wrong-pass', User::DUMMY_HASH);
+        $cost[] = microtime(true) - $a;
+    }
+    sort($cost);
     $known = $median("sb-$stamp@test.local");
     $unknown = $median("nobody-$stamp@test.local");
     DB::run('UPDATE {users} SET failed_logins = 0, locked_until = NULL WHERE email = ?', ["sb-$stamp@test.local"]);
-    ok($unknown >= $known * 0.5, 'нет аккаунта — отвечаем не быстрее, чем на неверный пароль',
-        sprintf('%.0f мс против %.0f мс', $unknown * 1000, $known * 1000));
+    ok($known - $unknown < $cost[1] * 0.5, 'нет аккаунта — отвечаем не быстрее, чем на неверный пароль',
+        sprintf('%.0f мс против %.0f мс, хеш %.0f мс', $unknown * 1000, $known * 1000, $cost[1] * 1000));
 
     echo "\n── Пароль внутри сессии: лимит и трассировки ──\n";
     $j2 = $jar('reauth');
