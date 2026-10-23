@@ -25,7 +25,10 @@ trap cleanup EXIT
 
 start_server() {
   local port="$1" docroot="$2" router="${3:-}"
-  php $PHP_FLAGS -S "localhost:$port" -t "$docroot" $router > "tests/tmp/server-$port.log" 2>&1 &
+  # Без opcache: на Linux он включён и для php -S, а сверяет файлы раз в две
+  # секунды. Батарея правит код на месте (мутации, конфиг портала в e2e) и тут
+  # же идёт в сервер — тот отвечал старой версией, и мутации выходили «слепыми».
+  php $PHP_FLAGS -d opcache.enable=0 -S "localhost:$port" -t "$docroot" $router > "tests/tmp/server-$port.log" 2>&1 &
   PIDS+=($!)
   for _ in $(seq 1 40); do
     if curl -s -o /dev/null --max-time 1 "http://localhost:$port/" 2>/dev/null; then return 0; fi
