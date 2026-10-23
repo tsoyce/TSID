@@ -1432,6 +1432,11 @@ function js_i18n(): string
         'pkName' => t('Как назвать этот ключ?'),
         'pkDefaultName' => t('Мой passkey'),
         'pkFailedShort' => t('Не получилось.'),
+        /* palette.js (v5.0) */
+        'paletteTitle' => t('Поиск по системе'),
+        'paletteHint' => t('Раздел, пользователь, портал или действие…'),
+        'paletteFailed' => t('Не удалось получить результаты'),
+        'paletteNone' => t('Ничего не нашлось'),
     ];
     return '<script nonce="' . esc(csp_nonce()) . '">window.ssoI18n = '
         . json_encode($strings, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) . ';</script>';

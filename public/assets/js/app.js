@@ -227,6 +227,12 @@
 
   /* ---------- Drawer: [data-drawer] с JSON-полями в data-fields ---------- */
   var drawer = null;
+  /* Спрайт — тем же адресом, что у иконок страницы (с ?v=, v5.0): воркер
+     отдаёт /assets/ из кэша, и голый адрес держал бы прежний спрайт. */
+  function spriteUrl() {
+    var u = document.querySelector('use[href*="icons.svg"]');
+    return u ? u.getAttribute('href').split('#')[0] : '/assets/icons.svg';
+  }
   function ensureDrawer() {
     if (drawer) return drawer;
     drawer = document.createElement('div');
@@ -235,7 +241,7 @@
       '<aside class="drawer" role="dialog" aria-modal="true">' +
       '  <div class="drawer-head"><h3 class="mb-0 drawer-title"></h3>' +
       '    <button class="btn-icon btn-icon-s" type="button" data-drawer-close aria-label="">' +
-      '      <svg class="icon" width="18" height="18" aria-hidden="true"><use href="/assets/icons.svg#i-x"></use></svg>' +
+      '      <svg class="icon" width="18" height="18" aria-hidden="true"><use href="' + spriteUrl() + '#i-x"></use></svg>' +
       '    </button></div>' +
       '  <div class="drawer-body"><dl class="kv"></dl></div>' +
       '</aside>';
@@ -478,7 +484,7 @@
     if (form.dataset.confirmTpl) form.dataset.confirm = form.dataset.confirmTpl.replace(':n', n);
     form.querySelectorAll('button[type=submit]').forEach(function (b) { b.disabled = n === 0; });
   };
-  document.querySelectorAll('form[data-bulk]').forEach(bulkSync);
+  onPage(function () { document.querySelectorAll('form[data-bulk]').forEach(bulkSync); });
   document.addEventListener('change', function (e) {
     var form = e.target.closest('form[data-bulk]');
     if (!form || e.target.type !== 'checkbox') return;
@@ -532,7 +538,10 @@
      Круглые бока идут однострочному облачку и не идут многострочному: там текст
      упирается в скругление. Считаем по факту, а не по длине строки — ширина
      зависит от экрана, а перенос от шрифта. */
-  document.querySelectorAll('.toast').forEach(function (t) {
+  /* После подмены страницы (v5.0) приходят новые тосты — настраиваем и их. */
+  onPage(function () { document.querySelectorAll('.toast').forEach(function (t) {
+    if (t._ssoToast) return;
+    t._ssoToast = true;
     var line = parseFloat(getComputedStyle(t).fontSize) * 1.6;
     var text = t.querySelector('span');
     if (text && text.offsetHeight > line * 1.4) t.classList.add('is-long');
@@ -574,7 +583,7 @@
     t.addEventListener('mouseleave', arm);
     t.addEventListener('click', hide);
     arm();
-  });
+  }); });
 
   /* Запасной путь копирования: clipboard-API требует защищённого соединения,
      а установка по http — обычное дело на своём сервере. Без запасного пути
@@ -669,8 +678,8 @@
   });
 
   /* ---------- QR (TOTP): [data-qr] с текстом в data-qr ---------- */
-  document.querySelectorAll('[data-qr]').forEach(function (el) {
-    if (typeof qrcode !== 'function') return;
+  onPage(function () { document.querySelectorAll('[data-qr]').forEach(function (el) {
+    if (typeof qrcode !== 'function' || el.querySelector('svg')) return;
     try {
       var qr = qrcode(0, 'M');
       qr.addData(el.dataset.qr);
@@ -682,7 +691,7 @@
          работало ровно до второго места применения. */
       if (svg) { svg.style.width = '100%'; svg.style.height = '100%'; svg.style.display = 'block'; }
     } catch (err) { /* секрет останется в ручном виде рядом */ }
-  });
+  }); });
 
   /* ---------- Аватар: превью выбранного файла ---------- */
   document.addEventListener('change', function (e) {
@@ -697,7 +706,9 @@
      Панель из пяти полей занимала весь первый экран, и до списка приходилось
      доскроллить. Кнопку добавляет скрипт, а не шаблоны: фильтр-баров три, и
      любой новый получит сворачивание сам. Без JS всё остаётся как было. */
-  document.querySelectorAll('.filter-bar').forEach(function (bar) {
+  onPage(function () { document.querySelectorAll('.filter-bar').forEach(function (bar) {
+    if (bar._ssoFilters) return;
+    bar._ssoFilters = true;
     var active = 0;
     bar.querySelectorAll('input, select').forEach(function (f) {
       if (f.type === 'hidden' || f.type === 'submit') return;
@@ -725,7 +736,7 @@
       var open = wrap.classList.toggle('open');
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
-  });
+  }); });
 
   /* ---------- Акцент: пипетка пишет в hex-поле, hex-поле — в пипетку ---------- */
   document.addEventListener('input', function (e) {
@@ -750,7 +761,9 @@
   document.addEventListener('change', function (e) {
     var form = e.target.closest('form.filter-bar');
     if (!form || e.target.tagName !== 'SELECT' && e.target.type !== 'date') return;
-    form.submit();
+    /* requestSubmit, а не submit(): отправка с событием — её подхватывает
+       подмена страницы (v5.0), и список меняется без перезагрузки. */
+    submitForm(form);
   });
 
   /* ---------- Редактор экрана входа (v4.71) ----------
@@ -1004,12 +1017,16 @@
         if (!window.confirm(L('schemeDrop', 'Убрать схему «:name»?').replace(':name', drop.getAttribute('data-name') || ''))) return;
         var dfd = new FormData();
         dfd.append('id', drop.getAttribute('data-look-drop-scheme') || '');
+        /* Отказ сервера и сбой сети — вслух (v5.0): раньше схема просто
+           оставалась на месте, и было непонятно, нажалось ли. */
+        var dropSay = ed.querySelector('[data-look-scheme-status]');
+        var dropFail = function (msg) { if (dropSay) dropSay.textContent = msg || L('requestFailed', 'Сбой запроса — посмотрите логи.'); };
         post('/admin/look/schemes/drop', dfd).then(function (j) {
-          if (!j.ok) return;
+          if (!j.ok) { dropFail(j.message); return; }
           var tile = drop.closest('.look-mine');
           if (tile) tile.remove();
           mineSync();
-        });
+        }).catch(function () { dropFail(); });
         return;
       }
       var ad = e.target.closest('[data-look-adopt]');
@@ -1127,10 +1144,14 @@
   var frameOrigin = document.documentElement.getAttribute('data-frame-origin');
   var framed = !!frameOrigin && window.parent !== window;
   var toPortal = function (m) { m.type = 'sso:frame'; window.parent.postMessage(m, frameOrigin); };
-  var frameWrap = document.querySelector('.auth-wrap');
+  /* Обёртку ищем при каждом замере (v5.0): подмена во фрейме меняет
+     body.innerHTML, прежняя .auth-wrap отсоединяется и мерится нулём —
+     sso.js такой размер отбрасывал, и высота окна застывала на первом экране. */
+  var frameWrap = function () { return document.querySelector('.auth-wrap'); };
   var reportSize = function () {
     if (!framed) return;
-    toPortal({ state: 'size', h: frameWrap ? Math.ceil(frameWrap.getBoundingClientRect().height)
+    var w = frameWrap();
+    toPortal({ state: 'size', h: w ? Math.ceil(w.getBoundingClientRect().height)
       : document.documentElement.scrollHeight });
   };
   var loadedScripts = {};
@@ -1143,6 +1164,18 @@
   /* Номер вкладки экрана: по нему переход знает, в какую сторону уходить. */
   var TABS = ['/login', '/register', '/recover'];
   var tabOf = function (path) { return TABS.indexOf(path); };
+  /* Кабинет и админка без перезагрузки (v5.0): между экранами с островком
+     меняется только содержимое — островок, док, подвал и тема остаются.
+     Формы уходят как раньше, страницей: проверяет сервер. Вне подмены —
+     файлы и всё, что меняет состояние по GET: туда идём обычным переходом. */
+  var appShell = !framed && !!document.querySelector('.isle');
+  var APP = /^\/(admin|profile)(\/|$)/;
+  var NOT_APP = /\.[a-z0-9]{2,5}$|\/(export|download|cancel|logout|lang|probe)(\/|$)/i;
+  var appPath = function (path) { return APP.test(path) && !NOT_APP.test(path); };
+  /* Экраны со своим долгим скриптом (редактор экрана входа с живым
+     предпросмотром) открываются документом: их настройка — при загрузке. */
+  var NEEDS_LOAD = /data-look-editor/;
+  var depth = function (path) { return path.split('/').filter(Boolean).length; };
   var swapPage = function (html, url, push) {
     var next = new DOMParser().parseFromString(html, 'text/html');
     document.title = next.title;
@@ -1166,8 +1199,14 @@
       document.body.className = next.body.className;
       document.body.innerHTML = next.body.innerHTML;
     } else {
-      /* Только колонка формы и тосты: панель, подвал и тема — те же. */
+      /* Только колонка формы и тосты: панель, подвал и тема — те же. В
+         кабинете и админке (v5.0) — ещё островок и док: в них отмечен
+         текущий раздел. */
       document.getElementById('main').innerHTML = next.getElementById('main').innerHTML;
+      ['.isle', '.dock'].forEach(function (sel) {
+        var a = document.querySelector(sel), b = next.querySelector(sel);
+        if (a && b) a.innerHTML = b.innerHTML;
+      });
       var toasts = document.querySelector('.toasts'), nextToasts = next.querySelector('.toasts');
       if (toasts && nextToasts) toasts.innerHTML = nextToasts.innerHTML;
     }
@@ -1192,6 +1231,12 @@
     document.dispatchEvent(new CustomEvent('sso:page'));
     var focus = document.querySelector('[autofocus]');
     if (focus) focus.focus({ preventScroll: true });
+    else if (appShell) {
+      /* Чтение с экрана начинает новый экран с начала, а не с места щелчка. */
+      var main = document.getElementById('main');
+      main.setAttribute('tabindex', '-1');
+      main.focus({ preventScroll: true });
+    }
     reportSize();
   };
   /* Переход с анимацией: dir — 'fwd', 'back' или 'fade'. */
@@ -1219,43 +1264,87 @@
     return fetch(url, Object.assign({ credentials: 'same-origin', mode: 'same-origin' }, init || {}))
       .then(function (r) { return r.text().then(function (html) { return { r: r, html: html }; }); });
   };
+  /* Переход, пришедший во время другого (v5.0): «назад» дважды подряд
+     менял адрес, а экран оставался прежним. Запоминаем последний и идём
+     к нему, когда текущий закончится. */
+  var queued = null;
   var go = function (url, init, push) {
-    if (swapBusy) return;
+    if (swapBusy) { if (!init) queued = { url: url, push: push }; return; }
     swapBusy = true;
+    /* Открытое меню или окно уходит вместе со старым экраном — закрываем
+       заранее, иначе осталась бы блокировка прокрутки под ним. */
+    document.querySelectorAll('.menu.open, .modal-backdrop.open, .drawer-backdrop.open, .pass-sheet.open, .palette-backdrop.open')
+      .forEach(function (m) { m.classList.remove('open'); });
     document.documentElement.setAttribute('aria-busy', 'true');
     var from = tabOf(location.pathname);
     fetchPage(url, init)
       .then(function (res) {
         if (framed && !framable(res.r)) throw new Error('not-framable');
-        var to = tabOf(new URL(res.r.url).pathname);
-        /* Вне фрейма подменяем только экран с вкладками — всё прочее (вошёл
-           и уехал в кабинет, ошибка) открывается обычным переходом. */
+        var path = new URL(res.r.url).pathname;
+        var to = tabOf(path);
+        var html = /text\/html/.test(res.r.headers.get('Content-Type') || '');
+        /* Вне фрейма подменяем экран с вкладками и экраны с островком — всё
+           прочее (вошёл и уехал в кабинет, ошибка, файл) открывается обычным
+           переходом. */
+        if (!framed && appShell) {
+          if (!html || !res.r.ok || !appPath(path) || !/class="isle"/.test(res.html) || NEEDS_LOAD.test(res.html)) { leave(res.r.url); return; }
+          var a = depth(location.pathname), b = depth(path);
+          animate(function () { swapPage(res.html, res.r.url, push); }, b > a ? 'fwd' : (b < a ? 'back' : 'fade'));
+          return;
+        }
         if (!framed && (to === -1 || !/class="auth-tabs/.test(res.html))) { leave(res.r.url); return; }
         animate(function () { swapPage(res.html, res.r.url, push); },
           from === -1 || to === -1 || from === to ? 'fade' : (to > from ? 'fwd' : 'back'));
       })
       .catch(function () { if (framed) toPortal({ state: 'window' }); else leave(url); })
-      .then(function () { swapBusy = false; document.documentElement.removeAttribute('aria-busy'); });
+      .then(function () {
+        swapBusy = false;
+        document.documentElement.removeAttribute('aria-busy');
+        if (queued) { var q = queued; queued = null; if (q.url !== location.href) go(q.url, null, q.push); }
+      });
   };
   /* passkey.js после входа уходит по адресу из ответа — тоже сюда. */
   if (framed) window.ssoGo = function (url) { go(url); };
 
   /* Вне фрейма перехватываем только переход между вкладками входа. */
   var tabLink = function (a) {
-    if (framed || !document.querySelector('.auth-tabs')) return false;
-    return a.origin === location.origin && tabOf(a.pathname) !== -1;
+    if (framed || a.origin !== location.origin) return false;
+    /* Ссылка с якорем открывает что-то на месте (мастер подключения портала
+       по #открыть-wizard) — это делает загрузка страницы, а не подмена. */
+    if (appShell) return appPath(a.pathname) && !a.hash && !a.hasAttribute('data-download') && !a.hasAttribute('data-no-swap');
+    return !!document.querySelector('.auth-tabs') && tabOf(a.pathname) !== -1;
   };
-  if (!framed && document.querySelector('.auth-tabs')) {
+  if (!framed && (appShell || document.querySelector('.auth-tabs'))) {
     try { history.replaceState({ sso: 1 }, ''); } catch (err) { /* без истории — обычные переходы */ }
     window.addEventListener('popstate', function (e) {
-      if (e.state && e.state.sso && tabOf(location.pathname) !== -1) go(location.href, null, false);
+      if (!e.state || !e.state.sso) return;
+      if (appShell ? appPath(location.pathname) : tabOf(location.pathname) !== -1) go(location.href, null, false);
     });
     var warm = function (e) {
       var a = e.target.closest && e.target.closest('a[href]');
       if (!a || !tabLink(a) || a.href === location.href || early[a.href]) return;
-      early[a.href] = { at: Date.now(), p: fetch(a.href, { credentials: 'same-origin', mode: 'same-origin' })
-        .then(function (r) { return r.text().then(function (html) { return { r: r, html: html }; }); }) };
+      /* Ответ, который не пришёл, не должен всплыть ошибкой (v5.0): щелчок
+         тогда просто запросит страницу заново. */
+      var p = fetch(a.href, { credentials: 'same-origin', mode: 'same-origin' })
+        .then(function (r) { return r.text().then(function (html) { return { r: r, html: html }; }); });
+      early[a.href] = { at: Date.now(), p: p };
+      p.catch(function () { delete early[a.href]; });
     };
+    /* Фильтры и поиск — формы GET (v5.0): их ответ — тот же экран с другим
+       списком, и подменяется он так же, как по ссылке. */
+    if (appShell) document.addEventListener('submit', function (e) {
+      var form = e.target;
+      if (e.defaultPrevented || (form.getAttribute('method') || 'get').toLowerCase() !== 'get') return;
+      var target = form.getAttribute('target');
+      if (target && target !== '_self') return;
+      var action = new URL(form.getAttribute('action') || location.pathname, location.href);
+      if (action.origin !== location.origin || !appPath(action.pathname)) return;
+      e.preventDefault();
+      var params = new URLSearchParams();
+      new FormData(form).forEach(function (v, k) { if (typeof v === 'string' && v !== '') params.append(k, v); });
+      action.search = params.toString();
+      go(action.href, null, true);
+    });
     document.addEventListener('pointerover', warm, { passive: true });
     document.addEventListener('touchstart', warm, { passive: true });
     document.addEventListener('focusin', warm);
@@ -1283,7 +1372,12 @@
   if (framed) {
     toPortal({ state: 'ready' });
     reportSize();
-    if (window.ResizeObserver) new ResizeObserver(reportSize).observe(frameWrap || document.body);
+    if (window.ResizeObserver) {
+      var sizeObs = new ResizeObserver(reportSize);
+      var watchSize = function () { sizeObs.disconnect(); sizeObs.observe(frameWrap() || document.body); };
+      watchSize();
+      document.addEventListener('sso:page', watchSize);
+    }
     document.addEventListener('click', function (e) {
       var out = e.target.closest('a[href^="/social/"], [data-frame-window]');
       if (!out) return;
@@ -1378,9 +1472,10 @@
      проставляет сам (Permission::withImplied), но до сих пор делал это молча:
      человек ставил «изменять», сохранял и видел в таблице лишнюю галочку,
      которой не ставил. Теперь это видно до сохранения. */
-  (function () {
+  onPage(function () {
     var form = document.querySelector('[data-perm-form]');
-    if (!form) return;
+    if (!form || form._ssoPerm) return;
+    form._ssoPerm = true;
 
     var LETTER = { read: 'r', write: 'w', delete: 'd' };
     var rows = Array.prototype.slice.call(form.querySelectorAll('tbody tr[data-area]'));
@@ -1525,7 +1620,7 @@
        есть. */
     initial = snapshot();
     refresh();
-  })();
+  });
 
 
   /* ---------- Маски ввода: [data-mask] ----------
@@ -1558,9 +1653,9 @@
        выбрасывала бы его в хвост на каждом нажатии. */
     if (atEnd) { try { el.setSelectionRange(el.value.length, el.value.length); } catch (err) {} }
   });
-  document.querySelectorAll('[data-mask]').forEach(function (el) {
+  onPage(function () { document.querySelectorAll('[data-mask]').forEach(function (el) {
     if (el.value) el.value = applyMask(el.dataset.mask, el.value);
-  });
+  }); });
 
   /* ---------- Клетки под цифры: [data-digits] ----------
      Номер аккаунта раньше вводили строкой: человек должен был знать формат
@@ -1582,7 +1677,9 @@
     return String((10 - (sum % 10)) % 10);
   }
 
-  document.querySelectorAll('[data-digits]').forEach(function (box) {
+  onPage(function () { document.querySelectorAll('[data-digits]').forEach(function (box) {
+    if (box._ssoDigits) return;
+    box._ssoDigits = true;
     var len = +box.dataset.len || 9;
     var body = len - 1;                       // последняя клетка — контрольная
     var hidden = box.querySelector('input[type="hidden"]');
@@ -1697,7 +1794,7 @@
       });
     }
     refresh();
-  });
+  }); });
 
 
   /* ---------- «Довести до дела»: ?do=<id> ----------
@@ -1712,11 +1809,11 @@
      Параметр из адреса убираем сразу: перезагрузка страницы не должна
      открывать мастер второй раз, а ссылка из истории — открывать его через
      неделю. */
-  (function () {
+  onPage(function () {
     var target = new URLSearchParams(location.search).get('do');
     if (!target) return;
     var el = document.getElementById(target);
-    history.replaceState(null, '', location.pathname + location.hash);
+    history.replaceState(history.state, '', location.pathname + location.hash);
     if (!el) return;
 
     var OVERLAY = 'modal-backdrop drawer-backdrop palette-backdrop pass-sheet'.split(' ');
@@ -1734,7 +1831,7 @@
     setTimeout(function () { el.classList.remove('is-called'); }, 2000);
     var focusable = el.querySelector('input:not([type=hidden]), select, textarea, button');
     if (focusable) setTimeout(function () { focusable.focus({ preventScroll: true }); }, 350);
-  })();
+  });
 
 
   /* ---------- После неудачной отправки — курсор в первое непринятое поле ----
@@ -1749,13 +1846,13 @@
      мы и так обязаны выставлять, и второй правды о том, какое поле не принято,
      не заводится. Прокрутка при этом уводит поле из-под островка — за это
      отвечает scroll-padding-top у html. */
-  (function () {
+  onPage(function () {
     var bad = document.querySelector('[aria-invalid="true"]');
     if (!bad) return;
     /* Небольшая задержка: автофокус на первом поле формы ставится браузером
        раньше, и без неё он перебивал бы наш выбор. */
     setTimeout(function () { bad.focus(); }, 0);
-  })();
+  });
 
   /* ---------- Отбор строк в таблице: [data-filter="#id-таблицы"] ----------
      Список людей сервиса бывает на двести строк, и найти в нём нужного значит
@@ -1770,9 +1867,11 @@
 
      Сравнение по всему тексту строки: имя, почта, логин и роли лежат в разных
      ячейках, а человек ищет по тому, что помнит, — и помнит он не колонку. */
-  (function () {
+  onPage(function () {
     var MIN_ROWS = 8;
     document.querySelectorAll('[data-filter]').forEach(function (input) {
+      if (input._ssoFilter) return;
+      input._ssoFilter = true;
       var table = document.querySelector(input.getAttribute('data-filter'));
       if (!table) return;
       var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
@@ -1807,13 +1906,15 @@
         if (empty) empty.hidden = shown !== 0;
       });
     });
-  })();
+  });
 
   /* Редактор обложки: блоки видео и YouTube — только у выбранного вида, блок
      картинок — всегда (они заставка видео). Без скрипта видно всё. */
   /* Редакторов на странице бывает два — обложка и фон страниц (v4.84): у
      каждого своя приставка полей. */
-  document.querySelectorAll('[data-cover-edit]').forEach(function (box) {
+  onPage(function () { document.querySelectorAll('[data-cover-edit]').forEach(function (box) {
+    if (box._ssoCover) return;
+    box._ssoCover = true;
     var kindName = (box.getAttribute('data-cover-edit') || 'cover') + '_kind';
     function sync() {
       var k = box.querySelector('input[name="' + kindName + '"]:checked');
@@ -1824,7 +1925,7 @@
     }
     box.addEventListener('change', function (e) { if (e.target.name === kindName) sync(); });
     sync();
-  });
+  }); });
 
   /* ---------- Обложка панели входа: галерея, видео, YouTube (v4.81) ----------
      В разметке нет ни адреса видео, ни фрейма YouTube: их подключает этот код

@@ -155,19 +155,6 @@
 /* Предпросмотр в редакторе: фрейм перерисовывается на каждую правку, и
    переходы превращали это в мигание. */
 .is-preview *, .is-preview *::before, .is-preview *::after { transition: none !important; animation: none !important; }
-/* Предпросмотр панели в админке. Панель на экране входа занимает целую
-   колонку и растёт до высоты экрана; в карточке настроек ей нужна рамка с
-   заданной высотой, иначе она вытянет карточку на весь экран. Пропорция
-   близка к настоящей — иначе предпросмотр врёт о том, что покажут людям. */
-.appearance-preview {
-  position: relative; aspect-ratio: 3 / 4; max-height: 420px; overflow: hidden;
-  border-radius: var(--radius-m); border: 1px solid var(--line); background: var(--surface-2);
-}
-.appearance-preview .media-pane, .appearance-preview .media-blank { position: absolute; inset: 0; }
-.appearance-preview .media-caption { padding: 14px 18px 16px; }
-.appearance-preview .media-caption-title { font-size: var(--fs-16); }
-.appearance-preview .media-caption p { font-size: var(--fs-13); }
-
 /* Медиа-панель: одна картинка, галерея или видео. Что именно — решает
    владелец в оформлении сайта; вёрстка одна и та же. */
 .media-pane { position: absolute; inset: 0; display: grid; grid-template-rows: 1fr auto; }
@@ -251,10 +238,6 @@
 body.has-backdrop { background: transparent; }
 .has-backdrop .guest, .has-backdrop .auth-split-form { background: transparent; }
 @media (prefers-reduced-motion: reduce) { .pb-media { transform: none !important; } }
-/* Галерея: точки в строке подписи, а не на снимке */
-.media-dots { display: flex; gap: 6px; align-items: center; margin-bottom: 12px; }
-.media-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--line-strong); }
-.media-dots i.is-on { background: var(--ink); width: 20px; border-radius: 3px; }
 /* Пустая панель: акцентная заливка вместо чужого снимка. Это состояние по
    умолчанию — большинство установок ничего не загрузит. */
 .media-blank {
@@ -283,17 +266,6 @@ body.has-backdrop { background: transparent; }
 .portal-cover-caption { display: flex; flex-direction: column; gap: 8px; padding: 28px 40px 32px; }
 .portal-cover-caption .portal-pane-quote { margin: 4px 0 0; font-size: var(--fs-28); }
 .portal-cover-caption .portal-pane-foot { margin-top: 12px; }
-/* Плашка «сюда кладут снимок» — только в макете, в проде её нет */
-.media-slot {
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(-45deg, var(--line) 0 1px, transparent 1px 9px), var(--surface-2);
-  display: flex; align-items: center; justify-content: center;
-}
-.media-slot span {
-  font: 500 var(--fs-13) var(--font-mono); color: var(--text-3);
-  background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--radius-s); padding: 6px 12px;
-}
-
 /* ---- Карточка формы -------------------------------------------------------
    Не «ещё одна .bento-card»: на пустом экране карточка с тенью и рамкой
    выглядит вырезанной из админки. Здесь форма стоит прямо на фоне.           */
@@ -414,15 +386,6 @@ html[data-frame-origin] .auth-wrap { justify-content: flex-start; padding: 32px 
    элемент именно в from — при любом fill-mode и любом способе навешивания.
    Поэтому from обязан быть состоянием, в котором контент уже читается:
    здесь это те же 6px ниже места, но полностью видимые. */
-@keyframes auth-in { from { transform: translateY(6px); } to { transform: none; } }
-/* Анимация въезда навешивается ТОЛЬКО как следствие действия человека: класс
-   is-swap ставит обработчик клика по вкладке. На первом рендере анимации нет
-   вовсе — иначе там, где часы анимации не идут (throttled iframe, фоновая
-   вкладка, content-visibility), currentTime навсегда 0, а это ВНУТРИ активной
-   фазы: кадр from продолжает применяться при любом fill-mode, и форма просто
-   невидима. Анимация не должна быть тем, что делает контент видимым. */
-.auth-stage.is-swap > * { animation: auth-in var(--dur-slow) var(--ease-out); }
-
 /* ---- Гостевая: карта проектов фоном, форма поверх -------------------------
    Домен SSO набирают случайно. Сетка проектов отвечает «куда ты попал»
    раньше любого текста, а форма стоит поверх неё, а не под ней.
@@ -577,10 +540,6 @@ html[data-frame-origin] .auth-wrap { justify-content: flex-start; padding: 32px 
   font: 500 var(--fs-12)/1 var(--font-mono); color: var(--text-2);
   background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 4px 8px;
 }
-/* Акцент несёт рамка, текст остаётся нейтральным: --ink-text на --ink-soft
-   уходит под гейт на акцентах без запаса (см. блок 8 changes.md). */
-.chip-ink { background: var(--ink-soft); border-color: var(--ink); color: var(--text); }
-
 /* ---- Карточка удостоверения ----------------------------------------------
    Цитата формы документа, а не имитация: пропорция ID-1, машинная зона,
    уголок как у знака. Ни герба, ни голограмм, ни защитной сетки.             */
@@ -698,9 +657,6 @@ html[data-frame-origin] .auth-wrap { justify-content: flex-start; padding: 32px 
   transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
 }
 .tile:hover { border-color: var(--line-strong); background: var(--surface-2); }
-.tile-ico { flex: none; display: flex; width: 34px; height: 34px; align-items: center; justify-content: center;
-  border-radius: var(--radius-s); background: var(--surface-2); color: var(--text-2); }
-.tile-ico-warn { background: var(--warning-bg); color: var(--warning); }
 .tile-main { min-width: 0; flex: 1; }
 /* display: block обязателен: это <span> внутри обычного блока, и без него
    заголовок с подписью рисуются одним слитным прогоном. */
@@ -934,9 +890,6 @@ html[data-frame-origin] .auth-wrap { justify-content: flex-start; padding: 32px 
 .rel-item:hover { border-color: var(--line-strong); background: var(--surface-2); }
 .rel-item > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rel-item .badge { flex: none; }
-/* Счётчик вместо перечисления, когда объектов больше, чем помещается */
-.rel-more { color: var(--text-3); font-size: var(--fs-13); align-self: center; white-space: nowrap; }
-
 /* Строка истории: кто, что и когда. Одна и та же на всех объектах. */
 .hist { display: grid; gap: 0; }
 .hist-row {

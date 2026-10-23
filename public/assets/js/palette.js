@@ -4,16 +4,25 @@
 (function () {
   'use strict';
 
-  var root = null, input = null, list = null, items = [], cursor = 0, timer = null, lastQuery = null;
+  var root = null, input = null, list = null, items = [], cursor = 0, timer = null, lastQuery = null, seq = 0;
+
+  /* Подписи — на языке страницы (v5.0): словарь кладёт js_i18n(). */
+  function L(key, fallback) { return (window.ssoI18n && window.ssoI18n[key]) || fallback; }
+  /* Спрайт — тем же адресом, что у иконок страницы (с ?v=): воркер отдаёт
+     /assets/ из кэша, и голый адрес держал бы прежний спрайт после выпуска. */
+  function sprite() {
+    var u = document.querySelector('use[href*="icons.svg"]');
+    return u ? u.getAttribute('href').split('#')[0] : '/assets/icons.svg';
+  }
 
   function build() {
     root = document.createElement('div');
     root.className = 'palette-backdrop';
     root.innerHTML =
-      '<div class="palette" role="dialog" aria-modal="true" aria-label="Поиск по системе">' +
+      '<div class="palette" role="dialog" aria-modal="true" aria-label="' + esc(L('paletteTitle', 'Поиск по системе')) + '">' +
       '  <div class="palette-head">' +
-      '    <svg class="icon icon-muted" width="18" height="18" aria-hidden="true"><use href="/assets/icons.svg#i-search"></use></svg>' +
-      '    <input class="palette-input" type="text" placeholder="Раздел, пользователь, портал или действие…" autocomplete="off" spellcheck="false">' +
+      '    <svg class="icon icon-muted" width="18" height="18" aria-hidden="true"><use href="' + sprite() + '#i-search"></use></svg>' +
+      '    <input class="palette-input" type="text" placeholder="' + esc(L('paletteHint', 'Раздел, пользователь, портал или действие…')) + '" autocomplete="off" spellcheck="false">' +
       '    <kbd class="palette-kbd">Esc</kbd>' +
       '  </div>' +
       '  <div class="palette-list" role="listbox"></div>' +
@@ -55,16 +64,23 @@
         '<div class="skeleton skeleton-line w-60"></div><div class="skeleton skeleton-line"></div>' +
         '<div class="skeleton skeleton-line w-40"></div></div>';
     }
+    /* Ответы приходят не по порядку (v5.0): «а» могло ответить позже «ад» и
+       затереть его выдачу. Рисуем только ответ на последний запрос. */
+    var mine = ++seq;
     fetch('/search?q=' + encodeURIComponent(q), { credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' } })
-      .then(function (r) { return r.json(); })
-      .then(function (j) { render(j.groups || []); })
-      .catch(function () { list.innerHTML = '<div class="palette-empty">Не удалось получить результаты</div>'; });
+      .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+      .then(function (j) { if (mine === seq) render(j.groups || []); })
+      .catch(function () {
+        if (mine !== seq) return;
+        lastQuery = null;
+        list.innerHTML = '<div class="palette-empty">' + esc(L('paletteFailed', 'Не удалось получить результаты')) + '</div>';
+      });
   }
 
   function render(groups) {
     items = [];
     if (!groups.length) {
-      list.innerHTML = '<div class="palette-empty">Ничего не нашлось</div>';
+      list.innerHTML = '<div class="palette-empty">' + esc(L('paletteNone', 'Ничего не нашлось')) + '</div>';
       return;
     }
     var html = '';
@@ -74,7 +90,7 @@
         var idx = items.length;
         items.push(it);
         html += '<a class="palette-item" role="option" data-idx="' + idx + '" href="' + esc(it.url) + '">' +
-          '<svg class="icon icon-muted" width="18" height="18" aria-hidden="true"><use href="/assets/icons.svg#i-' + esc(it.icon || 'chevron-right') + '"></use></svg>' +
+          '<svg class="icon icon-muted" width="18" height="18" aria-hidden="true"><use href="' + sprite() + '#i-' + esc(it.icon || 'chevron-right') + '"></use></svg>' +
           '<span class="palette-label">' + esc(it.label) + '</span>' +
           (it.hint ? '<span class="palette-hint">' + esc(it.hint) + '</span>' : '') +
           '</a>';
@@ -99,7 +115,9 @@
     else if (e.key === 'Enter') {
       e.preventDefault();
       var el = list.querySelector('.palette-item.is-cursor');
-      if (el) location.href = el.getAttribute('href');
+      /* Щелчком, а не location.href (v5.0): ссылку подхватывает подмена
+         страницы, и раздел открывается без перезагрузки. */
+      if (el) el.click();
     } else if (e.key === 'Escape') { e.preventDefault(); close(); }
   }
 

@@ -2850,6 +2850,63 @@ $mutations = [
         'to'    => "\$good = \$d >= 0;",
         'check' => 'tests/dashboard_stats.php',
     ],
+    /* v5.0: кабинет и админка без перезагрузки. */
+    [
+        'why'   => 'подгрузка при наведении снова запускает выгрузки и прозвон',
+        'file'  => 'public/assets/js/app.js',
+        'from'  => "|\\/(export|download|cancel|logout|lang|probe)(\\/|$)/i;",
+        'to'    => "|\\/(export|download|logout|lang)(\\/|$)/i;",
+        'check' => 'tests/app_swap.php',
+    ],
+    [
+        'why'   => 'ответ-файл или ошибка снова вставляются вместо экрана',
+        'file'  => 'public/assets/js/app.js',
+        'from'  => "if (!html || !res.r.ok || !appPath(path) ||",
+        'to'    => "if (!appPath(path) ||",
+        'check' => 'tests/app_swap.php',
+    ],
+    [
+        'why'   => 'островок после подмены отмечает прежний раздел',
+        'file'  => 'public/assets/js/app.js',
+        'from'  => "      ['.isle', '.dock'].forEach(function (sel) {",
+        'to'    => "      [].forEach(function (sel) {",
+        'check' => 'tests/app_swap.php',
+    ],
+    [
+        'why'   => 'тосты на подменённом экране снова не уходят',
+        'file'  => 'public/assets/js/app.js',
+        'from'  => "onPage(function () { document.querySelectorAll('.toast').forEach(function (t) {\n    if (t._ssoToast) return;",
+        'to'    => "(function () { document.querySelectorAll('.toast').forEach(function (t) {\n    if (t._ssoToast) return;",
+        'check' => 'tests/app_swap.php',
+    ],
+    [
+        'why'   => '«назад» во время перехода снова теряется',
+        'file'  => 'public/assets/js/app.js',
+        'from'  => "if (swapBusy) { if (!init) queued = { url: url, push: push }; return; }",
+        'to'    => "if (swapBusy) return;",
+        'check' => 'tests/app_swap.php',
+    ],
+    [
+        'why'   => 'высота окна во фрейме снова застывает на первом экране',
+        'file'  => 'public/assets/js/app.js',
+        'from'  => "      document.addEventListener('sso:page', watchSize);\n",
+        'to'    => "",
+        'check' => 'tests/app_swap.php',
+    ],
+    [
+        'why'   => 'поиск снова рисует запоздавший ответ',
+        'file'  => 'public/assets/js/palette.js',
+        'from'  => "if (mine === seq) render(j.groups || []);",
+        'to'    => "render(j.groups || []);",
+        'check' => 'tests/app_swap.php',
+    ],
+    [
+        'why'   => 'палитра снова говорит по-русски на английском интерфейсе',
+        'file'  => 'public/assets/js/palette.js',
+        'from'  => "esc(L('paletteNone', 'Ничего не нашлось'))",
+        'to'    => "'Ничего не нашлось'",
+        'check' => 'tests/app_swap.php',
+    ],
 ];
 
 if (in_array('--list', $argv, true)) {
