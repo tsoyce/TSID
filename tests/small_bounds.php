@@ -12,7 +12,10 @@
  *   · архив бэкапа не остаётся во временной папке;
  *   · журнал по адресу и счёт сессий идут по индексу; миграции — по одной;
  *   · вход по ключу идёт той же дорогой, что остальные (вебхук login.success),
- *     а ключ без проверки пользователя не заменяет включённую 2FA.
+ *     а ключ без проверки пользователя не заменяет включённую 2FA;
+ *   · админ портала видит в карточке человека только свой портал, а не его
+ *     доступы, сессии и журнал по всей системе; участник организации с
+ *     журналом одного портала не читает журнал организации целиком.
  *
  * Запуск: php tests/small_bounds.php  (нужен dev-сервер на :8710)
  */
@@ -34,6 +37,8 @@ $failed = 0;
 $stamp = bin2hex(random_bytes(3));
 $people = [];
 $hooks = [];
+$clients = [];
+$orgs = [];
 $jars = [];
 
 $person = static function (string $email, array $extra = []) use (&$people): int {
@@ -176,7 +181,49 @@ try {
     ok($st === 200 && ($b['redirect'] ?? '') !== '/login/2fa' && ($b['ok'] ?? false), 'ключ с PIN или биометрией — сразу вход',
         "$st " . json_encode($b, JSON_UNESCAPED_UNICODE));
     ok($hooked() === $was + 1, 'и вход по ключу шлёт login.success, как остальные');
+
+    echo "\n── Админ портала: карточка и журнал ──\n";
+    $mk = static function (string $name) use (&$clients, $stamp): int {
+        $slug = 'sb-' . count($clients) . '-' . $stamp;
+        [$cid] = \App\Models\Client::create(['name' => $name, 'slug' => $slug, 'base_url' => "https://$slug.example",
+            'redirect_uris' => ["https://$slug.example/cb"], 'post_logout_uris' => [], 'backchannel_uri' => null]);
+        $clients[] = (int)$cid;
+        return (int)$cid;
+    };
+    $mine = $mk("Свой портал $stamp");
+    $other = $mk("Чужой портал $stamp");
+    $p5 = $person("sb5-$stamp@test.local");
+    \App\Models\Access::grant($p5, $mine, null, 'active');
+    \App\Models\Access::grant($p5, $other, null, 'active');
+    $d = $person("sb6-$stamp@test.local");
+    \App\Models\Access::grant($d, $mine, null, 'active');
+    foreach (['client_admin', 'auditor'] as $slug) {
+        \App\Models\Role::assignScoped($d, (int)\App\Models\Role::findBySlug($slug)['id'], \App\Core\Scope::client($mine));
+    }
+    $org = \App\Models\Org::create("Организация $stamp", null, null);
+    $orgs[] = $org;
+    DB::update('clients', ['org_id' => $org], 'id = ?', [$mine]);
+    \App\Models\Org::addMember($org, $d, 'member', null);
+    $marker = 'sb-org-secret-' . $stamp;
+    DB::insert('audit_log', ['event' => 'org.updated', 'org_id' => $org, 'meta' => json_encode(['name' => $marker]),
+        'created_at' => now()]);
+    $jd = $jar('delegate');
+    $signIn("sb6-$stamp@test.local", $jd);
+    [$st, $page] = http('GET', SSO . "/admin/users/$p5/access", [], [], $jd);
+    ok($st === 200 && str_contains($page, "Свой портал $stamp") && !str_contains($page, "Чужой портал $stamp"),
+        'в «Сервисах» человека — только свой портал', "код $st");
+    [$st] = http('GET', SSO . "/admin/users/$p5/sessions", [], [], $jd);
+    ok($st === 403, 'сессии человека по всей системе — не админу портала', "код $st");
+    [$st, $page] = http('GET', SSO . "/admin/users/$p5", [], [], $jd);
+    ok($st === 200 && !str_contains($page, "/admin/users/$p5/sessions"), 'и раздела «Сессии» у него в карточке нет');
+    /* Токен — со страницы профиля: у одной области переключателя в шапке нет. */
+    [, $dash] = http('GET', SSO . '/profile/settings', [], [], $jd);
+    http('POST', SSO . '/admin/context', ['_csrf' => csrfOf($dash), 'scope' => 'org:' . $org], [], $jd);
+    [$st, $page] = http('GET', SSO . '/admin/logs', [], [], $jd);
+    ok($st === 200 && str_contains($page, "Организация $stamp") && !str_contains($page, $marker), 'журнал организации целиком участнику с журналом портала не виден', "код $st");
 } finally {
+    foreach ($orgs as $o) \App\Models\Org::purge($o);
+    foreach ($clients as $c) \App\Models\Client::purge($c);
     foreach ($hooks as $h) {
         DB::run('DELETE FROM {webhook_deliveries} WHERE webhook_id = ?', [$h]);
         DB::run('DELETE FROM {webhooks} WHERE id = ?', [$h]);

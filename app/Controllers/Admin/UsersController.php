@@ -122,10 +122,40 @@ final class UsersController extends AdminBase
     {
         $id = (int)$user['id'];
         return [
-            'access' => count(Access::forUser($id)),
-            'roles' => count(Role::ofUser($id)),
-            'sessions' => count(SessionModel::activeForUser($id)),
+            'access' => count($this->inScope(Access::forUser($id))),
+            'roles' => count($this->scopedGrants($id)),
+            'sessions' => $this->permittedClientIds() === null ? count(SessionModel::activeForUser($id)) : 0,
         ];
+    }
+
+    /**
+     * Строки только из портала делегированного админа (v5.5).
+     *
+     * Админ портала открывал карточку своего человека и видел всё, что у того
+     * есть по системе: чужие порталы, роли в них. Добавить в портал можно
+     * любого по почте — так карточка становилась окном в чужие данные.
+     */
+    private function inScope(array $rows, string $key = 'client_id'): array
+    {
+        $scope = $this->permittedClientIds();
+        if ($scope === null) return $rows;
+        return array_values(array_filter($rows,
+            static fn(array $r): bool => in_array((int)($r[$key] ?? 0), $scope, true)));
+    }
+
+    /** Выдачи ролей с областью; админу портала — только касающиеся его порталов. */
+    private function scopedGrants(int $userId): array
+    {
+        if (!\App\Core\AccessResolver::ready()) return [];
+        $rows = \App\Core\DB::all(
+            'SELECT r.id, r.slug, r.name, r.access_level, r.client_id, ur.scope_type, ur.scope_id
+               FROM {user_roles} ur JOIN {roles} r ON r.id = ur.role_id
+              WHERE ur.user_id = ? ORDER BY r.access_level DESC', [$userId]);
+        $scope = $this->permittedClientIds();
+        if ($scope === null) return $rows;
+        return array_values(array_filter($rows, static fn(array $g): bool =>
+            in_array((int)$g['client_id'], $scope, true)
+            || ($g['scope_type'] === \App\Core\Scope::CLIENT && in_array((int)$g['scope_id'], $scope, true))));
     }
 
     private function personPage(array $user, string $section, array $data): never
@@ -155,7 +185,7 @@ final class UsersController extends AdminBase
         $user = $this->person($id);
         $scope = $this->permittedClientIds();
         $this->personPage($user, 'access', [
-            'access' => Access::forUser((int)$user['id']),
+            'access' => $this->inScope(Access::forUser((int)$user['id'])),
             'clients' => $scope === null ? Client::all()
                 : array_filter(Client::all(), fn($c) => in_array((int)$c['id'], $scope, true)),
         ]);
@@ -171,18 +201,14 @@ final class UsersController extends AdminBase
             'allRoles' => \App\Core\RoleOffer::inScope(\App\Core\Scope::system()),
             /* Область у каждой выдачи: без неё «роль есть» ничего не говорит
                о том, где она действует (SCOPES §2). */
-            'grants' => \App\Core\AccessResolver::ready()
-                ? \App\Core\DB::all(
-                    'SELECT r.id, r.slug, r.name, r.access_level, ur.scope_type, ur.scope_id
-                       FROM {user_roles} ur JOIN {roles} r ON r.id = ur.role_id
-                      WHERE ur.user_id = ? ORDER BY r.access_level DESC', [(int)$user['id']])
-                : [],
+            'grants' => $this->scopedGrants((int)$user['id']),
         ]);
     }
 
     public function sessions(string $id): never
     {
         $user = $this->person($id);
+        $this->requireGlobalAdmin();
         $this->personPage($user, 'sessions', [
             'sessions' => SessionModel::activeForUser((int)$user['id']),
         ]);
@@ -203,6 +229,7 @@ final class UsersController extends AdminBase
     public function audit(string $id): never
     {
         $user = $this->person($id, 'logs.read');
+        $this->requireGlobalAdmin();
         $this->personPage($user, 'audit', [
             /* История объекта — тем же читателем, что у портала и организации.
                У человека она двусторонняя: и что делали с ним, и что делал он. */

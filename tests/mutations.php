@@ -2392,6 +2392,34 @@ $mutations = [
         'to'    => "        if (\$auditEvent !== 'login.passkey') WebhookDispatcher::emit('login.success', [",
         'check' => 'tests/small_bounds.php',
     ],
+    [
+        'why'   => 'админ портала снова видит в карточке человека все его порталы',
+        'file'  => 'app/Controllers/Admin/UsersController.php',
+        'from'  => "            'access' => \$this->inScope(Access::forUser((int)\$user['id'])),",
+        'to'    => "            'access' => Access::forUser((int)\$user['id']),",
+        'check' => 'tests/small_bounds.php',
+    ],
+    [
+        'why'   => 'админ портала снова видит сессии человека по всей системе',
+        'file'  => 'app/Controllers/Admin/UsersController.php',
+        'from'  => "        \$user = \$this->person(\$id);\n        \$this->requireGlobalAdmin();",
+        'to'    => "        \$user = \$this->person(\$id);",
+        'check' => 'tests/small_bounds.php',
+    ],
+    [
+        'why'   => 'раздел только для глобального админа снова виден в карточке админу портала',
+        'file'  => 'app/Core/ObjectMap.php',
+        'from'  => "            if (!empty(\$s['global']) && !Auth::isAdmin()) continue;\n",
+        'to'    => "",
+        'check' => 'tests/small_bounds.php',
+    ],
+    [
+        'why'   => 'участник организации с журналом портала снова читает журнал организации целиком',
+        'file'  => 'app/Controllers/Admin/LogsController.php',
+        'from'  => "            && (\$scope === null || \\App\\Core\\Auth::can('logs.read', \\App\\Core\\Scope::org((int)\$ctx->id)));",
+        'to'    => ";",
+        'check' => 'tests/small_bounds.php',
+    ],
     /* v4.87: окно входа без лишних окон — Telegram переходом, вкладка вместо окна, раскладка. */
     [
         'why'   => 'Telegram снова открывается страницей с виджетом, которая открывает ещё окно',
