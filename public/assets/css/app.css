@@ -1726,6 +1726,33 @@ table.table { width: 100%; border-collapse: collapse; font-size: var(--fs-14); }
 .rank-track { grid-column: 1 / -1; height: 4px; border-radius: 2px; background: var(--surface-2); overflow: hidden; }
 .rank-track i { display: block; height: 100%; border-radius: 2px; background: var(--series-1); transform-origin: left; }
 
+/* Аналитика (v5.1). Подпись строки без ссылки — тот же обрез, что у ссылки. */
+.rank-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank-label .chart-dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 8px; }
+.rank-track i.s2 { background: var(--series-2); } .rank-track i.s3 { background: var(--series-3); }
+.rank-track i.s4 { background: var(--series-4); }
+
+.funnel { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+.funnel li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; font-size: var(--fs-14); }
+.funnel-conv { color: var(--text-3); font-size: var(--fs-13); margin-left: 8px; }
+.funnel-bar { grid-column: 1 / -1; height: 12px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+/* Шаги — одна величина на убыль, а не разные ряды: один цвет. */
+.funnel-bar i { display: block; height: 100%; border-radius: 4px; background: var(--series-1); transform-origin: left; }
+
+/* Тепловая карта: один оттенок, пять ступеней от фона к --series-1.
+   Ступени — смесь с фоном, поэтому тёмная тема получает свои сами. */
+.heat-wrap { overflow-x: auto; }
+.heat { display: grid; grid-template-columns: 28px repeat(24, minmax(16px, 1fr)); gap: 4px; min-width: 560px; }
+.heat-h { font-size: var(--fs-12); color: var(--text-3); text-align: left; }
+.heat-d { font-size: var(--fs-12); color: var(--text-2); align-self: center; }
+.heat-cell { display: block; height: 20px; border-radius: 4px; background: var(--surface-2); }
+.heat-cell.l1 { background: color-mix(in srgb, var(--series-1) 22%, var(--surface-2)); }
+.heat-cell.l2 { background: color-mix(in srgb, var(--series-1) 45%, var(--surface-2)); }
+.heat-cell.l3 { background: color-mix(in srgb, var(--series-1) 70%, var(--surface-2)); }
+.heat-cell.l4 { background: var(--series-1); }
+.heat-legend { display: flex; align-items: center; gap: 4px; margin-top: 12px; flex-wrap: wrap; }
+.heat-legend .heat-cell { width: 12px; height: 12px; border-radius: 2px; }
+
 .ring-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
 .ring { width: 112px; height: 112px; flex: none; }
 .ring circle { fill: none; stroke-width: 12; }
@@ -1738,7 +1765,7 @@ table.table { width: 100%; border-collapse: collapse; font-size: var(--fs-14); }
    из видимого конечного состояния назад — без JS страница уже полная. */
 @media (prefers-reduced-motion: no-preference) {
   .chart-bars .bar-col { animation: bar-rise var(--dur-slow) var(--ease-out) both; transform-box: fill-box; transform-origin: bottom; }
-  .rank-track i { animation: bar-grow 600ms var(--ease-out) both; }
+  .rank-track i, .funnel-bar i { animation: bar-grow 600ms var(--ease-out) both; }
   .ring-value { animation: ring-draw 900ms var(--ease-out) both; }
 }
 @keyframes bar-rise { from { transform: scaleY(0); } }

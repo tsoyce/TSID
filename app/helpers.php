@@ -2000,6 +2000,27 @@ function logs_tabs(string $current): string
 }
 
 /**
+ * Вкладки «Пульт | Аналитика» и переключатель периода (v5.1). Период едет
+ * с вкладки на вкладку: смотрел «30 дн.» на пульте — и аналитика за 30.
+ */
+function dash_head(string $current, int $days, string $title): string
+{
+    $base = $current === 'analytics' ? '/admin/analytics' : '/admin';
+    /* Период ссылками, а не формой: адрес можно отправить, «назад» работает. */
+    $out = '<div class="page-head"><h1>' . esc($title) . '</h1><nav class="period-switch" aria-label="' . esc(t('Период')) . '">';
+    foreach (App\Core\Stats::PERIODS as $p) {
+        $out .= '<a href="' . $base . '?p=' . $p . '"' . ($p === $days ? ' aria-current="true"' : '') . '>'
+            . esc($p === 1 ? t('Сегодня') : t(':n дн.', ['n' => $p])) . '</a>';
+    }
+    $out .= '</nav>';
+    $tabs = '<div class="tabs mb-16">';
+    foreach (['pult' => ['/admin', t('Пульт')], 'analytics' => ['/admin/analytics', t('Аналитика')]] as $key => [$href, $label]) {
+        $tabs .= '<a' . ($key === $current ? ' class="active" aria-current="page"' : '') . ' href="' . $href . '?p=' . $days . '">' . esc($label) . '</a>';
+    }
+    return $out . '</div>' . $tabs . '</div>';
+}
+
+/**
  * Выбор одного из нескольких — карточками с образцом (v4.71).
  *
  * Для выбора, который надо ВИДЕТЬ, а не читать: шрифт показывается шрифтом,

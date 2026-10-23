@@ -2907,6 +2907,77 @@ $mutations = [
         'to'    => "'Ничего не нашлось'",
         'check' => 'tests/app_swap.php',
     ],
+    /* v5.1: аналитика входа и регистрации. */
+    [
+        'why'   => 'регистрация снова не пишет ввод почты',
+        'file'  => 'app/Controllers/RegistrationController.php',
+        'from'  => "        Audit::log('signup.started', ['actor' => null]);\n",
+        'to'    => "",
+        'check' => 'tests/analytics.php',
+    ],
+    [
+        'why'   => 'подтверждение по ссылке снова не попадает в воронку',
+        'file'  => 'app/Controllers/RegistrationController.php',
+        'from'  => "        Audit::log('signup.verified', ['actor' => null, 'meta' => ['by' => 'link']]);\n",
+        'to'    => "",
+        'check' => 'tests/analytics.php',
+    ],
+    [
+        'why'   => 'часы недели снова по UTC',
+        'file'  => 'app/Core/Stats.php',
+        'from'  => "\$t = (new DateTimeImmutable(\$r['h'] . ':00:00', new DateTimeZone('UTC')))->setTimezone(\$tz);",
+        'to'    => "\$t = new DateTimeImmutable(\$r['h'] . ':00:00', new DateTimeZone('UTC'));",
+        'check' => 'tests/analytics.php',
+    ],
+    [
+        'why'   => 'неудача без причины снова пропадает',
+        'file'  => 'app/Core/Stats.php',
+        'from'  => "\$why = \$why === '' ? 'other' : \$why;",
+        'to'    => "if (\$why === '') continue;",
+        'check' => 'tests/analytics.php',
+    ],
+    [
+        'why'   => 'незнакомая система снова теряется',
+        'file'  => 'app/Core/Stats.php',
+        'from'  => "\$os = \$parts[1] ?? t('Другая');",
+        'to'    => "if (!isset(\$parts[1])) continue; \$os = \$parts[1];",
+        'check' => 'tests/analytics.php',
+    ],
+    [
+        'why'   => 'аналитика снова открыта любому админу',
+        'file'  => 'app/Controllers/Admin/DashboardController.php',
+        'from'  => "    public function analytics(): never\n    {\n        \$this->requireGlobalAdmin();\n",
+        'to'    => "    public function analytics(): never\n    {\n",
+        'check' => 'tests/analytics.php',
+    ],
+    [
+        'why'   => 'период снова уводит с аналитики на пульт',
+        'file'  => 'app/helpers.php',
+        'from'  => "\$base = \$current === 'analytics' ? '/admin/analytics' : '/admin';",
+        'to'    => "\$base = '/admin';",
+        'check' => 'tests/analytics.php',
+    ],
+    [
+        'why'   => 'пустая воронка снова молчит',
+        'file'  => 'templates/admin/analytics.php',
+        'from'  => "<?php if (\$funnel[0]['n'] === 0 && \$funnel[2]['n'] > 0): ?>",
+        'to'    => "<?php if (false): ?>",
+        'check' => 'tests/analytics.php',
+    ],
+    [
+        'why'   => 'хвост браузеров снова на весь экран',
+        'file'  => 'templates/admin/analytics.php',
+        'from'  => "    if (count(\$rows) <= \$n + 1) return \$rows;",
+        'to'    => "    return \$rows;",
+        'check' => 'tests/analytics.php',
+    ],
+    [
+        'why'   => 'ступени тепловой карты снова не по максимуму',
+        'file'  => 'templates/admin/analytics.php',
+        'from'  => "(int)ceil(\$n / \$heatMax * 4)",
+        'to'    => "min(4, \$n)",
+        'check' => 'tests/analytics.php',
+    ],
 ];
 
 if (in_array('--list', $argv, true)) {

@@ -180,4 +180,75 @@ final class Stats
         if ($prev === 0) return null;
         return (int)round(($now - $prev) / $prev * 100);
     }
+
+    /**
+     * Воронка регистрации (v5.1): ввели почту → подтвердили → завершили.
+     * События шагов пишутся с 5.1 — раньше их не было, и до первых данных
+     * воронка пустая, а не выдуманная.
+     * @return list<array{key:string, n:int}>
+     */
+    public static function funnel(string $since): array
+    {
+        $out = [];
+        foreach (['signup.started', 'signup.verified', 'register'] as $e) {
+            $out[] = ['key' => $e, 'n' => self::count('audit_log', 'event = ?', [$e], $since)];
+        }
+        return $out;
+    }
+
+    /**
+     * Входы по дням недели и часам, по местному времени: [1..7][0..23] => n
+     * (1 — понедельник). Группирует база по часам UTC, раскладываем здесь.
+     */
+    public static function heatmap(string $since): array
+    {
+        $grid = array_fill(1, 7, array_fill(0, 24, 0));
+        $rows = DB::all('SELECT SUBSTR(created_at, 1, 13) AS h, COUNT(*) AS n FROM {audit_log} WHERE ' . self::loginIn()
+            . ' AND created_at >= ? GROUP BY SUBSTR(created_at, 1, 13)', array_merge(self::LOGIN_EVENTS, [$since]));
+        $tz = self::tz();
+        foreach ($rows as $r) {
+            $t = (new DateTimeImmutable($r['h'] . ':00:00', new DateTimeZone('UTC')))->setTimezone($tz);
+            $grid[(int)$t->format('N')][(int)$t->format('G')] += (int)$r['n'];
+        }
+        return $grid;
+    }
+
+    /**
+     * Почему вход не удался: причина из meta login.fail.
+     * Группирует база по самой строке meta — одинаковые причины пишутся
+     * одинаковым JSON, — разбираем уже горстку строк.
+     * @return array<string,int> причина => n, по убыванию
+     */
+    public static function failReasons(string $since): array
+    {
+        $out = [];
+        foreach (DB::all('SELECT meta, COUNT(*) AS n FROM {audit_log} WHERE event = ? AND created_at >= ? GROUP BY meta ORDER BY n DESC LIMIT 50',
+            ['login.fail', $since]) as $r) {
+            $why = (string)(json_decode((string)$r['meta'], true)['reason'] ?? '');
+            $why = $why === '' ? 'other' : $why;
+            $out[$why] = ($out[$why] ?? 0) + (int)$r['n'];
+        }
+        arsort($out);
+        return $out;
+    }
+
+    /**
+     * Чем входят: браузер и система по user-agent успешных входов. Подпись —
+     * device_label(), та же, что в сессиях и письмах о новом устройстве.
+     * @return array{browsers: array<string,int>, systems: array<string,int>}
+     */
+    public static function devices(string $since): array
+    {
+        $b = $o = [];
+        foreach (DB::all('SELECT user_agent, COUNT(*) AS n FROM {audit_log} WHERE ' . self::loginIn()
+            . ' AND created_at >= ? GROUP BY user_agent ORDER BY n DESC LIMIT 500', array_merge(self::LOGIN_EVENTS, [$since])) as $r) {
+            $parts = explode(' · ', device_label((string)$r['user_agent']));
+            $b[$parts[0]] = ($b[$parts[0]] ?? 0) + (int)$r['n'];
+            $os = $parts[1] ?? t('Другая');
+            $o[$os] = ($o[$os] ?? 0) + (int)$r['n'];
+        }
+        arsort($b);
+        arsort($o);
+        return ['browsers' => $b, 'systems' => $o];
+    }
 }

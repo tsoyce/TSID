@@ -96,6 +96,31 @@ final class DashboardController extends AdminBase
     }
 
     /**
+     * «Аналитика» (v5.1): как входят и регистрируются — то, что пульт
+     * показывает одной цифрой, здесь разложено: воронка, часы, причины
+     * неудач, браузеры и системы. Тот же период, те же местные сутки.
+     */
+    public function analytics(): never
+    {
+        $this->requireGlobalAdmin();
+        $days = Stats::period($_GET['p'] ?? null);
+        [$since] = Stats::bounds($days);
+        /* Часы недели за сутки не сложатся в картину — для «сегодня» берём неделю. */
+        $heatSince = $days < 7 ? Stats::dayStart(6) : $since;
+        $byMethod = Stats::loginsByMethod($days);
+        View::render('admin/analytics', [
+            'pageTitle' => t('Аналитика'),
+            'days' => $days,
+            'funnel' => Stats::funnel($since),
+            'heat' => Stats::heatmap($heatSince),
+            'heatDays' => max(7, $days),
+            'reasons' => Stats::failReasons($since),
+            'devices' => Stats::devices($since),
+            'methods' => array_map('array_sum', $byMethod),
+        ]);
+    }
+
+    /**
      * «Требует внимания» (v4.99): только то, что не в порядке, — со ссылкой,
      * куда идти. Раньше здоровье стояло списком из шести зелёных строк, и
      * единственная красная терялась среди них.

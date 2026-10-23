@@ -189,6 +189,7 @@ $router->get('/offline', [PwaController::class, 'offline'], ['api']);
    или предзагрузка браузера наткнуться не должны. */
 $router->post('/admin/context', [DashboardController::class, 'context'], ['admin']);
 $router->get('/admin', [DashboardController::class, 'index'], ['admin']);
+$router->get('/admin/analytics', [DashboardController::class, 'analytics'], ['admin']);
 $router->post('/admin/onboarding/hide', [DashboardController::class, 'hideOnboarding'], ['admin']);
 $router->get('/admin/users', [UsersController::class, 'index'], ['admin']);
 /* Похоже на ботов (v4.95) — до /admin/users/{id}, иначе {id} перехватит «bots». */

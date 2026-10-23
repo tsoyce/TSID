@@ -16,15 +16,7 @@ $delta = static function (array $pair, bool $upIsGood) use ($prevLabel): string 
 $fmt = static fn(int $n): string => number_format($n, 0, '', ' ');
 $methods = Stats::methods();
 ?>
-<div class="page-head">
-  <h1><?= esc(t('Дашборд')) ?></h1>
-  <?php /* Период ссылками, а не формой: адрес можно отправить, «назад» работает. */ ?>
-  <nav class="period-switch" aria-label="<?= esc(t('Период')) ?>">
-    <?php foreach (Stats::PERIODS as $p): ?>
-    <a href="/admin?p=<?= $p ?>"<?= $p === $days ? ' aria-current="true"' : '' ?>><?= esc($p === 1 ? t('Сегодня') : t(':n дн.', ['n' => $p])) ?></a>
-    <?php endforeach; ?>
-  </nav>
-</div>
+<?= dash_head('pult', $days, t('Дашборд')) ?>
 
 <?php if (!$onboarding['hidden'] && $onboarding['steps'] !== []): ?>
 <?php /* Свёрнуты в одну строку (v4.99): развёрнутые, они занимали весь первый

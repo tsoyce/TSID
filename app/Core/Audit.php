@@ -130,6 +130,8 @@ final class Audit
         'logout' => 'Выход',
         'logout.everywhere' => 'Выход на всех устройствах',
         'register' => 'Регистрация',
+        'signup.started' => 'Регистрация: введена почта',
+        'signup.verified' => 'Регистрация: почта подтверждена',
         'register.refused' => 'Отказ в регистрации: устаревший браузер',
         'email.verify' => 'Почта подтверждена',
         'email.verify_resent' => 'Письмо подтверждения отправлено ещё раз',
