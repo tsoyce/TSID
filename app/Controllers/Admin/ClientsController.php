@@ -34,7 +34,7 @@ final class ClientsController extends AdminBase
      * этого области и заводились (SCOPES §2). Без организации сервис ничей, и
      * заводить такой вправе только администратор системы.
      */
-    /** v4.98: адрес http(s) с хостом — или null. Один на создание и правку. */
+    /** v4.97.2: адрес http(s) с хостом — или null. Один на создание и правку. */
     private static function httpUrl(string $url): ?string
     {
         return preg_match('~^https?://[^\s/?#]+~i', $url) === 1 && !preg_match('~\s~', $url) ? $url : null;
@@ -733,7 +733,7 @@ final class ClientsController extends AdminBase
             Flash::error(t('Обложка: нужна картинка JPEG, PNG, GIF или WebP до 5 МБ.'));
         }
         $baseUrl = rtrim(trim((string)($_POST['base_url'] ?? $client['base_url'])), '/');
-        /* v4.98: та же проверка, что при создании. Без неё в «Реквизитах»
+        /* v4.97.2: та же проверка, что при создании. Без неё в «Реквизитах»
            сохранялся javascript:… или пустая строка — и уходил в href
            кабинета, письма и редирект приглашения. */
         $urlError = null;
@@ -774,7 +774,7 @@ final class ClientsController extends AdminBase
         if ($orgNew !== null && \App\Models\Org::find($orgNew) === null) {
             $orgNew = $client['org_id'] === null ? null : (int)$client['org_id'];
         }
-        /* v4.98: сменить владельца — то же право, что завести портал в нём
+        /* v4.97.2: сменить владельца — то же право, что завести портал в нём
            (mayCreate). Админ портала уводил его в любую организацию или
            делал ничьим — мимо владельца-организации. */
         $orgWas = $client['org_id'] === null ? null : (int)$client['org_id'];
@@ -1066,7 +1066,7 @@ final class ClientsController extends AdminBase
                     : t('Событие поставлено в очередь — результат виден во вкладке «Доставка».'));
                 break;
             case 'retry_event':
-                /* v4.98: событие — только этого портала: номер приходит из
+                /* v4.97.2: событие — только этого портала: номер приходит из
                    формы, и админ портала A перезапускал доставки портала B. */
                 $eventId = (int)($_POST['event_id'] ?? 0);
                 if (!\App\Core\DB::val('SELECT 1 FROM {client_events} WHERE id = ? AND client_id = ?',
@@ -1078,7 +1078,7 @@ final class ClientsController extends AdminBase
 
             case 'create_invite':
                 $email = mb_strtolower(trim((string)($_POST['invite_email'] ?? '')));
-                /* v4.98: роль из POST сверяется с тем, что в этом портале можно
+                /* v4.97.2: роль из POST сверяется с тем, что в этом портале можно
                    выдать, — список в форме лишь занавеска (см. RoleOffer). */
                 $inviteRole = (int)($_POST['invite_role'] ?? 0) ?: null;
                 if ($inviteRole !== null

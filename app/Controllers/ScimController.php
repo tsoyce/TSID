@@ -169,7 +169,7 @@ final class ScimController
             if (isset($map[$path])) $patch[$map[$path]] = $this->str($value, 150);
         }
         unset($patch['']);
-        /* v4.98: выключение — общей блокировкой: с сессиями, refresh-токенами
+        /* v4.97.2: выключение — общей блокировкой: с сессиями, refresh-токенами
            и оповещением порталов; суперадмина — никогда. */
         $block = ($patch['status'] ?? '') === 'blocked';
         if ($block && \App\Core\UserBlock::forbidden((int)$u['id'])) {
@@ -285,7 +285,7 @@ final class ScimController
     {
         $this->auth('users:write');
         $org = $this->mustOrg($id);
-        /* v4.98: purge, как в админке и API: голый delete оставлял выдачи
+        /* v4.97.2: purge, как в админке и API: голый delete оставлял выдачи
            ролей на org:X и порталы с org_id = X — админы удалённой
            организации сохраняли доступ к её порталам. */
         Org::purge((int)$org['id']);

@@ -47,7 +47,7 @@ final class RefreshToken
     {
         $row = DB::row('SELECT * FROM {refresh_tokens} WHERE token_hash = ?', [Crypto::hashToken($token)]);
         if (!$row) return [null, null];
-        /* v4.98: чужой клиент токен не трогает. Сверка стояла после ротации, и
+        /* v4.97.2: чужой клиент токен не трогает. Сверка стояла после ротации, и
            один запрос с утёкшим токеном помечал его использованным — следующее
            законное обновление выглядело повтором и отзывало всю семью. */
         if ((int)$row['client_id'] !== $clientDbId) return [null, null];

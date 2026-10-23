@@ -140,7 +140,7 @@ final class Markdown
                 $safe = preg_match('~^(https?://|mailto:|/)~i', $href) === 1;
                 if (!$safe) return $m[1];   // подозрительная ссылка — остаётся текстом
                 /* Внешние ссылки уводят с сайта: rel обязателен, иначе открытая
-                   страница получает доступ к window.opener. v4.98: «//host» —
+                   страница получает доступ к window.opener. v4.97.2: «//host» —
                    тоже внешняя (схема от страницы), и HTTP://… — тоже. */
                 $ext = preg_match('~^(https?:)?//~i', $href) === 1;
                 return '<a href="' . $href . '"'

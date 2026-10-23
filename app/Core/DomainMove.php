@@ -89,7 +89,7 @@ final class DomainMove
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => false,   // разрешённый хост первым же 302 увёл бы куда угодно
-            /* v4.98: только http(s) — адрес задаёт админ портала, а libcurl
+            /* v4.97.2: только http(s) — адрес задаёт админ портала, а libcurl
                умеет gopher://, dict://, file://: нагрузка во внутреннюю сеть. */
             CURLOPT_PROTOCOLS => CURLPROTO_HTTPS | CURLPROTO_HTTP,
             CURLOPT_CONNECTTIMEOUT => 3,

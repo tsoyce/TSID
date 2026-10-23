@@ -410,7 +410,7 @@ final class AuthController
 
     /* ---- Сервисные переходы по токенам ---- */
 
-    /** GET — только кнопка: по ссылке из письма ходят и сканеры (v4.98, как /verify). */
+    /** GET — только кнопка: по ссылке из письма ходят и сканеры (v4.97.2, как /verify). */
     public function showCancelDelete(string $token): never
     {
         if (!OneTimeToken::peek($token, 'account_delete')) ErrorPage::render(404);
@@ -457,7 +457,7 @@ final class AuthController
 
     public function revertEmailChange(string $token): never
     {
-        /* email_change — ссылки, выданные до v4.98: неделю они ещё живы. */
+        /* email_change — ссылки, выданные до v4.97.2: неделю они ещё живы. */
         $row = OneTimeToken::consume($token, 'email_revert') ?? OneTimeToken::consume($token, 'email_change');
         if (!$row || ($row['payload']['kind'] ?? '') !== 'revert') ErrorPage::render(404);
         $user = User::find((int)$row['user_id']);
@@ -489,7 +489,7 @@ final class AuthController
             Flash::info('Войдите, чтобы получить права администратора портала.');
             redirect('/login');
         }
-        /* v4.98: гасит тот, кому досталась строка, — два одновременных
+        /* v4.97.2: гасит тот, кому досталась строка, — два одновременных
            открытия ссылки делали администраторами портала двоих. */
         if (!OneTimeToken::consume($token, 'client_setup')) {
             ErrorPage::render(404, ['title' => 'Ссылка недействительна',

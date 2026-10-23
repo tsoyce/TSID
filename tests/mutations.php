@@ -2166,7 +2166,7 @@ $mutations = [
         'to'    => "",
         'check' => 'tests/login_look.php',
     ],
-    /* v4.98: ревизия кода — границы прав (access_bounds) и вход с токенами (login_bounds). */
+    /* v4.97.2: ревизия кода — границы прав (access_bounds) и вход с токенами (login_bounds). */
     [
         'why'   => 'приглашение снова выдаёт роль без client_id на всю систему',
         'file'  => 'app/Models/Invite.php',

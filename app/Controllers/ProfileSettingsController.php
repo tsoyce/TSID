@@ -100,7 +100,7 @@ final class ProfileSettingsController
     public function downloadExport(string $token): never
     {
         $job = \App\Core\DataExport::findByToken($token);
-        /* v4.98: выгрузка — только своя. Ссылка из письма, попавшая к другому
+        /* v4.97.2: выгрузка — только своя. Ссылка из письма, попавшая к другому
            вошедшему (пересланное письмо), отдавала ему чужой архив. */
         if ($job && (int)$job['user_id'] !== (int)\App\Core\Auth::id()) $job = null;
         if (!$job) {

@@ -310,7 +310,7 @@ final class UsersController extends AdminBase
             Flash::error(t('Вливаемый аккаунт — суперадмин. Оставьте его, а влейте другой, или сначала снимите роль.'));
             redirect('/admin/users/' . (int)$user['id'] . '/merge?with=' . (int)$other['id']);
         }
-        /* v4.98: и главный тоже. Влив свой аккаунт в суперадмина, admin
+        /* v4.97.2: и главный тоже. Влив свой аккаунт в суперадмина, admin
            приносил туда свои ключи и соцвходы — и входил суперадмином. */
         if (in_array('superadmin', User::globalRoleSlugs((int)$main['id']), true)) $this->requireSuperadmin();
         try {
@@ -433,7 +433,7 @@ final class UsersController extends AdminBase
              */
             case 'login_link':
                 $this->requireGlobalAdmin();
-                /* v4.98: ссылка входа — это вход в чужой аккаунт. В аккаунт
+                /* v4.97.2: ссылка входа — это вход в чужой аккаунт. В аккаунт
                    суперадмина её делает только суперадмин, иначе admin
                    поднимал себя до суперадмина одной кнопкой. */
                 if (in_array('superadmin', User::globalRoleSlugs((int)$user['id']), true)) $this->requireSuperadmin();
@@ -518,7 +518,7 @@ final class UsersController extends AdminBase
 
             case 'reset_link':
                 // Пароль руками не задаётся никогда (§5.2) — только ссылка
-                /* v4.98: ссылка сброса суперадмину без почты показывается
+                /* v4.97.2: ссылка сброса суперадмину без почты показывается
                    здесь — тот же вход в чужой аккаунт, что и login_link. */
                 if (in_array('superadmin', User::globalRoleSlugs((int)$user['id']), true)) $this->requireSuperadmin();
                 $token = OneTimeToken::issue((int)$user['id'], 'password_reset');

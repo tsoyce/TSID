@@ -74,7 +74,7 @@ final class AuthorizeFlow
             if (!$user || !$sess) $err('login_required', 'No active SSO session');
         }
 
-        /* v4.98: запертая сессия кода не выдаёт. Замок запирал кабинет и
+        /* v4.97.2: запертая сессия кода не выдаёт. Замок запирал кабинет и
            админку, а /authorize флага `auth` не носит — и взявший оставленный
            телефон молча входил в любой портал. После отпирания — сюда же. */
         if ($user && Auth::locked()) {
@@ -170,7 +170,7 @@ final class AuthorizeFlow
         self::issueAndRedirect($q, $client, $user, $sess);
     }
 
-    /** Нужен ли экран первого входа (шаг 7). Один ответ на /authorize и FedCM (v4.98). */
+    /** Нужен ли экран первого входа (шаг 7). Один ответ на /authorize и FedCM (v4.97.2). */
     public static function mustConsent(array $user, array $client): bool
     {
         $access = Access::get((int)$user['id'], (int)$client['id']);

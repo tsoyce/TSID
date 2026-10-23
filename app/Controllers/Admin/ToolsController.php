@@ -366,7 +366,7 @@ final class ToolsController extends AdminBase
     public function settingsExport(): never
     {
         $this->requirePerm('settings.write');
-        /* v4.98: как у экрана настроек (SettingsController::save) — только
+        /* v4.97.2: как у экрана настроек (SettingsController::save) — только
            суперадмин. Через перенос admin с settings.write менял SMTP и
            забирал секреты соцвхода, хотя на сам экран его не пускают. */
         $this->requireSuperadmin();
@@ -394,7 +394,7 @@ final class ToolsController extends AdminBase
     public function settingsImport(): never
     {
         $this->requirePerm('settings.write');
-        /* v4.98: как у экрана настроек (SettingsController::save) — только
+        /* v4.97.2: как у экрана настроек (SettingsController::save) — только
            суперадмин. Через перенос admin с settings.write менял SMTP и
            забирал секреты соцвхода, хотя на сам экран его не пускают. */
         $this->requireSuperadmin();

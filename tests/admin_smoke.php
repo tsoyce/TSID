@@ -1185,7 +1185,7 @@ ok($st === 400, 'токен не выдаётся на origin, не принад
     ['Sec-Fetch-Dest: webidentity', 'Origin: ' . $fedClient['base_url']]);
 ok($st === 400, 'чужой account_id отбивается');
 
-/* v4.98: первый вход в портал без экрана согласия FedCM не выдаёт — экран
+/* v4.97.2: первый вход в портал без экрана согласия FedCM не выдаёт — экран
    есть только у /authorize, туда портал и уходит по отказу. */
 $fedAdminId = (int)\App\Core\DB::val('SELECT id FROM {users} WHERE email = ?', ['admin@test.local']);
 \App\Core\DB::run('UPDATE {user_client_access} SET consented_at = NULL WHERE user_id = ? AND client_id = ?',

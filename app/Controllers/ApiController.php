@@ -146,7 +146,7 @@ final class ApiController
         foreach (['first_name', 'last_name', 'display_name', 'login'] as $field) {
             if (array_key_exists($field, $body)) $data[$field] = trim((string)$body[$field]) ?: null;
         }
-        /* v4.98: логин при правке — по тем же правилам, что при создании:
+        /* v4.97.2: логин при правке — по тем же правилам, что при создании:
            без них писался недопустимый, а занятый ронял запрос в 500. */
         if (($data['login'] ?? null) !== null) {
             $data['login'] = \App\Core\LoginName::normalize($data['login']);
@@ -419,7 +419,7 @@ final class ApiController
             $this->error(422, 'invalid_request',
                 'Эту роль нельзя выдать в этой области: она к ней не относится');
         }
-        /* v4.98: суперадмина выдаёт только токен `*` — с одним roles:write
+        /* v4.97.2: суперадмина выдаёт только токен `*` — с одним roles:write
            программа поднимала себя до уровня, которого ей не давали. */
         if ($role['slug'] === 'superadmin' && !in_array(ApiToken::SCOPE_ALL, $this->token['scopes'], true)) {
             $this->error(403, 'insufficient_scope', 'Роль superadmin выдаёт только токен «*»');
@@ -575,7 +575,7 @@ final class ApiController
         $changed = [];
         foreach ($body as $k => $v) {
             if (!is_string($k) || !preg_match('~^[a-z0-9_.]{2,64}$~i', $k)) continue;
-            /* v4.98: право settings:write — это настройки, которые переезжают
+            /* v4.97.2: право settings:write — это настройки, которые переезжают
                между установками (SettingsTransfer::portable). Прочее (служебные
                отметки, ключи подписи, владелец) — только токену `*`, а
                владелец и ключи не пишутся вовсе: у них свои пути с
