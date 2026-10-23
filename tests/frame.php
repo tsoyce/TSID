@@ -184,7 +184,8 @@ $loginUrl = str_starts_with($loc, 'http') ? $loc : SSO . $loc;
 [, $page] = http('GET', $loginUrl, [], $inFrame, $xjar);
 $rt = preg_match('~name="rt" value="([^"]+)"~', $page, $rm) ? $rm[1] : '';
 [$st, $reg, , , $h] = http('GET', SSO . '/register?rt=' . urlencode($rt), [], $fetchHdr, $xjar);
-ok($st === 200 && str_contains($reg, 'name="first_name"') && $ancestors($h) === PORTAL,
+/* С v4.96 регистрация по шагам: первый — почта. */
+ok($st === 200 && str_contains($reg, 'action="/register"') && str_contains($reg, 'name="email"') && $ancestors($h) === PORTAL,
     'вкладка «Регистрация» запросом — экран, который встраивает только этот портал', "status=$st fa=" . $ancestors($h));
 [$st, , $loc, , $h] = http('POST', SSO . '/login', ['_csrf' => csrfOf($page), 'identity' => $email,
     'password' => 'correct-horse-battery', 'rt' => $rt], $fetchHdr, $xjar);
