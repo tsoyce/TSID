@@ -2293,6 +2293,48 @@ $mutations = [
         'to'    => "            \$revert = \\App\\Models\\OneTimeToken::issue((int)\$user['id'], 'email_change',",
         'check' => 'tests/login_bounds.php',
     ],
+    [
+        'why'   => 'журнал «Почта» снова показывает действующие ссылки из писем',
+        'file'  => 'templates/admin/logs_mail.php',
+        'from'  => "<?= esc(\\App\\Core\\Mailer::redact((string)\$viewMail['body_text'])) ?>",
+        'to'    => "<?= esc(\$viewMail['body_text']) ?>",
+        'check' => 'tests/infra_bounds.php',
+    ],
+    [
+        'why'   => 'cron снова запускается поверх незавершённого прошлого',
+        'file'  => 'app/Core/CronTasks.php',
+        'from'  => "if (\$lock === false || !flock(\$lock, LOCK_EX | LOCK_NB)) {",
+        'to'    => "if (false) {",
+        'check' => 'tests/infra_bounds.php',
+    ],
+    [
+        'why'   => 'неотправленные письма снова копятся вечно',
+        'file'  => 'app/Core/CronTasks.php',
+        'from'  => "['sent', 'failed', \$before]",
+        'to'    => "['sent', 'sent', \$before]",
+        'check' => 'tests/infra_bounds.php',
+    ],
+    [
+        'why'   => 'инсталлятор снова открыт, когда пропал замок',
+        'file'  => 'install/index.php',
+        'from'  => "if (is_file(SSO_ROOT . '/config/config.php')) {",
+        'to'    => "if (false) {",
+        'check' => 'tests/infra_bounds.php',
+    ],
+    [
+        'why'   => 'картинка снова разбирается без потолка по пикселям',
+        'file'  => 'app/Core/Image.php',
+        'from'  => " || \$info[0] * \$info[1] > self::MAX_PIXELS) return false;",
+        'to'    => ") return false;",
+        'check' => 'tests/infra_bounds.php',
+    ],
+    [
+        'why'   => 'ссылка «//host» в документах снова без rel',
+        'file'  => 'app/Core/Markdown.php',
+        'from'  => "\$ext = preg_match('~^(https?:)?//~i', \$href) === 1;",
+        'to'    => "\$ext = str_starts_with(\$href, 'http');",
+        'check' => 'tests/infra_bounds.php',
+    ],
     /* v4.87: окно входа без лишних окон — Telegram переходом, вкладка вместо окна, раскладка. */
     [
         'why'   => 'Telegram снова открывается страницей с виджетом, которая открывает ещё окно',

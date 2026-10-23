@@ -190,16 +190,6 @@ final class RoleCatalog
         return self::ROLES['user']['level'];
     }
 
-    /** Роли, которые имеет смысл заводить в этой области. @return array<string, array> */
-    public static function forScope(string $scopeType): array
-    {
-        $out = [];
-        foreach (self::ROLES as $slug => $row) {
-            if (in_array($scopeType, $row['scopes'], true)) $out[$slug] = $row;
-        }
-        return $out;
-    }
-
     /** Права роли из справочника; `*` разворачивается в полный список. */
     public static function permsOf(string $slug): array
     {

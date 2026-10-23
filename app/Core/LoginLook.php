@@ -145,7 +145,7 @@ final class LoginLook
     public static function storeImage(string $tmp, string $dest, int $maxW, int $maxH, int $quality): bool
     {
         if (!function_exists('imagewebp') || !is_file($tmp)) return false;
-        $img = @imagecreatefromstring((string)file_get_contents($tmp));
+        $img = \App\Core\Image::fromBytes((string)file_get_contents($tmp));
         if ($img === false) return false;
         $w = imagesx($img); $h = imagesy($img);
         $scale = min(1.0, $maxW / max(1, $w), $maxH / max(1, $h));

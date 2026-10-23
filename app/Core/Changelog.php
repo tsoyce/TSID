@@ -202,10 +202,4 @@ final class Changelog
         return Markdown::toHtml((string)($release['body'] ?? ''));
     }
 
-    /** Есть ли релиз новее установленного — для будущего уведомления. */
-    public static function latest(): ?array
-    {
-        $all = self::releases(1);
-        return $all[0] ?? null;
-    }
 }

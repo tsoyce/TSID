@@ -105,13 +105,4 @@ final class ErrorDigest
         return $walk($entry);
     }
 
-    /** Сколько ошибок за сутки — одним числом для светофора. */
-    public static function errorsToday(): int
-    {
-        $n = 0;
-        foreach (self::top(100)['day'] as $row) {
-            if ($row['level'] === 'error') $n += (int)$row['count'];
-        }
-        return $n;
-    }
 }

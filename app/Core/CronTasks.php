@@ -107,10 +107,24 @@ final class CronTasks
                 if ($n > 0) $out .= ", активности: $n";
                 $mailDays = Setting::getInt('retention.mail_days', 30);
                 if ($mailDays > 0) {
-                    $n = DB::run('DELETE FROM {mail_queue} WHERE status = ? AND created_at < ?',
-                        ['sent', now_plus(-$mailDays * 86400)])->rowCount();
+                    /* v4.98: и неотправленные, и доставки событий и вебхуков —
+                       тем же сроком. Чистились только отправленные письма, а
+                       failed, webhook_deliveries и client_events (с JSON
+                       внутри) копились вечно. Ждущие доставки не трогаем. */
+                    $before = now_plus(-$mailDays * 86400);
+                    $n = DB::run('DELETE FROM {mail_queue} WHERE status IN (?, ?) AND created_at < ?',
+                        ['sent', 'failed', $before])->rowCount();
                     $out .= ", писем: $n";
+                    $n = DB::run('DELETE FROM {webhook_deliveries} WHERE status <> ? AND created_at < ?',
+                        ['pending', $before])->rowCount()
+                        + DB::run('DELETE FROM {client_events} WHERE status <> ? AND created_at < ?',
+                        ['pending', $before])->rowCount();
+                    if ($n > 0) $out .= ", доставок: $n";
                 }
+                /* Счётчики лимитов: строка на каждый адрес и почту навсегда.
+                   Самое длинное окно — часы; двое суток — с запасом. */
+                $n = DB::run('DELETE FROM {rate_limits} WHERE window_start < ?', [now_plus(-2 * 86400)])->rowCount();
+                if ($n > 0) $out .= ", счётчиков лимитов: $n";
                 return $out;
             }],
             ['exports_cleanup', 3600, function () {
@@ -157,6 +171,24 @@ final class CronTasks
 
     /** Запуск всех «созревших» задач. Возвращает лог. */
     public static function run(): array
+    {
+        /* v4.98: один запуск за раз — и из CLI, и из /cron. Отметка «когда
+           последний раз» ставится не атомарно, и запуск, начатый, пока прошлый
+           ещё ждёт медленный SMTP, брал те же задачи и те же письма. */
+        $dir = SSO_ROOT . '/storage';
+        $lock = @fopen($dir . '/cron.lock', 'c');
+        if ($lock === false || !flock($lock, LOCK_EX | LOCK_NB)) {
+            return ['пропущено: ещё идёт прошлый запуск'];
+        }
+        try {
+            return self::runUnlocked();
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+    }
+
+    private static function runUnlocked(): array
     {
         $log = [];
         foreach (self::tasks() as [$name, $interval, $fn]) {

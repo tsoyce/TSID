@@ -166,7 +166,7 @@ final class ProfileController
             Flash::error('Аватар — до 5 МБ.');
             redirect('/profile/edit');
         }
-        $img = @imagecreatefromstring((string)file_get_contents($f['tmp_name']));
+        $img = \App\Core\Image::fromBytes((string)file_get_contents($f['tmp_name']));
         if ($img === false) {
             Flash::error('Это не похоже на изображение.');
             redirect('/profile/edit');

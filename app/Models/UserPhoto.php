@@ -101,7 +101,7 @@ final class UserPhoto
     public static function store(array $user, string $bytes, string $source, ?string $ref): ?int
     {
         if (!self::ready()) return null;
-        $img = @imagecreatefromstring($bytes);
+        $img = \App\Core\Image::fromBytes($bytes);
         if ($img === false) return null;
 
         $w = imagesx($img); $h = imagesy($img);

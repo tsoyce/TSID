@@ -52,6 +52,9 @@ final class WebhookDispatcher
         }
 
         $attempts = (int)$row['attempts'] + 1;
+        // v4.98: доставку берёт один — тот, чей UPDATE сдвинул счётчик (см. Mailer::attempt)
+        if (DB::run('UPDATE {webhook_deliveries} SET attempts = ? WHERE id = ? AND attempts = ? AND status = ?',
+                [$attempts, $deliveryId, (int)$row['attempts'], 'pending'])->rowCount() !== 1) return false;
         $body = json_encode([
             'event' => $row['event'],
             'created_at' => gmdate('c', strtotime($row['created_at'] . ' UTC')),

@@ -507,7 +507,7 @@ return [
     'Хранение данных' => 'Data retention',
     'Аудит, дней' => 'Audit log, days',
     'Логи приложения, дней' => 'Application logs, days',
-    'Отправленные письма в очереди, дней' => 'Sent mail kept in the queue, days',
+    'Письма и доставки событий, дней' => 'Mail and event deliveries kept, days',
     '(0 — бессрочно)' => '(0 — forever)',
     '(0 — хранить вечно)' => '(0 — keep forever)',
 

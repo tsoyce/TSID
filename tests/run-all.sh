@@ -171,6 +171,7 @@ step "Вкладки входа и алиас портала" php $PHP_FLAGS tes
 # портала делало его админа суперадмином.
 step "Границы прав: приглашения, API, SCIM, порталы" php $PHP_FLAGS tests/access_bounds.php
 step "Вход и токены: 2FA соцвхода, замок, FedCM, refresh" php $PHP_FLAGS tests/login_bounds.php
+step "Инфраструктура: журнал почты, cron, хранение, установщик" php $PHP_FLAGS tests/infra_bounds.php
 
 # Письма и интерфейс на одном языке (v4.74): английское письмо без русских
 # букв, тосты и заголовки — переводом при выводе, письмо за человека — на его

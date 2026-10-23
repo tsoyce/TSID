@@ -248,7 +248,7 @@ final class SettingsController extends AdminBase
             @unlink($dir . '/logo.webp');
             Setting::delete('branding.logo_v');
         } elseif (($f = $_FILES['logo'] ?? null) && $f['error'] === UPLOAD_ERR_OK && $f['size'] <= 2 * 1024 * 1024) {
-            $img = @imagecreatefromstring((string)file_get_contents($f['tmp_name']));
+            $img = \App\Core\Image::fromBytes((string)file_get_contents($f['tmp_name']));
             if ($img !== false && function_exists('imagewebp')) {
                 $w = imagesx($img); $h = imagesy($img);
                 $nh = 64;
@@ -271,7 +271,7 @@ final class SettingsController extends AdminBase
             @unlink($dir . '/favicon.png');
             Setting::delete('branding.favicon_v');
         } elseif (($f = $_FILES['favicon'] ?? null) && $f['error'] === UPLOAD_ERR_OK && $f['size'] <= 1024 * 1024) {
-            $img = @imagecreatefromstring((string)file_get_contents($f['tmp_name']));
+            $img = \App\Core\Image::fromBytes((string)file_get_contents($f['tmp_name']));
             if ($img !== false) {
                 $w = imagesx($img); $h = imagesy($img);
                 $side = min($w, $h);

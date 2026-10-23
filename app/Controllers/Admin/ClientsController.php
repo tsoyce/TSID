@@ -843,7 +843,7 @@ final class ClientsController extends AdminBase
             Flash::error('Иконка: до 2 МБ, и серверному GD нужна поддержка webp.');
             return $client['icon_path'];
         }
-        $img = @imagecreatefromstring((string)file_get_contents($f['tmp_name']));
+        $img = \App\Core\Image::fromBytes((string)file_get_contents($f['tmp_name']));
         if ($img === false) {
             Flash::error('Иконка не похожа на изображение.');
             return $client['icon_path'];

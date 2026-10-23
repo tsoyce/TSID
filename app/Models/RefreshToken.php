@@ -85,14 +85,6 @@ final class RefreshToken
         return $row;
     }
 
-    public static function revokeByToken(string $token): bool
-    {
-        $row = DB::row('SELECT * FROM {refresh_tokens} WHERE token_hash = ?', [Crypto::hashToken($token)]);
-        if (!$row) return false;
-        self::revokeFamily($row['family_id']);
-        return true;
-    }
-
     public static function revokeAllForUser(int $userId): void
     {
         DB::run('UPDATE {refresh_tokens} SET revoked_at = ? WHERE user_id = ? AND revoked_at IS NULL', [now(), $userId]);

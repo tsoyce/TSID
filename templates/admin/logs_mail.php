@@ -38,7 +38,7 @@
 <div class="bento-card mb-16">
   <div class="bc-title"><?= esc(t('Письмо №:n', ['n' => (int)$viewMail['id']])) ?> → <?= esc($viewMail['to_email']) ?></div>
   <div class="cell-main mb-8"><?= esc($viewMail['subject']) ?></div>
-  <div class="code-block code-scroll"><?= esc($viewMail['body_text']) ?></div>
+  <div class="code-block code-scroll"><?= esc(\App\Core\Mailer::redact((string)$viewMail['body_text'])) ?></div>
   <div class="bc-footer"><a href="/admin/logs/mail"><?= esc(t('Закрыть')) ?></a></div>
 </div>
 <?php endif; ?>

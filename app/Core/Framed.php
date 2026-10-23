@@ -68,12 +68,6 @@ final class Framed
             && ($_SERVER['HTTP_SEC_FETCH_SITE'] ?? '') === 'cross-site';
     }
 
-    /** Отдельная пара cookie фрейма на чужом сайте. */
-    public static function partitioned(): bool
-    {
-        return self::$partitioned;
-    }
-
     /** Имя cookie: служебная сессия (_s) или вход (''), у фрейма на чужом сайте — свои. */
     public static function cookieName(string $suffix): string
     {
