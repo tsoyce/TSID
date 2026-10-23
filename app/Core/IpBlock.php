@@ -149,6 +149,28 @@ final class IpBlock
         return null;
     }
 
+    /**
+     * Закрыть пачку адресов и подсетей (v4.95): со страницы ботов и со
+     * страницы адресов. Уже закрытые целиком пропускаются молча, прочие отказы
+     * (свой адрес, слишком широкая подсеть) — списком «правило — почему».
+     *
+     * @param list<string> $rules
+     * @return array{0:int, 1:list<string>} сколько закрыто и что не вышло
+     */
+    public static function addMany(array $rules, string $reason, int $days, ?int $byUserId): array
+    {
+        $closed = 0;
+        $skipped = [];
+        foreach ($rules as $rule) {
+            $r = self::parse((string)$rule);
+            if (is_array($r) && self::match($r['from']) !== null && self::match($r['to']) !== null) continue;
+            $err = self::add((string)$rule, $reason, $days, $byUserId);
+            if ($err === null) $closed++;
+            else $skipped[] = $rule . ' — ' . $err;
+        }
+        return [$closed, $skipped];
+    }
+
     public static function remove(int $id): void
     {
         $row = DB::row('SELECT rule FROM {ip_blocks} WHERE id = ?', [$id]);

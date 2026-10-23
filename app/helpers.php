@@ -1981,6 +1981,8 @@ function logs_tabs(string $current): string
     $tabs = ['audit' => ['/admin/logs', t('Аудит')]];
     if (App\Core\Auth::isAdmin()) $tabs['requests'] = ['/admin/logs/requests', t('Запросы')];
     $tabs += ['errors' => ['/admin/logs/errors', t('Журнал приложения')], 'mail' => ['/admin/logs/mail', t('Почта')]];
+    /* Адреса (v4.95): их видят в журналах и закрывают, глядя на журналы. */
+    if (App\Core\Auth::isAdmin() && App\Core\Auth::can('settings.read')) $tabs['blocks'] = ['/admin/blocks', t('Адреса')];
     $out = '<div class="tabs">';
     foreach ($tabs as $key => [$href, $label]) {
         $out .= '<a' . ($key === $current ? ' class="active"' : '') . ' href="' . esc($href) . '">' . esc($label) . '</a>';

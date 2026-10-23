@@ -136,6 +136,7 @@ final class SettingsController extends AdminBase
                     mb_substr(trim((string)($_POST['login_reserved'] ?? '')), 0, 2000));
                 /* Капча: порог, а не «включить всем». Ниже двух попыток порог
                    не опускаем — иначе капча встречает человека с первой опечатки. */
+                Setting::set('policy.refuse_outdated', !empty($_POST['refuse_outdated']) ? '1' : '0');
                 Setting::set('captcha.enabled', !empty($_POST['captcha_enabled']) ? '1' : '0');
                 Setting::set('captcha.on_register', !empty($_POST['captcha_on_register']) ? '1' : '0');
                 Setting::set('captcha.on_recover', !empty($_POST['captcha_on_recover']) ? '1' : '0');

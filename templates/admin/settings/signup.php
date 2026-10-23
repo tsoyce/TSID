@@ -73,10 +73,14 @@ use App\Core\Setting;
       </div>
 
       <div class="bento-card col-6">
-        <div class="bc-title"><?= esc(t('Капча')) ?></div>
+        <div class="bc-title"><?= esc(t('Боты и капча')) ?></div>
         <?php /* Порог, а не «включить всем»: человек, который ввёл пароль верно
                  с первого раза, разгадывать картинки не должен. Капча — ответ
                  на подбор, а не пошлина со всех подряд. */ ?>
+        <?php /* v4.95: боты на регистрации представлялись браузерами десятилетней
+                 давности — у людей таких нет. См. App\Core\BotSignal. */ ?>
+        <?= field_toggle('refuse_outdated', t('Не регистрировать с устаревших браузеров'), App\Core\BotSignal::refuseOutdated(),
+              t('Internet Explorer, Chrome и Firefox старше 2022 года, Android 4 — так представляются боты. Человеку скажем обновить браузер.')) ?>
         <?= field_toggle('captcha_enabled', t('Включить капчу'), setting('captcha.enabled') === '1',
               t('Появится только после нескольких неудач подряд — тем, кто вошёл сразу, она не встретится.')) ?>
         <?= field_text('captcha_after_attempts', t('Показывать после N неудач'),

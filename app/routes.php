@@ -184,6 +184,9 @@ $router->post('/admin/context', [DashboardController::class, 'context'], ['admin
 $router->get('/admin', [DashboardController::class, 'index'], ['admin']);
 $router->post('/admin/onboarding/hide', [DashboardController::class, 'hideOnboarding'], ['admin']);
 $router->get('/admin/users', [UsersController::class, 'index'], ['admin']);
+/* Похоже на ботов (v4.95) — до /admin/users/{id}, иначе {id} перехватит «bots». */
+$router->get('/admin/users/bots', [\App\Controllers\Admin\BotsController::class, 'index'], ['admin']);
+$router->post('/admin/users/bots', [\App\Controllers\Admin\BotsController::class, 'purge'], ['admin']);
 $router->get('/admin/users/{id}', [UsersController::class, 'card'], ['admin']);
 /* Разделы человека: у каждого свой адрес (v4.30). Карточкой делятся в
    переписке чаще прочих — «посмотри его сессии», — и вкладка такой ссылки
@@ -271,6 +274,8 @@ $router->get('/admin/ip/{ip}', [LogsController::class, 'ip'], ['admin']);
 $router->get('/admin/blocks', [\App\Controllers\Admin\BlocksController::class, 'index'], ['admin']);
 $router->post('/admin/blocks', [\App\Controllers\Admin\BlocksController::class, 'add'], ['admin']);
 $router->post('/admin/blocks/{id}/remove', [\App\Controllers\Admin\BlocksController::class, 'remove'], ['admin']);
+$router->post('/admin/blocks/bulk', [\App\Controllers\Admin\BlocksController::class, 'bulk'], ['admin']);
+$router->post('/admin/blocks/remove', [\App\Controllers\Admin\BlocksController::class, 'removeMany'], ['admin']);
 $router->get('/admin/logs/errors/download', [LogsController::class, 'errorsDownload'], ['admin']);
 $router->post('/admin/logs/errors/purge', [LogsController::class, 'errorsPurge'], ['admin']);
 $router->post('/admin/logs/mail/purge', [LogsController::class, 'mailPurge'], ['admin']);

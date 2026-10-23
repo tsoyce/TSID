@@ -97,7 +97,7 @@ final class Audit
     /** Событие о тревоге: отказ, повтор, перебор — красным в списках. */
     public static function alarming(string $event): bool
     {
-        return (bool)preg_match('~fail|replay|reuse|locked|denied~', $event);
+        return (bool)preg_match('~fail|replay|reuse|locked|denied|refused~', $event);
     }
 
     /**
@@ -129,6 +129,7 @@ final class Audit
         'logout' => 'Выход',
         'logout.everywhere' => 'Выход на всех устройствах',
         'register' => 'Регистрация',
+        'register.refused' => 'Отказ в регистрации: устаревший браузер',
         'email.verify' => 'Почта подтверждена',
         'email.verify_resent' => 'Письмо подтверждения отправлено ещё раз',
         'email.pending_changed' => 'Исправлен неподтверждённый адрес',

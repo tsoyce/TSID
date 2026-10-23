@@ -78,8 +78,21 @@ final class BulkPurge
      */
     public static function run(): array
     {
+        return self::purge(self::plan(), 'deleted');
+    }
+
+    /**
+     * Удалить этих людей насовсем — одним путём и для помеченных, и для ботов
+     * (v4.95): события порталам, вебхук, поимённая запись в лог, одна запись
+     * аудита на пачку. Кого удалять, решает вызывающий — своим планом.
+     *
+     * @param list<array> $users строки users (id, public_id, email)
+     * @return array{users:int, rows:int}
+     */
+    public static function purge(array $users, string $kind): array
+    {
         $done = ['users' => 0, 'rows' => 0];
-        foreach (self::plan() as $u) {
+        foreach ($users as $u) {
             /* До удаления: событие рассылается по строкам доступа, а purge()
                их сносит — см. тот же порядок в карточке человека. */
             \App\Oidc\EventDispatcher::userDeleted($u, 'purged');
@@ -89,13 +102,13 @@ final class BulkPurge
             /* В файловый лог поимённо: запись в аудите сошлётся на аккаунт,
                которого больше нет, и восстановить по ней будет нечего. */
             Log::warning('admin.user.purge', [
-                'email' => $u['email'], 'sub' => $u['public_id'], 'bulk' => true,
+                'email' => $u['email'], 'sub' => $u['public_id'], 'bulk' => $kind,
             ]);
             WebhookDispatcher::emit('user.deleted',
                 ['sub' => $u['public_id'], 'email' => $u['email']]);
         }
         if ($done['users'] > 0) {
-            Audit::log('admin.bulk.purge', ['meta' => $done]);
+            Audit::log('admin.bulk.purge', ['meta' => $done + ['kind' => $kind]]);
             AdminNotify::say('bulk.purged',
                 fn() => t('Массовая чистка: удалено :n :word, строк — :rows.', [
                     'n' => $done['users'],

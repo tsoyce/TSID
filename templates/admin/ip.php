@@ -33,7 +33,7 @@
             ], '0') ?>
         <button class="btn btn-danger btn-block" type="submit"><?= icon('lock', 16) ?> <?= esc(t('Заблокировать адрес')) ?></button>
       </form>
-      <p class="hint mt-8"><a href="/admin/blocks?ip=<?= esc(rawurlencode($ip)) ?>"><?= esc(t('Закрыть всю подсеть →')) ?></a></p>
+      <p class="hint mt-8"><a href="/admin/blocks?ip=<?= esc(rawurlencode((string)(App\Core\BotSignal::subnet(ip_bin($ip)) ?? $ip))) ?>"><?= esc(t('Закрыть всю подсеть →')) ?></a></p>
     <?php endif; ?>
   </div>
 

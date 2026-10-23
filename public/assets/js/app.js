@@ -463,6 +463,31 @@
     if (form && !confirm(form.dataset.confirm)) e.preventDefault();
   }, true);
 
+  /* ---------- Пачка с галочками [data-bulk] (v4.95) ----------
+     Боты, подсети, правила: «выбрать все», счётчик выбранного и число в
+     вопросе перед отправкой. Ничего не выбрано — кнопки молчат: пустая пачка
+     ушла бы на сервер ради ответа «ничего не выбрано». */
+  var bulkSync = function (form) {
+    var boxes = form.querySelectorAll('tbody input[type=checkbox]');
+    var n = 0;
+    boxes.forEach(function (b) { if (b.checked) n++; });
+    var all = form.querySelector('[data-check-all]');
+    if (all) { all.checked = n > 0 && n === boxes.length; all.indeterminate = n > 0 && n < boxes.length; }
+    var count = form.querySelector('[data-bulk-count]');
+    if (count) count.textContent = count.dataset.tpl.replace(':n', n);
+    if (form.dataset.confirmTpl) form.dataset.confirm = form.dataset.confirmTpl.replace(':n', n);
+    form.querySelectorAll('button[type=submit]').forEach(function (b) { b.disabled = n === 0; });
+  };
+  document.querySelectorAll('form[data-bulk]').forEach(bulkSync);
+  document.addEventListener('change', function (e) {
+    var form = e.target.closest('form[data-bulk]');
+    if (!form || e.target.type !== 'checkbox') return;
+    if (e.target.matches('[data-check-all]')) {
+      form.querySelectorAll('tbody input[type=checkbox]').forEach(function (b) { b.checked = e.target.checked; });
+    }
+    bulkSync(form);
+  });
+
   /* ---------- Submit: спиннер вместо блокировки «в никуда» ---------- */
   document.addEventListener('submit', function (e) {
     var form = e.target;

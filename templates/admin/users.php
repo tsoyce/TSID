@@ -1,4 +1,5 @@
-<?php /** Пользователи (§5.2): таблица + фильтры. Массовых действий нет — намеренно. */ ?>
+<?php /** Пользователи (§5.2): таблица + фильтры. Массовых действий здесь нет — намеренно; ботов
+ * удаляют пачкой на своей странице (v4.95), куда ведёт строка над списком. */ ?>
 <div class="page-head">
   <h1><?= esc(t('Пользователи')) ?> <span class="muted fw-400"><?= number_format($total, 0, '', ' ') ?></span></h1>
 </div>
@@ -31,6 +32,14 @@
            Без скрипта она на месте. */ ?>
   <noscript><?= field_submit(t('Фильтровать')) ?></noscript>
 </form>
+
+<?php if (($bots ?? 0) > 0): ?>
+<div class="knock-line hint mb-12">
+  <?= icon('shield', 16, 'icon-muted') ?>
+  <span><?= esc(t('Похоже на ботов: :n — завели аккаунт, не подтвердили почту и ни разу не пришли в портал.', ['n' => $bots])) ?>
+    <a href="/admin/users/bots"><?= esc(t('Разобрать')) ?></a></span>
+</div>
+<?php endif; ?>
 
 <div class="table-wrap">
 <table class="table table-cards">

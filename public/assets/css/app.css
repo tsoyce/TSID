@@ -1254,6 +1254,10 @@ table.table { width: 100%; border-collapse: collapse; font-size: var(--fs-14); }
   .table-cards td { display: block; border: 0; padding: 0; grid-column: 1 / -1; }
   /* Ячейка без подписи — это аватар или иконка: слева от главного поля */
   .table-cards .cell-avatar { grid-column: 1; grid-row: 1; width: auto; }
+  /* Галочка пачки (v4.95) — на месте аватара, слева от главного поля. */
+  .table-cards td.cell-check { grid-column: 1; grid-row: 1; width: auto; padding-top: 0; }
+  .table-cards .chip-row { justify-content: flex-end; }
+  .table-cards .cell-stack { text-align: right; }
   .table-cards .cell-primary { grid-column: 2; grid-row: 1; }
   /* Без аватара главное поле — первая ячейка, и места слева ему не нужно
      (v4.92): иначе название роли или устройства стояло с пустым отступом. */
@@ -1984,6 +1988,16 @@ input:focus-visible + .perm-box { box-shadow: var(--focus); }
 /* Строка «скрыто стуков сканеров» над «Запросами» (v4.94): значок и текст. */
 .knock-line { display: flex; align-items: flex-start; gap: 8px; }
 .knock-line .icon { flex: none; margin-top: 2px; }
+/* Пачка с галочками (v4.95): боты, подсети, правила. Счётчик слева, действия справа. */
+.cell-check { width: 32px; }
+.cell-check input { display: block; }
+.bulk-bar { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 8px; }
+.bulk-bar [data-bulk-count] { margin-right: auto; align-self: center; }
+.bulk-bar .field { margin-bottom: 0; }
+/* Плашки признаков переносятся, а не уезжают за край карточки на телефоне. */
+.chip-row { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+/* Две строки в одной ячейке (адрес и браузер) — одним блоком. */
+.cell-stack { min-width: 0; }
 /* Внутри — SVG из спрайта, а не эмодзи: центрируем флексом, а не font-size */
 .health-icon { flex: none; width: 24px; display: flex; justify-content: center; }
 /* Размер задаётся здесь, а не скриптом: раньше 176px были зашиты в app.js и

@@ -52,6 +52,20 @@ final class RegistrationController
         ];
         $password = (string)($_POST['password'] ?? '');
         $errors = [];
+        /* v4.95: боты регистрировались с браузеров, которых у людей давно нет, —
+           64 из 64, а у людей ни разу (см. App\Core\BotSignal). Отказ до всего
+           остального: аккаунт не заводится и письмо чужому ящику не уходит. */
+        $outdated = \App\Core\BotSignal::refuseOutdated() ? \App\Core\BotSignal::outdated(request_ua()) : null;
+        if ($outdated !== null) {
+            Audit::log('register.refused', ['actor' => null, 'meta' => ['why' => $outdated]]);
+            View::render('auth/register', [
+                'pageTitle' => 'Регистрация',
+                'client' => LoginFlow::pendingClient(),
+                'popup' => LoginFlow::pendingIsPopup(),
+                'old' => $old,
+                'errors' => ['form' => t('Ваш браузер устарел (:b) — с него зарегистрироваться не получится. Обновите браузер или откройте эту страницу в другом.', ['b' => $outdated])],
+            ], 'layouts/auth');
+        }
         /* Проверяем на отправке тоже, а не только при показе формы: форму
            присылают и мимо браузера, а закрытая дверь, которую открывает
            лишний POST, — не закрытая дверь. */

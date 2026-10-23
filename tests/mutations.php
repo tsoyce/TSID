@@ -2593,6 +2593,77 @@ $mutations = [
         'to'    => "<?= esc(\$days >= 0 ? t('Хранится :n :days.'",
         'check' => 'tests/admin_logs.php',
     ],
+    /* v4.95: боты на регистрации. */
+    [
+        'why'   => 'регистрация с устаревшего браузера снова проходит',
+        'file'  => 'app/Controllers/RegistrationController.php',
+        'from'  => "\$outdated = \\App\\Core\\BotSignal::refuseOutdated() ? \\App\\Core\\BotSignal::outdated(request_ua()) : null;",
+        'to'    => "\$outdated = null;",
+        'check' => 'tests/admin_bots.php',
+    ],
+    [
+        'why'   => 'Chrome 39 снова считается живым браузером',
+        'file'  => 'app/Core/BotSignal.php',
+        'from'  => "private const FLOOR = ['chrome' => 100,",
+        'to'    => "private const FLOOR = ['chrome' => 30,",
+        'check' => 'tests/admin_bots.php',
+    ],
+    [
+        'why'   => 'Internet Explorer снова не узнаётся',
+        'file'  => 'app/Core/BotSignal.php',
+        'from'  => "if (preg_match('~MSIE |Trident/~', \$ua)) return 'Internet Explorer';",
+        'to'    => "",
+        'check' => 'tests/admin_bots.php',
+    ],
+    [
+        'why'   => 'в «Похоже на ботов» снова попадают подтвердившие почту',
+        'file'  => 'app/Core/BotSignal.php',
+        'from'  => "WHERE u.status IN ('pending', 'active') AND u.email_verified_at IS NULL\n               AND NOT EXISTS (SELECT 1 FROM {user_client_access} x WHERE x.user_id = u.id)\n             ORDER BY",
+        'to'    => "WHERE u.status IN ('pending', 'active')\n               AND NOT EXISTS (SELECT 1 FROM {user_client_access} x WHERE x.user_id = u.id)\n             ORDER BY",
+        'check' => 'tests/admin_bots.php',
+    ],
+    [
+        'why'   => 'в «Похоже на ботов» снова попадают пришедшие в портал',
+        'file'  => 'app/Core/BotSignal.php',
+        'from'  => "AND u.email_verified_at IS NULL\n               AND NOT EXISTS (SELECT 1 FROM {user_client_access} x WHERE x.user_id = u.id)\n             ORDER BY",
+        'to'    => "AND u.email_verified_at IS NULL\n             ORDER BY",
+        'check' => 'tests/admin_bots.php',
+    ],
+    [
+        'why'   => 'толпа с одной подсети снова не сильный признак',
+        'file'  => 'app/Core/BotSignal.php',
+        'from'  => "(\$crowd[\$r['net']] ?? 0) >= self::CROWD",
+        'to'    => "(\$crowd[\$r['net']] ?? 0) > 99",
+        'check' => 'tests/admin_bots.php',
+    ],
+    [
+        'why'   => 'удаление пачкой снова берёт любые id из формы',
+        'file'  => 'app/Controllers/Admin/BotsController.php',
+        'from'  => "\$pick = array_values(array_filter(BotSignal::suspects(),\n            static fn(array \$s): bool => in_array((int)\$s['id'], \$want, true)));",
+        'to'    => "\$pick = array_values(array_filter(array_map(static fn(int \$id) => \\App\\Models\\User::find(\$id), \$want)));",
+        'check' => 'tests/admin_bots.php',
+    ],
+    [
+        'why'   => '«Удалить и закрыть их подсети» снова не закрывает',
+        'file'  => 'app/Controllers/Admin/BotsController.php',
+        'from'  => "if ((\$_POST['block'] ?? '') === '1') {",
+        'to'    => "if (false) {",
+        'check' => 'tests/admin_bots.php',
+    ],
+    [
+        'why'   => 'адреса снова не рядом с журналами',
+        'file'  => 'app/helpers.php',
+        'from'  => "\$tabs['blocks'] = ['/admin/blocks', t('Адреса')];",
+        'to'    => "\$tabs += [];",
+        'check' => 'tests/admin_bots.php',
+    ],
+    [
+        'why'   => 'правила снова не снимаются пачкой',
+        'file'  => 'app/Controllers/Admin/BlocksController.php',
+        'from'  => "foreach (\$ids as \$id) IpBlock::remove(\$id);",
+        'to'    => "",
+        'check' => 'tests/admin_bots.php',
+    ],
 ];
 
 if (in_array('--list', $argv, true)) {

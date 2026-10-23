@@ -14,6 +14,7 @@ use App\Core\Setting; ?>
            опечатке — человек оказывался перед закрытой дверью. */ ?>
   <?php $inv = App\Core\Signup::inviteFromRequest(); ?>
   <?php if ($inv !== null): ?><input type="hidden" name="invite" value="<?= esc($inv['token']) ?>"><?php endif; ?>
+  <?php if (isset($errors['form'])): ?><div class="field-error mb-12" role="alert"><?= esc($errors['form']) ?></div><?php endif; ?>
   <div class="grid-2">
     <?= field_text('first_name', t('Имя'), $old['first_name'] ?? '', [
           'id' => 'first_name', 'max' => 120, 'autocomplete' => 'given-name',

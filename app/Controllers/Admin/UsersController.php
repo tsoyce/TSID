@@ -103,6 +103,8 @@ final class UsersController extends AdminBase
             'clients' => $scope === null ? Client::all() : array_filter(Client::all(), fn($c) => in_array((int)$c['id'], $scope, true)),
             'roles' => Role::all(),
             'filters' => compact('q', 'status', 'clientF', 'roleF', 'flag'),
+            /* v4.95: боты разбираются своей страницей — отсюда к ней одна строка. */
+            'bots' => Auth::isAdmin() && Auth::can('users.delete') ? \App\Core\BotSignal::suspectCount() : 0,
         ]);
     }
 
