@@ -187,6 +187,17 @@ $rt = preg_match('~name="rt" value="([^"]+)"~', $page, $rm) ? $rm[1] : '';
 /* С v4.96 регистрация по шагам: первый — почта. */
 ok($st === 200 && str_contains($reg, 'action="/register"') && str_contains($reg, 'name="email"') && $ancestors($h) === PORTAL,
     'вкладка «Регистрация» запросом — экран, который встраивает только этот портал', "status=$st fa=" . $ancestors($h));
+/* v5.3.1: три вкладки — одна шапка портала. «Не помню» показывала знак
+   установки вместо портала, а после отправки теряла ключ возврата: вкладка
+   «Вход» вела на безымянный вход. */
+ok(substr_count($reg, 'class="connector-head') === 1, 'вкладка «Регистрация» — та же шапка портала, что у «Вход»');
+[$st, $rec, , , $h] = http('GET', SSO . '/recover?rt=' . urlencode($rt), [], $fetchHdr, $xjar);
+ok($st === 200 && substr_count($rec, 'class="connector-head') === 1 && str_contains($rec, 'name="rt" value="' . $rt . '"')
+    && $ancestors($h) === PORTAL, 'вкладка «Не помню» — шапка портала, ключ возврата в форме, встраивает только портал',
+    "status=$st fa=" . $ancestors($h));
+[$st, , $loc] = http('POST', SSO . '/recover', ['_csrf' => csrfOf($rec), 'email' => 'nobody-' . bin2hex(random_bytes(3)) . '@test.local',
+    'rt' => $rt], $fetchHdr, $xjar);
+ok($st === 302 && str_ends_with($loc, '/recover?rt=' . urlencode($rt)), '«Не помню» после отправки — обратно с ключом возврата', "$st $loc");
 [$st, , $loc, , $h] = http('POST', SSO . '/login', ['_csrf' => csrfOf($page), 'identity' => $email,
     'password' => 'correct-horse-battery', 'rt' => $rt], $fetchHdr, $xjar);
 ok($st === 302 && str_contains($loc, '/authorize'), 'вход паролем запросом — та же переадресация', "$st $loc");
@@ -214,6 +225,14 @@ ok(str_contains($appJs, "if (form) submitForm(form);") && str_contains($appJs, '
     'app.js: код из шести цифр отправляется событием submit — его перехватывает подмена');
 ok(substr_count($appJs, 'onPage(function () { document.querySelectorAll(') >= 2,
     'app.js: поле кода и возврат на портал оживают и после подмены экрана');
+/* v5.3.1: Chrome 156 на Windows роняет фрейм с чужого сайта на
+   document.startViewTransition() — щелчок по вкладке давал серое окно. */
+$anim = substr($swap, (int)strpos($swap, 'var animate = function'), 600);
+ok((int)strpos($anim, 'if (framed) {') > 0 && (int)strpos($anim, 'if (framed) {') < (int)strpos($anim, 'startViewTransition'),
+    'app.js: во фрейме подмена без View Transitions — до вызова startViewTransition дело не доходит');
+ok(str_contains($swap, "if (shown && !reduced()) shown.classList.add('is-swapped-in');")
+    && str_contains((string)file_get_contents(SSO_ROOT . '/public/assets/css/app.css'), '.auth-card.is-swapped-in { animation: fade'),
+    'app.js: во фрейме новое содержимое проявляется CSS-анимацией');
 $pkJs = (string)file_get_contents(SSO_ROOT . '/public/assets/js/passkey.js');
 ok(str_contains($pkJs, '(window.ssoGo || function (u) { location.href = u; })(j.redirect)'),
     'passkey.js: после входа во фрейме — подмена, а не новый документ');
@@ -226,6 +245,11 @@ ok(($ui['display'] ?? null) === 'window' && !empty($ui['texts']['close']) && !em
 $js = (string)file_get_contents(SSO_ROOT . '/public/assets/js/sso.js');
 ok(str_contains($js, "'display=frame'") && str_contains($js, "if (ui.display === 'popup' && issuer) { openModal(j.authorize_url, btn); return; }"),
     'sso.js: «окном поверх сайта» — окно на странице с фреймом');
+ok(str_contains($js, "'height .2s ease'"), 'sso.js: окно меняет высоту плавно');
+ok(str_contains($js, "justifyContent: 'flex-start', gap: '12px', padding: top + 'px 16px 16px',"),
+    'sso.js: верхний край окна на месте — вкладки разной высоты не двигают его вверх-вниз');
+ok(str_contains((string)file_get_contents(SSO_ROOT . '/public/assets/css/identity.css'), 'html[data-frame-origin] { overflow-y: auto; }'),
+    'во фрейме нет постоянной полосы прокрутки — ленты вдоль края');
 ok(str_contains($js, 'if (!modal || e.origin !== issuer || e.source !== modal.frame.contentWindow) return;'),
     'sso.js: слушает только наш фрейм и только с адреса SSO');
 $appJs = (string)file_get_contents(SSO_ROOT . '/public/assets/js/app.js');

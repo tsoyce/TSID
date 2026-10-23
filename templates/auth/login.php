@@ -1,19 +1,10 @@
 <?php /** Вход (§5.1). $client — контекст «Вы входите в X». */ ?>
-<?php $bridge = App\Core\Bridge::brandingOf($client); ?>
 <?php if ($client): ?>
 <?php /* «Мостик»: человек пришёл с чужого сайта, и если экран выглядит
          совершенно иначе — это читается как подмена. Знак портала стоит РЯДОМ
          с нашим, а не вместо: слева тот, откуда пришли, справа тот, кто
          спрашивает пароль. */ ?>
-<div class="connector-head mb-24">
-  <?= portal_connector($client) ?>
-  <div class="connector-caption">
-    <?= esc(t('login.context')) ?> <b><?= esc($client['name']) ?></b>
-    <?php if ($bridge && $bridge['tagline']): ?>
-    <div class="hint"><?= esc($bridge['tagline']) ?></div>
-    <?php endif; ?>
-  </div>
-</div>
+<?= auth_portal_head($client, t('login.context')) ?>
 <?php endif; ?>
 
 <?php /* «Войти и привязать» (v4.88): сервис ждёт входа в свой аккаунт. Плашка,

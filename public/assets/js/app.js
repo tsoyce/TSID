@@ -1239,9 +1239,23 @@
     }
     reportSize();
   };
-  /* Переход с анимацией: dir — 'fwd', 'back' или 'fade'. */
+  /* Переход с анимацией: dir — 'fwd', 'back' или 'fade'.
+
+     Во фрейме — без View Transitions (v5.3.1). Chrome 156 на Windows роняет
+     процесс фрейма с чужого сайта на document.startViewTransition(): щелчок по
+     «Регистрация» или «Не помню» в окне входа на портале давал серое окно с
+     грустным значком. Замер 23.10 на той же версии: падает и без расширений,
+     а без перехода и на странице самого SSO — нет. Во фрейме новое содержимое
+     просто проявляется — обычной CSS-анимацией. */
+  var reduced = function () { return matchMedia('(prefers-reduced-motion: reduce)').matches; };
   var animate = function (fn, dir) {
-    if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) { fn(); return; }
+    if (framed) {
+      fn();
+      var shown = document.getElementById('main');
+      if (shown && !reduced()) shown.classList.add('is-swapped-in');
+      return;
+    }
+    if (!document.startViewTransition || reduced()) { fn(); return; }
     var root = document.documentElement;
     root.setAttribute('data-swap', dir);
     var done = function () { root.removeAttribute('data-swap'); };

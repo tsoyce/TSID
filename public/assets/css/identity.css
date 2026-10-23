@@ -284,6 +284,9 @@ body.has-backdrop { background: transparent; }
 .auth-shell.is-popup .auth-brandline { margin-bottom: var(--s-6); }
 html[data-frame-origin] body, html[data-frame-origin] .auth-wrap { min-height: 0; }
 html[data-frame-origin] .auth-wrap { justify-content: flex-start; padding: 32px 22px 24px; background: none; }
+/* Во фрейме полоса прокрутки не нужна (v5.3.1): окно по высоте содержимого, а
+   постоянная полоса из app.css оставляла светлую ленту вдоль правого края. */
+html[data-frame-origin] { overflow-y: auto; }
 
 /* Кнопки сторонних сервисов (v4.86): фирменный знак и «Продолжить с …» по
    центру, во всю ширину — как у Google, Apple и X. Рост и скругление — как

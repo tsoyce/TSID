@@ -1,10 +1,13 @@
 <?php /** Запрос ссылки восстановления (§5.1): ответы одинаковы для любых email. */ ?>
+<?php if (!empty($client)): ?>
+<?= auth_portal_head($client, t('login.context')) ?>
+<?php endif; ?>
 <?= auth_tabs('recover') ?>
 <?php /* Заголовка нет намеренно: экран уже назван вкладкой, и h1 под ней
          повторял бы то же слово вдвое крупнее. Объяснение принадлежит полю,
          а не экрану, поэтому стоит подписью под ним. */ ?>
 <form method="post" action="/recover">
-  <?= csrf_field() ?>
+  <?= csrf_field() ?><?= App\Core\Resume::field() ?>
   <?= field_text('email', t('common.email'), '', [
         'id' => 'email', 'type' => 'email', 'autocomplete' => 'email',
         'required' => true, 'autofocus' => true, 'hint' => t('recover.hint')]) ?>

@@ -55,7 +55,7 @@ ok(str_contains($app, "document.addEventListener('pointerover', warm, { passive:
     && str_contains($app, "early[key].at > Date.now() - 15000"),
     'вкладка подгружается при наведении — к щелчку ответ уже здесь');
 ok(str_contains($app, "animate(function () { swapPage(res.html, res.r.url, push); },"),
-    'во фрейме подмена тоже с переходом, а не скачком');
+    'подмена идёт через animate() — и во фрейме (там без View Transitions, v5.3.1)');
 
 echo "\n── Вход на алиасе портала ──\n";
 ok(str_contains($sso, "if (back && back !== 'null' && back !== location.origin && !e.auto) {")
