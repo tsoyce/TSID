@@ -194,7 +194,7 @@ try {
         'подсказка «Доверенный» не обещает, что экрана первого входа не будет');
 
     [, $dash] = http('GET', SSO . '/admin');
-    ok(str_contains($dash, 'за 14 дней:'), 'у неудачных входов на дашборде есть подпись срока');
+    ok(str_contains($dash, 'за 14 дней'), 'у плиток на дашборде есть подпись срока');
     ok(str_contains($dash, 'class="event-label'), 'события на дашборде — словами');
     [, $logs] = http('GET', SSO . '/admin/logs');
     ok(str_contains($logs, 'class="event-label'), 'журнал аудита — словами');

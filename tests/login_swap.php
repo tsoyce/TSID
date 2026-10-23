@@ -37,7 +37,7 @@ ok(str_contains($app, "var TABS = ['/login', '/register', '/recover'];")
 ok(str_contains($app, "document.getElementById('main').innerHTML = next.getElementById('main').innerHTML;"),
     'подменяется колонка формы — панель с обложкой и видео не начинается заново');
 ok(str_contains($app, "if (push) history.pushState({ sso: 1 }, '', url);")
-    && str_contains($app, "if (e.state && e.state.sso && tabOf(location.pathname) !== -1) go(location.href, null, false);"),
+    && str_contains($app, "if (appShell ? appPath(location.pathname) : tabOf(location.pathname) !== -1) go(location.href, null, false);"),
     'адрес настоящий и в истории: «назад» возвращает вкладку');
 ok(str_contains($app, "if (!framed && (to === -1 || !/class=\"auth-tabs/.test(res.html))) { leave(res.r.url); return; }"),
     'ответ без вкладок (вошёл и уехал в кабинет) — обычным переходом');
