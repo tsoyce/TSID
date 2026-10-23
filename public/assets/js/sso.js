@@ -191,7 +191,9 @@
     var card = set(document.createElement('div'), {
       position: 'relative', width: '100%', maxWidth: '440px', height: Math.min(620, innerHeight - 32) + 'px',
       borderRadius: '16px', overflow: 'hidden', background: dark ? '#1b1d22' : '#fff',
-      boxShadow: '0 24px 70px rgba(0,0,0,.4)'
+      boxShadow: '0 24px 70px rgba(0,0,0,.4)',
+      /* Вкладки во фрейме меняют высоту окна (v4.98) — плавно, а не рывком. */
+      transition: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'none' : 'height .2s ease'
     });
     var frame = set(document.createElement('iframe'), { width: '100%', height: '100%', border: '0', display: 'block' });
     frame.title = t.title || 'Вход';

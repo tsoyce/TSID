@@ -1127,11 +1127,21 @@
   var frameOrigin = document.documentElement.getAttribute('data-frame-origin');
   var framed = !!frameOrigin && window.parent !== window;
   var toPortal = function (m) { m.type = 'sso:frame'; window.parent.postMessage(m, frameOrigin); };
-  var frameWrap = document.querySelector('.auth-wrap');
+  /* Обёртку ищем заново на каждом замере (v4.98): подмена во фрейме меняет
+     тело целиком, и старая обёртка вне документа давала высоту 0 — портал её
+     отбрасывал, и окно оставалось высотой первого экрана. */
+  var sizeObserver = null;
   var reportSize = function () {
     if (!framed) return;
-    toPortal({ state: 'size', h: frameWrap ? Math.ceil(frameWrap.getBoundingClientRect().height)
+    var wrap = document.querySelector('.auth-wrap');
+    toPortal({ state: 'size', h: wrap ? Math.ceil(wrap.getBoundingClientRect().height)
       : document.documentElement.scrollHeight });
+  };
+  var watchSize = function () {
+    if (!framed || !window.ResizeObserver) return;
+    if (sizeObserver) sizeObserver.disconnect();
+    sizeObserver = new ResizeObserver(reportSize);
+    sizeObserver.observe(document.querySelector('.auth-wrap') || document.body);
   };
   var loadedScripts = {};
   Array.prototype.forEach.call(document.scripts, function (s) { if (s.src) loadedScripts[s.src] = true; });
@@ -1192,11 +1202,26 @@
     document.dispatchEvent(new CustomEvent('sso:page'));
     var focus = document.querySelector('[autofocus]');
     if (focus) focus.focus({ preventScroll: true });
+    watchSize();
     reportSize();
   };
-  /* Переход с анимацией: dir — 'fwd', 'back' или 'fade'. */
+  /* Переход с анимацией: dir — 'fwd', 'back' или 'fade'.
+
+     Во фрейме — без View Transitions (v4.98). Chrome 156 на Windows роняет
+     процесс фрейма с чужого сайта на document.startViewTransition(): щелчок по
+     «Регистрация» или «Не помню» в окне входа на портале давал серое окно с
+     грустным значком. Замер 23.10 на той же версии: падает и без расширений,
+     а без перехода и на странице самого SSO — нет. Во фрейме новое содержимое
+     просто проявляется — обычной CSS-анимацией. */
+  var reduced = function () { return matchMedia('(prefers-reduced-motion: reduce)').matches; };
   var animate = function (fn, dir) {
-    if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) { fn(); return; }
+    if (framed) {
+      fn();
+      var shown = document.getElementById('main');
+      if (shown && !reduced()) shown.classList.add('is-swapped-in');
+      return;
+    }
+    if (!document.startViewTransition || reduced()) { fn(); return; }
     var root = document.documentElement;
     root.setAttribute('data-swap', dir);
     var done = function () { root.removeAttribute('data-swap'); };
@@ -1283,7 +1308,7 @@
   if (framed) {
     toPortal({ state: 'ready' });
     reportSize();
-    if (window.ResizeObserver) new ResizeObserver(reportSize).observe(frameWrap || document.body);
+    watchSize();
     document.addEventListener('click', function (e) {
       var out = e.target.closest('a[href^="/social/"], [data-frame-window]');
       if (!out) return;

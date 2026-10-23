@@ -2233,7 +2233,7 @@ $mutations = [
     [
         'why'   => 'окно поверх сайта снова только растёт — высота по странице, а не по содержимому',
         'file'  => 'public/assets/js/app.js',
-        'from'  => "    toPortal({ state: 'size', h: frameWrap ? Math.ceil(frameWrap.getBoundingClientRect().height)\n      : document.documentElement.scrollHeight });",
+        'from'  => "    toPortal({ state: 'size', h: wrap ? Math.ceil(wrap.getBoundingClientRect().height)\n      : document.documentElement.scrollHeight });",
         'to'    => "    toPortal({ state: 'size', h: document.documentElement.scrollHeight });",
         'check' => 'tests/login_window.php',
     ],
@@ -2763,6 +2763,49 @@ $mutations = [
         'from'  => "if (\$host === '' || !in_array(\$host, \$aliases, true)) return \$base;",
         'to'    => "return \$base;",
         'check' => 'tests/login_swap.php',
+    ],
+    /* v4.98: окно входа на странице портала — все три вкладки. */
+    [
+        'why'   => 'во фрейме снова View Transitions — Chrome 156 роняет фрейм на «Регистрация»',
+        'file'  => 'public/assets/js/app.js',
+        'from'  => "    if (framed) {\n      fn();\n      var shown",
+        'to'    => "    if (false) {\n      fn();\n      var shown",
+        'check' => 'tests/frame.php',
+    ],
+    [
+        'why'   => 'высота окна снова меряется по обёртке, выброшенной подменой (0 — окно не меняется)',
+        'file'  => 'public/assets/js/app.js',
+        'from'  => "    watchSize();\n    reportSize();\n  };",
+        'to'    => "    reportSize();\n  };",
+        'check' => 'tests/frame.php',
+    ],
+    [
+        'why'   => '«Не помню» снова без шапки портала — знак установки вместо него',
+        'file'  => 'app/Controllers/RegistrationController.php',
+        'from'  => "            'client' => LoginFlow::pendingClient(), 'popup' => LoginFlow::pendingIsPopup(),\n            'captcha' => \\App\\Core\\Captcha::requiredForRecover()]",
+        'to'    => "            'captcha' => \\App\\Core\\Captcha::requiredForRecover()]",
+        'check' => 'tests/frame.php',
+    ],
+    [
+        'why'   => '«Не помню» снова теряет ключ возврата в форме',
+        'file'  => 'templates/auth/recover.php',
+        'from'  => "<?= csrf_field() ?><?= App\\Core\\Resume::field() ?>",
+        'to'    => "<?= csrf_field() ?>",
+        'check' => 'tests/frame.php',
+    ],
+    [
+        'why'   => '«Не помню» после отправки снова возвращает без ключа возврата',
+        'file'  => 'app/Controllers/RegistrationController.php',
+        'from'  => "redirect('/recover' . (\$rt !== '' ? '?rt=' . urlencode(\$rt) : ''));",
+        'to'    => "redirect('/recover');",
+        'check' => 'tests/frame.php',
+    ],
+    [
+        'why'   => '«Регистрация» снова со своей плашкой вместо шапки портала — шапка прыгает',
+        'file'  => 'templates/auth/register.php',
+        'from'  => "<?= auth_portal_head(\$client, t('register.context')) ?>",
+        'to'    => "<?= auth_context(\$client, t('register.context'), false) ?>",
+        'check' => 'tests/frame.php',
     ],
 ];
 

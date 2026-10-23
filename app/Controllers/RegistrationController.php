@@ -466,8 +466,22 @@ final class RegistrationController
 
     public function showRecover(): never
     {
+        /* Портал — как у «Вход» и «Регистрация» (v4.98): без него третья
+           вкладка входа с портала показывала знак установки, а во фрейме на
+           странице портала — ещё и без его оформления. */
         View::render('auth/recover', ['pageTitle' => 'Восстановление доступа',
+            'client' => LoginFlow::pendingClient(), 'popup' => LoginFlow::pendingIsPopup(),
             'captcha' => \App\Core\Captcha::requiredForRecover()], 'layouts/auth');
+    }
+
+    /**
+     * Обратно на «Не помню» — с ключом возврата (v4.98): иначе после отправки
+     * портал терялся, и вкладка «Вход» вела на безымянный вход.
+     */
+    private static function backToRecover(): never
+    {
+        $rt = \App\Core\Resume::fromRequest();
+        redirect('/recover' . ($rt !== '' ? '?rt=' . urlencode($rt) : ''));
     }
 
     public function doRecover(): never
@@ -477,7 +491,7 @@ final class RegistrationController
            не спрашивал — как и регистрация. */
         if (\App\Core\Captcha::requiredForRecover() && !\App\Core\Captcha::verify((string)($_POST['captcha'] ?? ''))) {
             Flash::error(t('Проверка не пройдена. Попробуйте ещё раз.'));
-            redirect('/recover');
+            self::backToRecover();
         }
         $email = mb_strtolower(trim((string)($_POST['email'] ?? '')));
         if (filter_var($email, FILTER_VALIDATE_EMAIL)
@@ -493,7 +507,7 @@ final class RegistrationController
             }
         }
         Flash::success('Если email существует — письмо отправлено.');
-        redirect('/recover');
+        self::backToRecover();
     }
 
     public function showReset(string $token): never
