@@ -103,6 +103,9 @@ final class WebhookDispatcher
             CURLOPT_TIMEOUT => 6,
             CURLOPT_CONNECTTIMEOUT => 3,
             CURLOPT_FOLLOWLOCATION => false,
+            /* v4.98: только http(s) — адрес задаёт админ портала, а libcurl
+               умеет gopher://, dict://, file://: нагрузка во внутреннюю сеть. */
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS | CURLPROTO_HTTP,
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json; charset=utf-8',
                 'User-Agent: ' . Setting::appName() . '-webhook/1.0',

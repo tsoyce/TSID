@@ -117,6 +117,8 @@ final class FedCmController
         if ($origin === '') $this->fail('origin отсутствует');
 
         if (!Auth::check()) $this->fail('нет сессии', 401);
+        /* v4.98: запертая сессия токенов не выдаёт — как и /authorize. */
+        if (Auth::locked()) $this->fail('сессия заперта', 401);
         $user = Auth::user();
 
         $clientId = trim((string)($_POST['client_id'] ?? ''));
@@ -147,6 +149,19 @@ final class FedCmController
             $this->fail('нет доступа к порталу', 403);
         }
 
+        /* v4.98: остальные условия /authorize — тоже. Без них FedCM был
+           обходом: портал с обязательной 2FA получал токен человека без неё,
+           первый вход проходил без экрана согласия, а scope выдавался полный,
+           даже если порталу `roles` или `email` не разрешены. Отказ уводит
+           портал на обычный редирект, где все эти экраны есть. */
+        if ((int)$client['require_2fa'] && $user['totp_enabled_at'] === null) {
+            $this->fail('портал требует 2FA', 403);
+        }
+        if (\App\Core\EmailGate::holds($user)) $this->fail('почта не подтверждена', 403);
+        if (\App\Oidc\AuthorizeFlow::mustConsent($user, $client)) $this->fail('нужно согласие', 403);
+        $scope = implode(' ', array_values(array_intersect(['openid', 'profile', 'email', 'roles'],
+            array_merge($client['allowed_scopes'], ['openid']))));
+
         /* sid общий с обычным входом: back-channel logout должен разлогинивать
            портал одинаково, каким бы путём тот ни получил токен. */
         $sess = Auth::sessionRecord() ?? [];
@@ -154,7 +169,7 @@ final class FedCmController
             ? \App\Models\SessionModel::sidFor((int)$sess['id'], (int)$client['id']) : '';
         $token = IdToken::issue(
             $user, $client,
-            'openid profile email roles',
+            $scope,
             $nonce !== '' ? $nonce : null,
             $sid,
             (int)strtotime((string)($sess['created_at'] ?? 'now')));

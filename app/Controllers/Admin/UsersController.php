@@ -310,6 +310,9 @@ final class UsersController extends AdminBase
             Flash::error(t('Вливаемый аккаунт — суперадмин. Оставьте его, а влейте другой, или сначала снимите роль.'));
             redirect('/admin/users/' . (int)$user['id'] . '/merge?with=' . (int)$other['id']);
         }
+        /* v4.98: и главный тоже. Влив свой аккаунт в суперадмина, admin
+           приносил туда свои ключи и соцвходы — и входил суперадмином. */
+        if (in_array('superadmin', User::globalRoleSlugs((int)$main['id']), true)) $this->requireSuperadmin();
         try {
             $stat = \App\Core\AccountMerge::into((int)$main['id'], (int)$dup['id'], (int)Auth::id());
         } catch (\Throwable $e) {
@@ -366,22 +369,15 @@ final class UsersController extends AdminBase
 
         switch ($action) {
             case 'block':
-                if (in_array('superadmin', User::globalRoleSlugs((int)$user['id']), true)) {
+                if (\App\Core\UserBlock::forbidden((int)$user['id'])) {
                     Flash::error('Суперадмина нельзя заблокировать.');
                     redirect($back);
                 }
-                User::update((int)$user['id'], ['status' => 'blocked']);
-                foreach (SessionModel::activeForUser((int)$user['id']) as $s) {
-                    EventDispatcher::sessionLogout((int)$s['id']);
-                }
-                SessionModel::revokeAllForUser((int)$user['id']);
-                RefreshToken::revokeAllForUser((int)$user['id']);
-                EventDispatcher::userEvent($user, 'user.blocked');
+                \App\Core\UserBlock::apply($user, 'admin');
                 \App\Core\AdminNotify::say('user.blocked',
                     fn() => t('Аккаунт :who заблокирован.', ['who' => user_handle($user)]),
                     fn() => [t('Кто') => user_handle(\App\Core\Auth::user() ?? []), t('Когда') => fmt_dt(now())]);
                 Audit::log('admin.user.block', ['on' => (int)$user['id']]);
-                \App\Core\WebhookDispatcher::emit('user.blocked', ['sub' => $user['public_id'], 'email' => $user['email']]);
                 Flash::success(t('Пользователь заблокирован, порталы оповещены.'));
                 break;
 
@@ -437,6 +433,10 @@ final class UsersController extends AdminBase
              */
             case 'login_link':
                 $this->requireGlobalAdmin();
+                /* v4.98: ссылка входа — это вход в чужой аккаунт. В аккаунт
+                   суперадмина её делает только суперадмин, иначе admin
+                   поднимал себя до суперадмина одной кнопкой. */
+                if (in_array('superadmin', User::globalRoleSlugs((int)$user['id']), true)) $this->requireSuperadmin();
                 $token = OneTimeToken::issue((int)$user['id'], 'login_link');
                 $_SESSION['fresh_login_link'] = [
                     'user' => (int)$user['id'], 'url' => base_url('/magic/' . $token),
@@ -518,6 +518,9 @@ final class UsersController extends AdminBase
 
             case 'reset_link':
                 // Пароль руками не задаётся никогда (§5.2) — только ссылка
+                /* v4.98: ссылка сброса суперадмину без почты показывается
+                   здесь — тот же вход в чужой аккаунт, что и login_link. */
+                if (in_array('superadmin', User::globalRoleSlugs((int)$user['id']), true)) $this->requireSuperadmin();
                 $token = OneTimeToken::issue((int)$user['id'], 'password_reset');
                 /* Человеку без почты письмо слать некуда, а восстановиться он
                    сам не может — это плата за перенос из сервиса, где почты не

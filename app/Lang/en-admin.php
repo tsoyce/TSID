@@ -3608,4 +3608,12 @@ return [
     'Ссылка устарела. Начните регистрацию заново — это одно поле.' => 'The link has expired. Start signing up again — it is one field.',
     'Шаг :n из :of' => 'Step :n of :of',
     'Изменить' => 'Change',
+    /* v4.98: ревизия кода */
+    'Адрес приёмника событий не изменён: нужен адрес http(s)://.' => 'The event receiver address was not changed: it must be an http(s):// address.',
+    'Адрес сервиса не изменён: нужен адрес http(s)://.' => 'The service address was not changed: it must be an http(s):// address.',
+    'Аккаунт с этой почтой есть, но адрес в нём не подтверждён. Восстановите доступ по почте — после этого вход через :provider заработает.' => 'An account with this email exists, but the address is not confirmed in it. Recover access by email — after that, signing in with :provider will work.',
+    'Оставить аккаунт?' => 'Keep the account?',
+    'Отмена удаления' => 'Cancel deletion',
+    'Сначала подтвердите адрес почты: приглашение выписано на него.' => 'Confirm your email address first: the invitation was issued to it.',
+    'Удаление будет отменено, аккаунт снова станет активным.' => 'The deletion will be cancelled and the account will be active again.',
 ];

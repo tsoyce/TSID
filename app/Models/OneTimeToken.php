@@ -14,6 +14,10 @@ final class OneTimeToken
         'email_verify' => 3 * 86400,
         'password_reset' => 3600,
         'email_change' => 3600,
+        /* «Это не я» старому адресу (v4.98): свой тип и неделя жизни. Под
+           типом email_change его гасила следующая же смена почты — захвативший
+           аккаунт делал вторую смену, и ссылка у хозяина умирала. */
+        'email_revert' => 7 * 86400,
         'login_link' => 900,
         'account_delete' => 14 * 86400,
         'client_setup' => 7 * 86400,

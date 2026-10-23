@@ -127,7 +127,11 @@ try {
     echo "\n── Отмена удаления из письма ──\n";
     $token = \App\Models\OneTimeToken::issue($u1, 'account_delete');
     $m = mark();
-    http('GET', SSO . '/delete/cancel/' . $token);
+    /* v4.98: по ссылке — только кнопка. Почтовый сканер, открывший письмо,
+       удаление больше не отменяет; отменяет нажатие. */
+    [, $cancelPage] = http('GET', SSO . '/delete/cancel/' . $token);
+    ok((string)(User::find($u1)['status'] ?? '') === 'deleted', 'открытая ссылка сама удаление не отменяет');
+    http('POST', SSO . '/delete/cancel/' . $token, ['_csrf' => csrfOf($cancelPage)]);
     ok((string)(User::find($u1)['status'] ?? '') === 'active', 'аккаунт снова активен');
     ok(first(eventsOf($a, $m), 'user.restored') !== null,
        'портал получил user.restored — иначе держал бы вернувшегося отключённым');

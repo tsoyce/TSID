@@ -109,7 +109,7 @@ final class ScimController
                а не заготовки. Пароля нет — вход по ссылке, passkey или соцвходу. */
             'status' => ($body['active'] ?? true) ? 'active' : 'blocked',
         ]);
-        Audit::log('scim.user.created', ['target_user_id' => $id,
+        Audit::log('scim.user.created', ['on' => $id,
             'meta' => ['token' => $this->token['name'] ?? '', 'email' => $email ?? ('@' . $login)]]);
 
         $this->ok($this->userResource(User::find($id) ?? []), 201);
@@ -129,7 +129,7 @@ final class ScimController
             'status' => array_key_exists('active', $body)
                 ? ($body['active'] ? 'active' : 'blocked') : null,
         ], static fn($v) => $v !== null));
-        Audit::log('scim.user.updated', ['target_user_id' => (int)$u['id'],
+        Audit::log('scim.user.updated', ['on' => (int)$u['id'],
             'meta' => ['token' => $this->token['name'] ?? '', 'op' => 'replace']]);
         $this->ok($this->userResource(User::find((int)$u['id']) ?? []));
     }
@@ -169,8 +169,17 @@ final class ScimController
             if (isset($map[$path])) $patch[$map[$path]] = $this->str($value, 150);
         }
         unset($patch['']);
+        /* v4.98: выключение — общей блокировкой: с сессиями, refresh-токенами
+           и оповещением порталов; суперадмина — никогда. */
+        $block = ($patch['status'] ?? '') === 'blocked';
+        if ($block && \App\Core\UserBlock::forbidden((int)$u['id'])) {
+            $this->fail(403, 'mutability', 'Суперадмина нельзя заблокировать');
+        }
+        if ($block) unset($patch['status']);
         if ($patch !== []) User::update((int)$u['id'], $patch);
-        Audit::log('scim.user.updated', ['target_user_id' => (int)$u['id'],
+        if ($block && $u['status'] !== 'blocked') \App\Core\UserBlock::apply($u, 'scim');
+        if ($block) $patch['status'] = 'blocked';
+        Audit::log('scim.user.updated', ['on' => (int)$u['id'],
             'meta' => ['token' => $this->token['name'] ?? '', 'fields' => array_keys($patch)]]);
         $this->ok($this->userResource(User::find((int)$u['id']) ?? []));
     }
@@ -184,9 +193,11 @@ final class ScimController
     {
         $this->auth('users:write');
         $u = $this->mustUser($id);
-        User::update((int)$u['id'], ['status' => 'blocked']);
-        \App\Models\SessionModel::revokeAllForUser((int)$u['id']);
-        Audit::log('scim.user.deactivated', ['target_user_id' => (int)$u['id'],
+        if (\App\Core\UserBlock::forbidden((int)$u['id'])) {
+            $this->fail(403, 'mutability', 'Суперадмина нельзя заблокировать');
+        }
+        if ($u['status'] !== 'blocked') \App\Core\UserBlock::apply($u, 'scim');
+        Audit::log('scim.user.deactivated', ['on' => (int)$u['id'],
             'meta' => ['token' => $this->token['name'] ?? '']]);
         http_response_code(204);
         exit;
@@ -274,7 +285,10 @@ final class ScimController
     {
         $this->auth('users:write');
         $org = $this->mustOrg($id);
-        Org::delete((int)$org['id']);
+        /* v4.98: purge, как в админке и API: голый delete оставлял выдачи
+           ролей на org:X и порталы с org_id = X — админы удалённой
+           организации сохраняли доступ к её порталам. */
+        Org::purge((int)$org['id']);
         Audit::log('scim.group.deleted', ['meta' => ['org' => $org['slug'], 'token' => $this->token['name'] ?? '']]);
         http_response_code(204);
         exit;
@@ -472,7 +486,7 @@ final class ScimController
         $token = ApiToken::findUsable(substr($header, 7));
         if (!$token) $this->fail(401, 'invalidCredentials', 'Токен неизвестен, отозван или истёк');
         RateLimiter::guard('scim:' . $token['id'], 120, 60);
-        if (!in_array($scope, $token['scopes'], true)) {
+        if (!ApiToken::allows($token['scopes'], $scope)) {
             $this->fail(403, 'insufficientScope', 'Токену не хватает права ' . $scope);
         }
         ApiToken::touch((int)$token['id']);

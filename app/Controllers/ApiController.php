@@ -146,23 +146,26 @@ final class ApiController
         foreach (['first_name', 'last_name', 'display_name', 'login'] as $field) {
             if (array_key_exists($field, $body)) $data[$field] = trim((string)$body[$field]) ?: null;
         }
+        /* v4.98: логин при правке — по тем же правилам, что при создании:
+           без них писался недопустимый, а занятый ронял запрос в 500. */
+        if (($data['login'] ?? null) !== null) {
+            $data['login'] = \App\Core\LoginName::normalize($data['login']);
+            if (($le = \App\Core\LoginName::check($data['login'])) !== null) $this->error(422, 'invalid_login', $le);
+            if (User::loginTaken($data['login'], (int)$user['id'])) $this->error(409, 'login_taken', 'Пользователь с таким login уже есть');
+        }
         if (isset($body['status']) && in_array($body['status'], ['active', 'blocked'], true)) {
-            if ($body['status'] === 'blocked'
-                && in_array('superadmin', User::globalRoleSlugs((int)$user['id']), true)) {
+            if ($body['status'] === 'blocked' && \App\Core\UserBlock::forbidden((int)$user['id'])) {
                 $this->error(403, 'forbidden', 'Суперадмина нельзя заблокировать');
             }
             $data['status'] = $body['status'];
         }
+        $block = ($data['status'] ?? '') === 'blocked' && $user['status'] !== 'blocked';
+        if ($block) unset($data['status']);
         if ($data !== []) User::update((int)$user['id'], $data);
-
-        // Блокировка через API работает как в админке: сессии гасим, порталы оповещаем
-        if (($data['status'] ?? '') === 'blocked') {
-            foreach (SessionModel::activeForUser((int)$user['id']) as $s) {
-                EventDispatcher::sessionLogout((int)$s['id']);
-            }
-            SessionModel::revokeAllForUser((int)$user['id']);
-            EventDispatcher::userEvent($user, 'user.blocked');
-            \App\Core\WebhookDispatcher::emit('user.blocked', ['sub' => $user['public_id'], 'via' => 'api']);
+        // Блокировка через API — та же, что в админке (UserBlock)
+        if ($block) {
+            \App\Core\UserBlock::apply($user, 'api');
+            $data['status'] = 'blocked';
         }
         $this->audit('api.user.update', ['on' => (int)$user['id'], 'meta' => ['fields' => array_keys($data)]]);
         $this->json($this->userDto(User::find((int)$user['id'])));
@@ -416,6 +419,11 @@ final class ApiController
             $this->error(422, 'invalid_request',
                 'Эту роль нельзя выдать в этой области: она к ней не относится');
         }
+        /* v4.98: суперадмина выдаёт только токен `*` — с одним roles:write
+           программа поднимала себя до уровня, которого ей не давали. */
+        if ($role['slug'] === 'superadmin' && !in_array(ApiToken::SCOPE_ALL, $this->token['scopes'], true)) {
+            $this->error(403, 'insufficient_scope', 'Роль superadmin выдаёт только токен «*»');
+        }
         Role::assignScoped((int)$u['id'], (int)$role['id'], $scope, null);
         \App\Core\AccessResolver::forget();
         $this->audit('api.role.grant', ['on' => (int)$u['id'],
@@ -567,6 +575,17 @@ final class ApiController
         $changed = [];
         foreach ($body as $k => $v) {
             if (!is_string($k) || !preg_match('~^[a-z0-9_.]{2,64}$~i', $k)) continue;
+            /* v4.98: право settings:write — это настройки, которые переезжают
+               между установками (SettingsTransfer::portable). Прочее (служебные
+               отметки, ключи подписи, владелец) — только токену `*`, а
+               владелец и ключи не пишутся вовсе: у них свои пути с
+               подтверждением (Owner::set, Keys). */
+            if ($k === 'system.owner_user_id' || str_starts_with($k, 'keys.')) {
+                $this->error(403, 'forbidden', 'Этот ключ через API не меняется: ' . $k);
+            }
+            if (!SettingsTransfer::portable($k) && !in_array(ApiToken::SCOPE_ALL, $this->token['scopes'], true)) {
+                $this->error(403, 'insufficient_scope', 'Служебная настройка — только токену «*»: ' . $k);
+            }
             /* Прочитал, поправил соседнее, записал всё обратно — обычный приём
                для машины. Секрет при чтении был `***`, и записать его обратно
                значит стереть настоящий. Отказываем: это маска, а не значение. */

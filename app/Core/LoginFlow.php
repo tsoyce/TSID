@@ -63,6 +63,19 @@ final class LoginFlow
         return in_array((string)($q['display'] ?? ''), ['popup', Framed::DISPLAY], true);
     }
 
+    /**
+     * Первый фактор пройден: дальше — второй, если он включён, иначе вход.
+     *
+     * v4.98: одна развилка на все пути первого фактора — пароль, ссылка из
+     * письма, соцвход. Была скопирована в два места и забыта в третьем: вход
+     * через Яндекс или GitHub не спрашивал код 2FA вовсе.
+     */
+    public static function afterFirstFactor(array $user, bool $remember, string $auditEvent = 'login.success'): never
+    {
+        if ($user['totp_enabled_at'] !== null) self::require2fa($user, $remember);
+        self::complete($user, $remember, $auditEvent);
+    }
+
     /** Успешный вход: сессия, аудит, редирект в нужное место. */
     public static function complete(array $user, bool $remember, string $auditEvent = 'login.success'): never
     {

@@ -43,10 +43,14 @@ final class RefreshToken
      * Повторное использование ротированного → отзыв семьи + аудит (⚠).
      * Возвращает [row, newToken] или [null, null].
      */
-    public static function rotate(string $token): array
+    public static function rotate(string $token, int $clientDbId): array
     {
         $row = DB::row('SELECT * FROM {refresh_tokens} WHERE token_hash = ?', [Crypto::hashToken($token)]);
         if (!$row) return [null, null];
+        /* v4.98: чужой клиент токен не трогает. Сверка стояла после ротации, и
+           один запрос с утёкшим токеном помечал его использованным — следующее
+           законное обновление выглядело повтором и отзывало всю семью. */
+        if ((int)$row['client_id'] !== $clientDbId) return [null, null];
         if ($row['revoked_at'] !== null || strtotime($row['expires_at'] . ' UTC') <= time()) return [null, null];
         /* Помечаем условным UPDATE и продолжаем, только если строка досталась
            нам (v4.70). Раньше два одновременных обновления одним токеном оба

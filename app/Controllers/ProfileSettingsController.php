@@ -100,6 +100,9 @@ final class ProfileSettingsController
     public function downloadExport(string $token): never
     {
         $job = \App\Core\DataExport::findByToken($token);
+        /* v4.98: выгрузка — только своя. Ссылка из письма, попавшая к другому
+           вошедшему (пересланное письмо), отдавала ему чужой архив. */
+        if ($job && (int)$job['user_id'] !== (int)\App\Core\Auth::id()) $job = null;
         if (!$job) {
             Flash::error('Ссылка на выгрузку устарела или недействительна.');
             redirect('/profile/settings');
@@ -178,11 +181,13 @@ final class ProfileSettingsController
                 'url' => base_url('/email/confirm/' . $confirm),
                 'new_email' => $newEmail,
             ]);
-            // Ревертный токен старому адресу живёт дольше подтверждающего
-            $revert = \App\Models\OneTimeToken::issue(null, 'email_change',
+            /* Ревертный токен старому адресу живёт дольше подтверждающего.
+               Выдаётся без user_id и привязывается после: issue() гасит
+               прежние токены типа, а прежние «Это не я» гаснуть не должны. */
+            $revert = \App\Models\OneTimeToken::issue(null, 'email_revert',
                 ['kind' => 'revert', 'old_email' => $user['email'], 'user_id' => (int)$user['id']]);
-            \App\Core\DB::run('UPDATE {one_time_tokens} SET user_id = ?, expires_at = ? WHERE token_hash = ?',
-                [(int)$user['id'], now_plus(7 * 86400), \App\Core\Crypto::hashToken($revert)]);
+            \App\Core\DB::run('UPDATE {one_time_tokens} SET user_id = ? WHERE token_hash = ?',
+                [(int)$user['id'], \App\Core\Crypto::hashToken($revert)]);
             /* Уведомление и «откатить» — старому адресу. Когда почты не было
                вовсе, это не смена, а добавление: откатывать некуда и предупреждать
                некого, а попытка отправки на NULL кончилась бы исключением ровно

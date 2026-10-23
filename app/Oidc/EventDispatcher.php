@@ -67,6 +67,9 @@ final class EventDispatcher
             CURLOPT_TIMEOUT => 5,
             CURLOPT_CONNECTTIMEOUT => 3,
             CURLOPT_FOLLOWLOCATION => false, // редиректов в back-channel нет
+            /* v4.98: только http(s) — адрес задаёт админ портала, а libcurl
+               умеет gopher://, dict://, file://: нагрузка во внутреннюю сеть. */
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS | CURLPROTO_HTTP,
             CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
         ]);
         curl_exec($ch);

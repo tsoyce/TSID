@@ -74,6 +74,15 @@ final class AuthorizeFlow
             if (!$user || !$sess) $err('login_required', 'No active SSO session');
         }
 
+        /* v4.98: запертая сессия кода не выдаёт. Замок запирал кабинет и
+           админку, а /authorize флага `auth` не носит — и взявший оставленный
+           телефон молча входил в любой портал. После отпирания — сюда же. */
+        if ($user && Auth::locked()) {
+            if ($prompt === 'none') $err('login_required', 'Session is locked');
+            $_SESSION['return_to'] = '/authorize?' . http_build_query($q);
+            redirect('/lock');
+        }
+
         /* 4. Нужен вход или переспрос пароля.
 
            `max_age=0` означает «пусть подтвердит пароль ПРЯМО сейчас» — так
@@ -147,11 +156,7 @@ final class AuthorizeFlow
            недоверенному он показывает ещё и список данных, доверенному просто
            говорит, куда человек входит. Выключается настройкой: установке, где
            все сервисы свои и вход сквозной, лишний экран не нужен. */
-        $access = Access::get((int)$user['id'], (int)$client['id']);
-        $firstTime = ($access['consented_at'] ?? null) === null;
-        $mustAsk = !(int)$client['is_trusted']
-            || \App\Core\Setting::get('policy.welcome_screen', '1') === '1';
-        if ($firstTime && $mustAsk) {
+        if (self::mustConsent($user, $client)) {
             if ($prompt === 'none') $err('access_denied', 'Consent required');
             $_SESSION['consent_request'] = $q;
             /* Тот же ключ возврата, что и на входе. Согласие — место, где одно
@@ -163,6 +168,16 @@ final class AuthorizeFlow
         }
 
         self::issueAndRedirect($q, $client, $user, $sess);
+    }
+
+    /** Нужен ли экран первого входа (шаг 7). Один ответ на /authorize и FedCM (v4.98). */
+    public static function mustConsent(array $user, array $client): bool
+    {
+        $access = Access::get((int)$user['id'], (int)$client['id']);
+        $firstTime = ($access['consented_at'] ?? null) === null;
+        $mustAsk = !(int)$client['is_trusted']
+            || \App\Core\Setting::get('policy.welcome_screen', '1') === '1';
+        return $firstTime && $mustAsk;
     }
 
     /** Выдача кода и возврат на портал — финал успешного /authorize. */

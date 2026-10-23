@@ -104,9 +104,17 @@ final class TokenFlow
     {
         $token = (string)($_POST['refresh_token'] ?? '');
         if ($token === '') self::error('invalid_request', 'refresh_token is required');
-        [$row, $newToken] = RefreshToken::rotate($token);
-        if ($row === null || (int)$row['client_id'] !== (int)$client['id']) {
-            self::error('invalid_grant', 'Refresh token is invalid, expired or reused');
+        [$row, $newToken] = RefreshToken::rotate($token, (int)$client['id']);
+        if ($row === null) self::error('invalid_grant', 'Refresh token is invalid, expired or reused');
+        /* v4.98: сессия, из которой токен выдан, завершена — выходом, «Завершить
+           сеанс» или блокировкой. Тогда и токен мёртв: иначе портал ещё
+           тридцать дней обновлял доступ после «Выйти везде». Истёкшая по
+           времени сессия токен не гасит — это и есть offline_access. */
+        $sessRow = $row['session_id'] !== null
+            ? DB::row('SELECT created_at, revoked_at FROM {sessions} WHERE id = ?', [(int)$row['session_id']]) : null;
+        if ($sessRow !== null && $sessRow['revoked_at'] !== null) {
+            RefreshToken::revokeFamily($row['family_id']);
+            self::error('invalid_grant', 'The session this token belongs to has ended');
         }
         $user = User::find((int)$row['user_id']);
         if (!\App\Models\User::canSignIn($user)) {
@@ -125,7 +133,11 @@ final class TokenFlow
             'access_token' => IdToken::issueAccess($user, $client, $row['scope'], $sid),
             'token_type' => 'Bearer',
             'expires_in' => IdToken::accessTtl(),
-            'id_token' => IdToken::issue($user, $client, $row['scope'], null, $sid ?? '', time()),
+            /* auth_time — время входа, а не обновления (OIDC Core §12.2, v4.98):
+               иначе портал, проверяющий свежесть входа, считал его только что
+               сделанным. */
+            'id_token' => IdToken::issue($user, $client, $row['scope'], null, $sid ?? '',
+                $sessRow !== null ? (int)strtotime($sessRow['created_at'] . ' UTC') : time()),
             'scope' => $row['scope'],
             'refresh_token' => $newToken,
         ]);
