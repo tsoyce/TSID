@@ -91,9 +91,36 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }
    Свой transform у плашки при переходе по ссылке не срабатывает вовсе: это
    разные документы, анимировать в старом уже нечего. */
 .auth-tabs-ink { view-transition-name: screen-tabs-ink; }
+/* Подписи вкладок — своими именами (v4.97). Без них они снимались вместе с
+   полосой, а плашка — отдельным слоем поверх: на время перехода подпись
+   активной вкладки пропадала под плашкой. Слои идут в порядке отрисовки, и
+   подписи (z-index: 1) ложатся над плашкой (z-index: 0), как и на странице. */
+.auth-tabs > a:nth-of-type(1) { view-transition-name: screen-tab-1; }
+.auth-tabs > a:nth-of-type(2) { view-transition-name: screen-tab-2; }
+.auth-tabs > a:nth-of-type(3) { view-transition-name: screen-tab-3; }
 /* Карточка попапа: коробка одна и та же на всех трёх экранах, меняется только
    её высота. Без имени она мигала целиком на каждом переходе. */
 .auth-shell.is-popup > .auth-card { view-transition-name: screen-card; }
+/* Вкладки входа без перезагрузки (v4.97): app.js подменяет колонку формы и
+   на время перехода ставит корню data-swap — fwd, back или fade. Колонка
+   получает имя только на это время: в обычной навигации между документами
+   она меняется целиком, как и раньше. Содержимое уходит в сторону выбранной
+   вкладки и приходит с другой; высота колонки меняется плавно, картинка при
+   этом не растягивается — прижата к верху. */
+:root[data-swap] #main { view-transition-name: screen-main; }
+:root[data-swap]::view-transition-old(screen-main),
+:root[data-swap]::view-transition-new(screen-main) {
+  height: 100%; object-fit: none; object-position: 50% 0;
+  animation-duration: var(--dur-slow); animation-timing-function: var(--ease-out); animation-fill-mode: both;
+}
+:root[data-swap="fwd"]::view-transition-old(screen-main) { animation-name: swap-out-start; }
+:root[data-swap="fwd"]::view-transition-new(screen-main) { animation-name: swap-in-end; }
+:root[data-swap="back"]::view-transition-old(screen-main) { animation-name: swap-out-end; }
+:root[data-swap="back"]::view-transition-new(screen-main) { animation-name: swap-in-start; }
+@keyframes swap-out-start { to { opacity: 0; transform: translateX(-24px); } }
+@keyframes swap-out-end { to { opacity: 0; transform: translateX(24px); } }
+@keyframes swap-in-end { from { opacity: 0; transform: translateX(24px); } }
+@keyframes swap-in-start { from { opacity: 0; transform: translateX(-24px); } }
 /* Просили меньше движения — значит меньше движения, а не «чуть-чуть». */
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) {

@@ -1100,21 +1100,187 @@
     }
   }
 
+  /* Уйти обычным переходом (v4.97) — вне фрейма, когда подменять нечего:
+     вошёл и уехал в кабинет, ошибка сети. Во фрейме нового документа не
+     бывает — см. подмену ниже. */
+  var leave = function (url) { location.href = url; };
+
+  /* ---------- Подмена страницы без нового документа (v4.75; v4.97 — и вне фрейма) ----------
+     Во фрейме (v4.75): Chrome 153 с блокировщиком рекламы (Adblock Plus,
+     AdBlock — их скрипты встраиваются в каждый новый документ каждого фрейма)
+     ронял процесс фрейма на переходе к новому документу: серое окно с грустным
+     значком, STATUS_BREAKPOINT в chrome.dll+0x4a63980. Одиннадцать дампов
+     25.09 — все на экранах входа во фрейме; первая загрузка проходит, падает
+     любой щелчок. Поэтому документ во фрейме один на весь вход: ссылки и формы
+     идут через fetch, ответ подменяет содержимое.
+
+     Вне фрейма (v4.97): «Вход», «Регистрация» и «Не помню» — три вкладки одного
+     экрана, и владелец просил переходы между ними как в приложении: без
+     перезагрузки, плавно. Подменяется только колонка формы — панель с
+     обложкой и видео остаётся, а не начинается заново. Адрес — настоящий, в
+     истории: «назад» возвращает вкладку. Формы уходят как обычно: проверяет
+     сервер, и переход после отправки сглаживает @view-transition.
+
+     Переход — View Transitions: вкладка-плашка переезжает, содержимое уходит
+     в сторону выбранной вкладки. Нет поддержки или просили меньше движения —
+     подмена мгновенная, ничего не ломается. */
+  var frameOrigin = document.documentElement.getAttribute('data-frame-origin');
+  var framed = !!frameOrigin && window.parent !== window;
+  var toPortal = function (m) { m.type = 'sso:frame'; window.parent.postMessage(m, frameOrigin); };
+  var frameWrap = document.querySelector('.auth-wrap');
+  var reportSize = function () {
+    if (!framed) return;
+    toPortal({ state: 'size', h: frameWrap ? Math.ceil(frameWrap.getBoundingClientRect().height)
+      : document.documentElement.scrollHeight });
+  };
+  var loadedScripts = {};
+  Array.prototype.forEach.call(document.scripts, function (s) { if (s.src) loadedScripts[s.src] = true; });
+  var swapBusy = false;
+  var framable = function (r) {
+    var fa = /frame-ancestors([^;]*)/.exec(r.headers.get('Content-Security-Policy') || '');
+    return !!fa && fa[1].split(/\s+/).indexOf(frameOrigin) !== -1;
+  };
+  /* Номер вкладки экрана: по нему переход знает, в какую сторону уходить. */
+  var TABS = ['/login', '/register', '/recover'];
+  var tabOf = function (path) { return TABS.indexOf(path); };
+  var swapPage = function (html, url, push) {
+    var next = new DOMParser().parseFromString(html, 'text/html');
+    document.title = next.title;
+    if (framed) {
+      ['lang', 'data-frame-origin'].forEach(function (a) {
+        if (next.documentElement.hasAttribute(a)) document.documentElement.setAttribute(a, next.documentElement.getAttribute(a));
+      });
+      document.head.querySelectorAll('style').forEach(function (s) { s.remove(); });
+      next.head.querySelectorAll('style').forEach(function (s) { document.head.appendChild(document.importNode(s, true)); });
+      next.head.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
+        var href = l.getAttribute('href');
+        var has = Array.prototype.some.call(document.head.querySelectorAll('link[rel="stylesheet"]'),
+          function (x) { return x.getAttribute('href') === href; });
+        if (!has) document.head.appendChild(document.importNode(l, true));
+      });
+      /* Словарь для скрипта: язык мог смениться (RU/EN внизу экрана). */
+      next.querySelectorAll('script').forEach(function (s) {
+        var m = /window\.ssoI18n = (\{.*\});/.exec(s.textContent);
+        if (m) { try { window.ssoI18n = JSON.parse(m[1]); } catch (err) { /* останется прежний */ } }
+      });
+      document.body.className = next.body.className;
+      document.body.innerHTML = next.body.innerHTML;
+    } else {
+      /* Только колонка формы и тосты: панель, подвал и тема — те же. */
+      document.getElementById('main').innerHTML = next.getElementById('main').innerHTML;
+      var toasts = document.querySelector('.toasts'), nextToasts = next.querySelector('.toasts');
+      if (toasts && nextToasts) toasts.innerHTML = nextToasts.innerHTML;
+    }
+    /* Скрипты из innerHTML не исполняются. Свои файлы (passkey.js, скрипт
+       капчи) догружаем, если их ещё не было. */
+    next.body.querySelectorAll('script[src]').forEach(function (s) {
+      var src = new URL(s.getAttribute('src'), url).href;
+      if (loadedScripts[src]) return;
+      loadedScripts[src] = true;
+      var el = document.createElement('script');
+      el.src = src;
+      document.head.appendChild(el);
+    });
+    /* Виджет капчи, уже загруженный раньше, сам второй раз не рисуется. */
+    if (window.turnstile) document.querySelectorAll('.cf-turnstile:empty').forEach(function (el) { window.turnstile.render(el); });
+    if (window.hcaptcha) document.querySelectorAll('.h-captcha:empty').forEach(function (el) { window.hcaptcha.render(el); });
+    try {
+      if (push) history.pushState({ sso: 1 }, '', url);
+      else history.replaceState({ sso: 1 }, '', url);
+    } catch (err) { /* адрес документа останется прежним */ }
+    window.scrollTo(0, 0);
+    document.dispatchEvent(new CustomEvent('sso:page'));
+    var focus = document.querySelector('[autofocus]');
+    if (focus) focus.focus({ preventScroll: true });
+    reportSize();
+  };
+  /* Переход с анимацией: dir — 'fwd', 'back' или 'fade'. */
+  var animate = function (fn, dir) {
+    if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) { fn(); return; }
+    var root = document.documentElement;
+    root.setAttribute('data-swap', dir);
+    var done = function () { root.removeAttribute('data-swap'); };
+    document.startViewTransition(fn).finished.then(done, done);
+  };
+  /* Вкладки подгружаются заранее — при наведении или касании: к щелчку ответ
+     уже здесь, и переход начинается сразу, а не после сети. */
+  var early = {};
+  var fetchPage = function (url, init) {
+    var key = (!init || !init.method || init.method === 'GET') ? url : null;
+    if (key && early[key] && early[key].at > Date.now() - 15000) {
+      var hit = early[key].p;
+      delete early[key];
+      return hit;
+    }
+    /* mode: 'same-origin' — переадресация на чужой адрес обрывается ДО
+       запроса туда: код авторизации не уйдёт на колбэк портала мимо
+       страницы. Во фрейме SSO туда и не переадресует — отдаёт код странице
+       портала (data-handoff). */
+    return fetch(url, Object.assign({ credentials: 'same-origin', mode: 'same-origin' }, init || {}))
+      .then(function (r) { return r.text().then(function (html) { return { r: r, html: html }; }); });
+  };
+  var go = function (url, init, push) {
+    if (swapBusy) return;
+    swapBusy = true;
+    document.documentElement.setAttribute('aria-busy', 'true');
+    var from = tabOf(location.pathname);
+    fetchPage(url, init)
+      .then(function (res) {
+        if (framed && !framable(res.r)) throw new Error('not-framable');
+        var to = tabOf(new URL(res.r.url).pathname);
+        /* Вне фрейма подменяем только экран с вкладками — всё прочее (вошёл
+           и уехал в кабинет, ошибка) открывается обычным переходом. */
+        if (!framed && (to === -1 || !/class="auth-tabs/.test(res.html))) { leave(res.r.url); return; }
+        animate(function () { swapPage(res.html, res.r.url, push); },
+          from === -1 || to === -1 || from === to ? 'fade' : (to > from ? 'fwd' : 'back'));
+      })
+      .catch(function () { if (framed) toPortal({ state: 'window' }); else leave(url); })
+      .then(function () { swapBusy = false; document.documentElement.removeAttribute('aria-busy'); });
+  };
+  /* passkey.js после входа уходит по адресу из ответа — тоже сюда. */
+  if (framed) window.ssoGo = function (url) { go(url); };
+
+  /* Вне фрейма перехватываем только переход между вкладками входа. */
+  var tabLink = function (a) {
+    if (framed || !document.querySelector('.auth-tabs')) return false;
+    return a.origin === location.origin && tabOf(a.pathname) !== -1;
+  };
+  if (!framed && document.querySelector('.auth-tabs')) {
+    try { history.replaceState({ sso: 1 }, ''); } catch (err) { /* без истории — обычные переходы */ }
+    window.addEventListener('popstate', function (e) {
+      if (e.state && e.state.sso && tabOf(location.pathname) !== -1) go(location.href, null, false);
+    });
+    var warm = function (e) {
+      var a = e.target.closest && e.target.closest('a[href]');
+      if (!a || !tabLink(a) || a.href === location.href || early[a.href]) return;
+      early[a.href] = { at: Date.now(), p: fetch(a.href, { credentials: 'same-origin', mode: 'same-origin' })
+        .then(function (r) { return r.text().then(function (html) { return { r: r, html: html }; }); }) };
+    };
+    document.addEventListener('pointerover', warm, { passive: true });
+    document.addEventListener('touchstart', warm, { passive: true });
+    document.addEventListener('focusin', warm);
+  }
+
+  document.addEventListener('click', function (e) {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target.closest('a[href]');
+    if (!a || a.hasAttribute('download')) return;
+    var target = a.getAttribute('target');
+    if (target && target !== '_self') return;
+    var href = a.getAttribute('href');
+    if (!href || href.charAt(0) === '#' || a.origin !== location.origin) return;
+    if (!framed && !tabLink(a)) return;
+    e.preventDefault();
+    if (!framed && a.href === location.href) return;
+    go(a.href, null, !framed);
+  });
+
   /* ---------- Вход во фрейме на странице портала (v4.73) ----------
      Фрейм говорит странице портала: готов, вот высота — и просит отдельное
      окно там, где фрейм не справится: вход через сервисы (их страницы фреймы
      запрещают) и ссылка из письма (откроется в новой вкладке, а не здесь).
      Щелчок во фрейме даёт право открыть окно и странице портала. */
-  var frameOrigin = document.documentElement.getAttribute('data-frame-origin');
-  if (frameOrigin && window.parent !== window) {
-    var toPortal = function (m) { m.type = 'sso:frame'; window.parent.postMessage(m, frameOrigin); };
-    /* Высота — по содержимому (v4.87), а не по странице: страница не ниже
-       фрейма, и по ней окно умело только расти. */
-    var frameWrap = document.querySelector('.auth-wrap');
-    var reportSize = function () {
-      toPortal({ state: 'size', h: frameWrap ? Math.ceil(frameWrap.getBoundingClientRect().height)
-        : document.documentElement.scrollHeight });
-    };
+  if (framed) {
     toPortal({ state: 'ready' });
     reportSize();
     if (window.ResizeObserver) new ResizeObserver(reportSize).observe(frameWrap || document.body);
@@ -1131,101 +1297,6 @@
       e.preventDefault();
       toPortal({ state: 'window' });
     }, true);
-
-    /* ---------- Переходы во фрейме — без новых документов (v4.75) ----------
-       Chrome 153 с блокировщиком рекламы (Adblock Plus, AdBlock — их скрипты
-       встраиваются в каждый новый документ каждого фрейма) роняет процесс
-       фрейма, когда фрейм переходит на новый документ: серое окно с грустным
-       значком, STATUS_BREAKPOINT в chrome.dll+0x4a63980. Одиннадцать дампов
-       25.09 — все на экранах входа во фрейме на Портфолио и Архиве; первая
-       загрузка проходит, падает любой щелчок. Тот же сбой, что в предпросмотре
-       экрана входа (4.73.1), и лечится так же: документ во фрейме один на весь
-       вход. Ссылки и формы идут через fetch, ответ подменяет содержимое.
-
-       Подменяется только ответ, который сам разрешил встраивать себя этому
-       порталу (frame-ancestors) — fetch не должен стать обходом запрета: страница,
-       которую нельзя показать во фрейме, не показывается в нём и так. Такой
-       ответ и любой сбой — повод открыть вход отдельным окном, как для входа
-       через сервисы. */
-    var loadedScripts = {};
-    Array.prototype.forEach.call(document.scripts, function (s) { if (s.src) loadedScripts[s.src] = true; });
-    var swapBusy = false;
-    var framable = function (r) {
-      var fa = /frame-ancestors([^;]*)/.exec(r.headers.get('Content-Security-Policy') || '');
-      return !!fa && fa[1].split(/\s+/).indexOf(frameOrigin) !== -1;
-    };
-    var swapPage = function (html, url) {
-      var next = new DOMParser().parseFromString(html, 'text/html');
-      ['lang', 'data-frame-origin'].forEach(function (a) {
-        if (next.documentElement.hasAttribute(a)) document.documentElement.setAttribute(a, next.documentElement.getAttribute(a));
-      });
-      document.title = next.title;
-      document.head.querySelectorAll('style').forEach(function (s) { s.remove(); });
-      next.head.querySelectorAll('style').forEach(function (s) { document.head.appendChild(document.importNode(s, true)); });
-      next.head.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
-        var href = l.getAttribute('href');
-        var has = Array.prototype.some.call(document.head.querySelectorAll('link[rel="stylesheet"]'),
-          function (x) { return x.getAttribute('href') === href; });
-        if (!has) document.head.appendChild(document.importNode(l, true));
-      });
-      /* Словарь для скрипта: язык мог смениться (RU/EN внизу экрана). */
-      next.querySelectorAll('script').forEach(function (s) {
-        var m = /window\.ssoI18n = (\{.*\});/.exec(s.textContent);
-        if (m) { try { window.ssoI18n = JSON.parse(m[1]); } catch (err) { /* останется прежний */ } }
-      });
-      document.body.className = next.body.className;
-      document.body.innerHTML = next.body.innerHTML;
-      /* Скрипты из innerHTML не исполняются. Свои файлы (passkey.js, скрипт
-         капчи) догружаем, если их ещё не было; встроенные — только
-         подстраховка прямой загрузки, во фрейме они не нужны. */
-      next.body.querySelectorAll('script[src]').forEach(function (s) {
-        var src = new URL(s.getAttribute('src'), url).href;
-        if (loadedScripts[src]) return;
-        loadedScripts[src] = true;
-        var el = document.createElement('script');
-        el.src = src;
-        document.head.appendChild(el);
-      });
-      /* Виджет капчи, уже загруженный раньше, сам второй раз не рисуется. */
-      if (window.turnstile) document.querySelectorAll('.cf-turnstile:empty').forEach(function (el) { window.turnstile.render(el); });
-      if (window.hcaptcha) document.querySelectorAll('.h-captcha:empty').forEach(function (el) { window.hcaptcha.render(el); });
-      try { history.replaceState(null, '', url); } catch (err) { /* адрес документа останется прежним */ }
-      window.scrollTo(0, 0);
-      document.dispatchEvent(new CustomEvent('sso:page'));
-      var focus = document.querySelector('[autofocus]');
-      if (focus) focus.focus();
-      reportSize();
-    };
-    var go = function (url, init) {
-      if (swapBusy) return;
-      swapBusy = true;
-      document.documentElement.setAttribute('aria-busy', 'true');
-      /* mode: 'same-origin' — переадресация на чужой адрес обрывается ДО
-         запроса туда: код авторизации не уйдёт на колбэк портала мимо
-         страницы. Во фрейме SSO туда и не переадресует — отдаёт код странице
-         портала (data-handoff). */
-      fetch(url, Object.assign({ credentials: 'same-origin', mode: 'same-origin' }, init || {}))
-        .then(function (r) {
-          if (!framable(r)) throw new Error('not-framable');
-          return r.text().then(function (html) { swapPage(html, r.url); });
-        })
-        .catch(function () { toPortal({ state: 'window' }); })
-        .then(function () { swapBusy = false; document.documentElement.removeAttribute('aria-busy'); });
-    };
-    /* passkey.js после входа уходит по адресу из ответа — тоже сюда. */
-    window.ssoGo = function (url) { go(url); };
-
-    document.addEventListener('click', function (e) {
-      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      var a = e.target.closest('a[href]');
-      if (!a || a.hasAttribute('download')) return;
-      var target = a.getAttribute('target');
-      if (target && target !== '_self') return;
-      var href = a.getAttribute('href');
-      if (!href || href.charAt(0) === '#' || a.origin !== location.origin) return;
-      e.preventDefault();
-      go(a.href);
-    });
     document.addEventListener('submit', function (e) {
       if (e.defaultPrevented) return;
       var form = e.target;

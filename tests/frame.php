@@ -198,15 +198,15 @@ ok(!str_contains($ancestors($h), PORTAL), 'кабинет порталу вст�
     "status=$st fa=" . $ancestors($h));
 
 $appJs = (string)file_get_contents(SSO_ROOT . '/public/assets/js/app.js');
-$from = (int)strpos($appJs, 'Переходы во фрейме — без новых документов');
+$from = (int)strpos($appJs, 'Подмена страницы без нового документа');
 $swap = substr($appJs, $from, (int)strpos($appJs, '---------- PWA', $from) - $from);
 ok(str_contains($swap, "fetch(url, Object.assign({ credentials: 'same-origin', mode: 'same-origin' }, init || {}))")
     && str_contains($swap, 'document.body.innerHTML = next.body.innerHTML')
-    && str_contains($swap, 'history.replaceState(null, \'\', url)'),
+    && str_contains($swap, 'else history.replaceState({ sso: 1 }, \'\', url);'),
     'app.js: во фрейме ссылки и формы идут запросом, ответ подменяет содержимое того же документа');
 ok(!preg_match('~location\.(href\s*=|assign|replace)|\.submit\(\)~', $swap),
     'app.js: во фрейме нет ни одного перехода на новый документ');
-ok(str_contains($swap, "if (!framable(r)) throw new Error('not-framable');")
+ok(str_contains($swap, "if (framed && !framable(res.r)) throw new Error('not-framable');")
     && str_contains($swap, "fa[1].split(/\\s+/).indexOf(frameOrigin) !== -1"),
     'app.js: подменяется только ответ, который разрешил встраивать себя этому порталу');
 ok(str_contains($swap, "mode: 'same-origin'"), 'app.js: переадресация на чужой адрес обрывается до запроса туда');
