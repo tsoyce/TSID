@@ -78,4 +78,106 @@ final class Stats
         }
         return $out;
     }
+
+    /** Периоды пульта, в днях (v4.99). 1 — «сегодня», по часам. */
+    public const PERIODS = [1, 7, 14, 30, 90];
+
+    /** Способы входа — для графика «по способам»: событие => подпись. */
+    public static function methods(): array
+    {
+        return [
+            'login.success' => t('Пароль'),
+            'login.magic_link' => t('Ссылка из письма'),
+            'login.passkey' => t('Passkey'),
+            'login.social' => t('Соцсети'),
+        ];
+    }
+
+    /** Период из запроса: незнакомое число — 14 дней. */
+    public static function period(mixed $raw): int
+    {
+        $p = (int)$raw;
+        return in_array($p, self::PERIODS, true) ? $p : 14;
+    }
+
+    /**
+     * Границы периода и предыдущего такого же (UTC): [с, прошлый с].
+     * «Сегодня» сравнивается со вчера целиком: часть вчерашнего дня против
+     * части сегодняшнего — честнее, но «до этого часа» никто не помнит.
+     */
+    public static function bounds(int $days, ?int $now = null): array
+    {
+        return [self::dayStart($days - 1, $now), self::dayStart(2 * $days - 1, $now)];
+    }
+
+    /** Сколько строк в [с, до). */
+    public static function count(string $table, string $where, array $params, string $since, ?string $until = null): int
+    {
+        $sql = 'SELECT COUNT(*) FROM {' . $table . '} WHERE ' . $where . ' AND created_at >= ?';
+        $params[] = $since;
+        if ($until !== null) { $sql .= ' AND created_at < ?'; $params[] = $until; }
+        return (int)DB::val($sql, $params);
+    }
+
+    /** Ряд по часам местных суток сегодня: [«H» => n], 0…23. */
+    public static function perHour(string $table, string $where, array $params, ?int $now = null): array
+    {
+        $now ??= time();
+        $rows = DB::all('SELECT SUBSTR(created_at, 1, 13) AS h, COUNT(*) AS n FROM {' . $table . '} WHERE ' . $where
+            . ' AND created_at >= ? GROUP BY SUBSTR(created_at, 1, 13)', array_merge($params, [self::dayStart(0, $now)]));
+        $out = array_fill_keys(array_map(static fn($h) => sprintf('%02d', $h), range(0, 23)), 0);
+        $tz = self::tz();
+        foreach ($rows as $r) {
+            $h = (new DateTimeImmutable($r['h'] . ':00:00', new DateTimeZone('UTC')))->setTimezone($tz)->format('H');
+            $out[$h] += (int)$r['n'];
+        }
+        return $out;
+    }
+
+    /** Ряд за период: по часам для «сегодня», по дням для остального. */
+    public static function series(string $table, string $where, array $params, int $days, ?int $now = null): array
+    {
+        return $days === 1 ? self::perHour($table, $where, $params, $now) : self::perDay($table, $where, $params, $days, $now);
+    }
+
+    /** Входы по способам: [событие => ряд]. */
+    public static function loginsByMethod(int $days, ?int $now = null): array
+    {
+        $out = [];
+        foreach (array_keys(self::methods()) as $e) $out[$e] = self::series('audit_log', 'event = ?', [$e], $days, $now);
+        return $out;
+    }
+
+    /**
+     * Порталы по входам за период: первый вход в портал из сессии
+     * (session_clients) — то самое «зашёл в портал через SSO».
+     * @return list<array{id:int, name:string, n:int}>
+     */
+    public static function portals(string $since, int $limit = 5): array
+    {
+        return array_map(static fn($r) => ['id' => (int)$r['id'], 'name' => (string)$r['name'], 'n' => (int)$r['n']],
+            DB::all('SELECT c.id, c.name, COUNT(*) AS n FROM {session_clients} sc JOIN {clients} c ON c.id = sc.client_id
+                     WHERE sc.created_at >= ? GROUP BY c.id, c.name ORDER BY n DESC, c.name LIMIT ' . $limit, [$since]));
+    }
+
+    /**
+     * Защита аккаунтов: у скольких живых людей есть passkey или второй фактор.
+     * Только число — ничего не требует (необязательность — принцип проекта).
+     * @return array{total:int, protected:int}
+     */
+    public static function protection(): array
+    {
+        return [
+            'total' => (int)DB::val('SELECT COUNT(*) FROM {users} WHERE status != ?', ['deleted']),
+            'protected' => (int)DB::val('SELECT COUNT(*) FROM {users} u WHERE u.status != ? AND (u.totp_enabled_at IS NOT NULL
+                OR EXISTS (SELECT 1 FROM {passkeys} p WHERE p.user_id = u.id))', ['deleted']),
+        ];
+    }
+
+    /** Разница к прошлому периоду в процентах; null — сравнивать не с чем. */
+    public static function delta(int $now, int $prev): ?int
+    {
+        if ($prev === 0) return null;
+        return (int)round(($now - $prev) / $prev * 100);
+    }
 }

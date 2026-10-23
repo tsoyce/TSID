@@ -1983,4 +1983,65 @@
     }, { passive: true });
   });
 
+  /* ---------- Пульт: подсказка у столбцов и досчёт чисел (v4.99) ----------
+     Столбец несёт свои числа в data-values, подписи рядов — у обёртки в
+     data-names. Подсказка — одна на график, следует за указателем; касание
+     на телефоне показывает её так же. */
+  onPage(function () {
+    document.querySelectorAll('.chart-bars[data-names]').forEach(function (box) {
+      if (box._ssoTip) return;
+      box._ssoTip = true;
+      var names = box.getAttribute('data-names').split('|');
+      var tip = document.createElement('div');
+      tip.className = 'chart-tip';
+      tip.hidden = true;
+      box.appendChild(tip);
+      var show = function (e) {
+        var col = e.target.closest && e.target.closest('.bar-col');
+        if (!col) { tip.hidden = true; return; }
+        var vals = col.getAttribute('data-values').split(',').map(Number);
+        var sum = vals.reduce(function (a, b) { return a + b; }, 0);
+        var head = document.createElement('div');
+        head.innerHTML = '<span></span><b></b>';
+        head.firstChild.textContent = col.getAttribute('data-tip');
+        head.lastChild.textContent = sum;
+        tip.textContent = '';
+        tip.appendChild(head);
+        vals.forEach(function (v, i) {
+          var row = document.createElement('div');
+          row.innerHTML = '<span><i class="chart-dot s' + (i + 1) + '"></i></span><b></b>';
+          row.firstChild.appendChild(document.createTextNode(names[i] || ''));
+          row.lastChild.textContent = v;
+          tip.appendChild(row);
+        });
+        var r = box.getBoundingClientRect(), c = col.getBoundingClientRect();
+        var x = c.left + c.width / 2 - r.left;
+        tip.hidden = false;
+        var half = tip.offsetWidth / 2;
+        tip.style.left = Math.min(Math.max(x, half), r.width - half) + 'px';
+        tip.style.top = (c.top - r.top + 4) + 'px';
+      };
+      box.addEventListener('pointermove', show);
+      box.addEventListener('pointerdown', show);
+      box.addEventListener('pointerleave', function () { tip.hidden = true; });
+    });
+
+    /* Числа досчитывают до значения один раз. Без JS и при «меньше
+       движения» число стоит сразу — оно и так в разметке. */
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    document.querySelectorAll('[data-count]').forEach(function (el) {
+      if (el._ssoCount) return;
+      el._ssoCount = true;
+      var text = el.textContent, to = parseInt(text.replace(/\D/g, ''), 10);
+      if (!(to > 1)) return;
+      var t0 = performance.now(), sep = text.replace(/[\d]/g, '').charAt(0) || ' ';
+      var fmt = function (n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, sep); };
+      (function step(t) {
+        var k = Math.min(1, (t - t0) / 600);
+        el.textContent = fmt(Math.round(to * (1 - Math.pow(1 - k, 3))));
+        if (k < 1) requestAnimationFrame(step); else el.textContent = text;
+      })(t0);
+    });
+  });
+
 })();

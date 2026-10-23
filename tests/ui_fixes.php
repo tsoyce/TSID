@@ -98,7 +98,7 @@ ok(substr_count($dash, '<div class="sparkline"><?= DashboardController::sparkSvg
     && str_contains($dash, "sparkSvg(\$regSpark, 120, 36,") && str_contains($dash, "sparkSvg(\$loginSpark, 120, 36,")
     && str_contains($dash, "sparkSvg(\$sessionSpark, 120, 36,"), 'у каждой из четырёх плиток — своя кривая за 14 дней');
 /* v4.98: ряд и число берут вход из одного списка — Stats::LOGIN_EVENTS. */
-ok(str_contains($dc, "\$loginSpark = array_values(Stats::perDay('audit_log', Stats::loginIn(), Stats::LOGIN_EVENTS, 14));")
+ok(str_contains($dc, "\$loginSpark = array_values(Stats::series('audit_log', \$login[0], \$login[1], \$days));")
     && str_contains($src('app/Core/Stats.php'), "->format('Y-m-d')] = 0;"),
     'входы считаются теми же событиями, что число над кривой; пустой день — ноль, а не пропуск');
 

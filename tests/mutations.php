@@ -2056,15 +2056,15 @@ $mutations = [
     [
         'why'   => 'плитка пользователей на дашборде снова кончается пустым полем',
         'file'  => 'templates/admin/dashboard.php',
-        'from'  => "    <div class=\"sparkline\"><?= DashboardController::sparkSvg(\$regSpark, 120, 36, t('Регистрации за 14 дней')) ?></div></div>",
+        'from'  => "    <div class=\"sparkline\"><?= DashboardController::sparkSvg(\$regSpark, 120, 36, t('Регистрации за период')) ?></div></div>",
         'to'    => "    </div>",
         'check' => 'tests/ui_fixes.php',
     ],
     [
         'why'   => 'кривая входов снова считает не те события, что число над ней',
         'file'  => 'app/Controllers/Admin/DashboardController.php',
-        'from'  => "\$loginSpark = array_values(Stats::perDay('audit_log', Stats::loginIn(), Stats::LOGIN_EVENTS, 14));",
-        'to'    => "\$loginSpark = array_values(Stats::perDay('audit_log', 'event = ?', ['login.success'], 14));",
+        'from'  => "\$loginSpark = array_values(Stats::series('audit_log', \$login[0], \$login[1], \$days));",
+        'to'    => "\$loginSpark = array_values(Stats::series('audit_log', 'event = ?', ['login.success'], \$days));",
         'check' => 'tests/ui_fixes.php',
     ],
     /* v4.86: кнопки сервисов входа — знак, «Продолжить с …», idp_hint, порядок. */
@@ -2775,8 +2775,8 @@ $mutations = [
     [
         'why'   => 'дашборд снова считает входы своим списком',
         'file'  => 'app/Controllers/Admin/DashboardController.php',
-        'from'  => "'logins_today' => Stats::logins(\$today),",
-        'to'    => "'logins_today' => (int)DB::val('SELECT COUNT(*) FROM {audit_log} WHERE event IN (?, ?) AND created_at >= ?', ['login.success', 'login.magic_link', \$today]),",
+        'from'  => "\$login = [Stats::loginIn(), Stats::LOGIN_EVENTS];",
+        'to'    => "\$login = ['event IN (?, ?)', ['login.success', 'login.magic_link']];",
         'check' => 'tests/dashboard_stats.php',
     ],
     [
@@ -2805,6 +2805,49 @@ $mutations = [
         'file'  => 'app/Core/Audit.php',
         'from'  => "        'install.done' => 'Установка завершена',\n",
         'to'    => "",
+        'check' => 'tests/dashboard_stats.php',
+    ],
+    /* v4.99: новый пульт. */
+    [
+        'why'   => 'зелёное здоровье снова занимает «Требует внимания»',
+        'file'  => 'app/Controllers/Admin/DashboardController.php',
+        'from'  => "            if (\$h['status'] === 'ok') continue;\n",
+        'to'    => "",
+        'check' => 'tests/dashboard_stats.php',
+    ],
+    [
+        'why'   => 'всплеск неудачных входов не замечен',
+        'file'  => 'app/Controllers/Admin/DashboardController.php',
+        'from'  => "if (\$fails >= 20 && \$fails > 3 * \$usual) {",
+        'to'    => "if (false) {",
+        'check' => 'tests/dashboard_stats.php',
+    ],
+    [
+        'why'   => 'шкала графика снова до максимума, а не круглая',
+        'file'  => 'app/Controllers/Admin/DashboardController.php',
+        'from'  => "\$top = max(\$step, (int)ceil(\$max / \$step) * \$step);",
+        'to'    => "\$top = max(1, \$max);",
+        'check' => 'tests/dashboard_stats.php',
+    ],
+    [
+        'why'   => '«сегодня» снова по часам UTC',
+        'file'  => 'app/Core/Stats.php',
+        'from'  => "\$h = (new DateTimeImmutable(\$r['h'] . ':00:00', new DateTimeZone('UTC')))->setTimezone(\$tz)->format('H');",
+        'to'    => "\$h = substr(\$r['h'], 11, 2);",
+        'check' => 'tests/dashboard_stats.php',
+    ],
+    [
+        'why'   => 'первые шаги снова разворачиваются на весь первый экран',
+        'file'  => 'templates/admin/dashboard.php',
+        'from'  => "<?= \$onboarding['done'] === 0 ? ' open' : '' ?>",
+        'to'    => " open",
+        'check' => 'tests/dashboard_stats.php',
+    ],
+    [
+        'why'   => 'падение неудачных входов снова красное',
+        'file'  => 'templates/admin/dashboard.php',
+        'from'  => "\$good = \$upIsGood ? \$d >= 0 : \$d <= 0;",
+        'to'    => "\$good = \$d >= 0;",
         'check' => 'tests/dashboard_stats.php',
     ],
 ];
