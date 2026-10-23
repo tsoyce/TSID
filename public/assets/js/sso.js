@@ -48,13 +48,13 @@
      sessionStorage — переход по страницам портала не спрашивает заново. */
   var ui = { display: null, texts: null, accent: null };
   function loadUi() {
-    if (!issuer || !clientId || !window.fetch) return;
+    if (!issuer || !clientId || !window.fetch) return Promise.resolve();
     var key = 'sso-ui:' + clientId;
     try {
       var cached = JSON.parse(sessionStorage.getItem(key) || 'null');
-      if (cached && cached.at > Date.now() - 60000) { ui = cached.ui; return; }
+      if (cached && cached.at > Date.now() - 60000) { ui = cached.ui; return Promise.resolve(); }
     } catch (e) { /* хранилище закрыто — спросим сервер */ }
-    fetch(issuer + '/portal/ui?client_id=' + encodeURIComponent(clientId), { credentials: 'omit' })
+    return fetch(issuer + '/portal/ui?client_id=' + encodeURIComponent(clientId), { credentials: 'omit' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
         if (!j) return;
@@ -291,7 +291,21 @@
       .then(function (r) { return r.json(); })
       .then(function (j) {
         if (!j.authorize_url) throw new Error('no authorize_url');
-        if (ui.display === 'page' || isMobile()) { location.href = j.authorize_url; return; }
+        /* Алиас (v4.97): сайт открыт по другому адресу, а портал возвращает
+           на основной. Здесь вход не завершится: окно SSO на этой странице
+           браузер не покажет, а возврат на основной адрес не найдёт сессию
+           входа, оставшуюся тут. Переходим на ту же страницу основного адреса
+           и начинаем вход там. Чтобы входить, не уходя с алиаса, порталу —
+           список 'aliases' в config.php набора и адрес возврата на алиасе в SSO. */
+        var back = '';
+        try { back = new URL(new URL(j.authorize_url).searchParams.get('redirect_uri') || '').origin; } catch (err) { /* как было */ }
+        if (back && back !== 'null' && back !== location.origin && !e.auto) {
+          location.href = back + location.pathname + location.search + '#sso-login';
+          return;
+        }
+        /* Вход, начатый сам после перехода, — без щелчка: отдельное окно
+           браузер не откроет, поэтому вместо него страница. */
+        if (ui.display === 'page' || isMobile() || (e.auto && ui.display !== 'popup')) { location.href = j.authorize_url; return; }
         if (ui.display === 'popup' && issuer) { openModal(j.authorize_url, btn); return; }
         openWindow(j.authorize_url, btn, ui.display === 'window' && overlayOn);
       })
@@ -321,7 +335,14 @@
       btn.addEventListener('click', start);
     });
     /* Настройку спрашиваем, только если есть чем входить: вошедшему она не нужна. */
-    if (found) loadUi();
+    if (!found) return;
+    var ready = loadUi();
+    /* Пришли с алиаса за входом (#sso-login) — продолжаем, когда настройка здесь. */
+    if (location.hash === '#sso-login') {
+      try { history.replaceState(null, '', location.pathname + location.search); } catch (err) { /* останется в адресе */ }
+      var first = document.querySelector('[data-sso-login]');
+      ready.then(function () { start({ preventDefault: function () {}, currentTarget: first, auto: true }); });
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
   else bind();

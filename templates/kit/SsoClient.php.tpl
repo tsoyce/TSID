@@ -40,6 +40,24 @@ class SsoClient
 
     /* ---------- Поток входа ---------- */
 
+    /**
+     * Адрес возврата для этого запроса. Сайт открыт по алиасу из 'aliases' —
+     * возврат на тот же алиас, тем же путём: state и verifier лежат в сессии
+     * алиаса, а колбэк на основном адресе их не нашёл бы — вход обрывался на
+     * «state mismatch». Окно входа на странице алиаса {{APP_NAME}} пускает,
+     * когда этот адрес есть в карточке портала.
+     */
+    private function redirectUri(): string
+    {
+        $base = (string)$this->cfg['redirect_uri'];
+        $host = strtolower((string)($_SERVER['HTTP_HOST'] ?? ''));
+        $aliases = array_map('strtolower', (array)($this->cfg['aliases'] ?? []));
+        if ($host === '' || !in_array($host, $aliases, true)) return $base;
+        $p = parse_url($base);
+        return ($p['scheme'] ?? 'https') . '://' . $host . ($p['path'] ?? '/')
+            . (isset($p['query']) ? '?' . $p['query'] : '');
+    }
+
     /** Сгенерировать state/nonce/verifier в сессию и вернуть authorize_url. */
     public function buildAuthorizeUrl(): string
     {
@@ -53,7 +71,7 @@ class SsoClient
         return $this->cfg['issuer'] . '/authorize?' . http_build_query([
             'response_type' => 'code',
             'client_id' => $this->cfg['client_id'],
-            'redirect_uri' => $this->cfg['redirect_uri'],
+            'redirect_uri' => $this->redirectUri(),
             'scope' => $this->cfg['scopes'],
             'state' => $state,
             'nonce' => $nonce,
@@ -75,7 +93,7 @@ class SsoClient
         $tokens = $this->post($this->cfg['issuer'] . '/token', [
             'grant_type' => 'authorization_code',
             'code' => $code,
-            'redirect_uri' => $this->cfg['redirect_uri'],
+            'redirect_uri' => $this->redirectUri(),
             'client_id' => $this->cfg['client_id'],
             'client_secret' => $this->cfg['client_secret'],
             'code_verifier' => $verifier,

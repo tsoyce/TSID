@@ -1209,14 +1209,14 @@ $mutations = [
     [
         'why'   => 'щелчок по ссылке во фрейме снова создаёт новый документ (падение вкладки в Chrome 153)',
         'file'  => 'public/assets/js/app.js',
-        'from'  => "      e.preventDefault();\n      go(a.href);",
-        'to'    => "      e.preventDefault();\n      location.href = a.href;",
+        'from'  => "    go(a.href, null, !framed);",
+        'to'    => "    location.href = a.href;",
         'check' => 'tests/frame.php',
     ],
     [
         'why'   => 'подмена во фрейме снова показывает страницу, которую портал встраивать не вправе',
         'file'  => 'public/assets/js/app.js',
-        'from'  => "          if (!framable(r)) throw new Error('not-framable');\n",
+        'from'  => "        if (framed && !framable(res.r)) throw new Error('not-framable');\n",
         'to'    => "",
         'check' => 'tests/frame.php',
     ],
@@ -2233,8 +2233,8 @@ $mutations = [
     [
         'why'   => 'окно поверх сайта снова только растёт — высота по странице, а не по содержимому',
         'file'  => 'public/assets/js/app.js',
-        'from'  => "      toPortal({ state: 'size', h: frameWrap ? Math.ceil(frameWrap.getBoundingClientRect().height)\n        : document.documentElement.scrollHeight });",
-        'to'    => "      toPortal({ state: 'size', h: document.documentElement.scrollHeight });",
+        'from'  => "    toPortal({ state: 'size', h: frameWrap ? Math.ceil(frameWrap.getBoundingClientRect().height)\n      : document.documentElement.scrollHeight });",
+        'to'    => "    toPortal({ state: 'size', h: document.documentElement.scrollHeight });",
         'check' => 'tests/login_window.php',
     ],
     [
@@ -2720,6 +2720,49 @@ $mutations = [
         'from'  => "if (!empty(\$s['invite'])) \$_POST['invite'] = \$s['invite'];",
         'to'    => "",
         'check' => 'tests/signup_steps.php',
+    ],
+    /* v4.97: вкладки входа без перезагрузки, вход на алиасе. */
+    [
+        'why'   => 'вкладки входа снова перезагружают страницу',
+        'file'  => 'public/assets/js/app.js',
+        'from'  => "if (!framed && !tabLink(a)) return;",
+        'to'    => "if (!framed) return;",
+        'check' => 'tests/login_swap.php',
+    ],
+    [
+        'why'   => 'смена вкладки снова перерисовывает панель с обложкой',
+        'file'  => 'public/assets/js/app.js',
+        'from'  => "document.getElementById('main').innerHTML = next.getElementById('main').innerHTML;",
+        'to'    => "document.body.innerHTML = next.body.innerHTML;",
+        'check' => 'tests/login_swap.php',
+    ],
+    [
+        'why'   => 'вкладка снова не попадает в историю — «назад» уводит со входа',
+        'file'  => 'public/assets/js/app.js',
+        'from'  => "if (push) history.pushState({ sso: 1 }, '', url);",
+        'to'    => "if (false) history.pushState({ sso: 1 }, '', url);",
+        'check' => 'tests/login_swap.php',
+    ],
+    [
+        'why'   => 'подпись активной вкладки снова пропадает под плашкой в переходе',
+        'file'  => 'public/assets/css/app.css',
+        'from'  => ".auth-tabs > a:nth-of-type(2) { view-transition-name: screen-tab-2; }",
+        'to'    => "",
+        'check' => 'tests/login_swap.php',
+    ],
+    [
+        'why'   => 'на алиасе портала снова пустое окно «не позволяет установить соединение»',
+        'file'  => 'public/assets/js/sso.js',
+        'from'  => "if (back && back !== 'null' && back !== location.origin && !e.auto) {",
+        'to'    => "if (false) {",
+        'check' => 'tests/login_swap.php',
+    ],
+    [
+        'why'   => 'набор портала снова возвращает с алиаса на основной адрес',
+        'file'  => 'templates/kit/SsoClient.php.tpl',
+        'from'  => "if (\$host === '' || !in_array(\$host, \$aliases, true)) return \$base;",
+        'to'    => "return \$base;",
+        'check' => 'tests/login_swap.php',
     ],
 ];
 
