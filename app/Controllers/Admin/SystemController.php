@@ -243,7 +243,7 @@ final class SystemController extends AdminBase
 
     public function acceptOwner(string $token): never
     {
-        /* v4.97.2: сначала сверка, потом гашение. Открытая в чужой сессии
+        /* v5.4: сначала сверка, потом гашение. Открытая в чужой сессии
            ссылка сгорала, и владение приходилось передавать заново. */
         $row = \App\Models\OneTimeToken::peek($token, 'owner_transfer');
         if ($row && \App\Core\Auth::id() !== (int)$row['user_id']) {

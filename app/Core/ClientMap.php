@@ -93,6 +93,12 @@ final class ClientMap extends ObjectMap
              'desc' => 'Ссылки-приглашения в этот сервис',
              'perm' => 'clients.write'],
 
+            /* Аналитика (v5.2): как сервисом пользуются — входы, активные люди,
+               токены, доставка событий и отказы за выбранный период. */
+            ['key' => 'analytics', 'group' => 'watch', 'icon' => 'chart',
+             'title' => 'Аналитика', 'path' => '/analytics',
+             'desc' => 'Входы, активные люди, токены, доставка событий и отказы за период',
+             'perm' => 'clients.read'],
             ['key' => 'events', 'group' => 'watch', 'icon' => 'activity',
              'title' => 'Доставка', 'path' => '/events',
              'desc' => 'Очередь событий порталу: выход, блокировка, отзыв доступа',

@@ -52,7 +52,7 @@ final class WebhookDispatcher
         }
 
         $attempts = (int)$row['attempts'] + 1;
-        // v4.97.2: доставку берёт один — тот, чей UPDATE сдвинул счётчик (см. Mailer::attempt)
+        // v5.4: доставку берёт один — тот, чей UPDATE сдвинул счётчик (см. Mailer::attempt)
         if (DB::run('UPDATE {webhook_deliveries} SET attempts = ? WHERE id = ? AND attempts = ? AND status = ?',
                 [$attempts, $deliveryId, (int)$row['attempts'], 'pending'])->rowCount() !== 1) return false;
         $body = json_encode([
@@ -106,7 +106,7 @@ final class WebhookDispatcher
             CURLOPT_TIMEOUT => 6,
             CURLOPT_CONNECTTIMEOUT => 3,
             CURLOPT_FOLLOWLOCATION => false,
-            /* v4.97.2: только http(s) — адрес задаёт админ портала, а libcurl
+            /* v5.4: только http(s) — адрес задаёт админ портала, а libcurl
                умеет gopher://, dict://, file://: нагрузка во внутреннюю сеть. */
             CURLOPT_PROTOCOLS => CURLPROTO_HTTPS | CURLPROTO_HTTP,
             CURLOPT_HTTPHEADER => [

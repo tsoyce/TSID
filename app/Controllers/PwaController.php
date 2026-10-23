@@ -61,6 +61,8 @@ final class PwaController
             'shortcuts' => [
                 ['name' => t('Безопасность'), 'url' => '/profile/security'],
                 ['name' => t('Сервисы'), 'url' => '/profile/services'],
+                /* v5.3: история аккаунта — с иконки приложения, в одно касание. */
+                ['name' => t('История'), 'url' => '/profile/activity'],
             ],
             /* Данные пользователя — не для публичного индекса витрин приложений */
             'prefer_related_applications' => false,

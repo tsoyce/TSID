@@ -145,6 +145,9 @@ final class RegistrationController
         }
         $_SESSION['signup'] = ['email' => $email, 'stage' => $gated ? 'code' : 'profile', 'token' => null,
             'invite' => $invite ?: null, 'verified' => false, 'at' => time()];
+        /* Шаги регистрации — в аудит (v5.1): воронка на «Аналитике» видит,
+           где люди уходят. Адрес не пишем: шаг считается, а не следит. */
+        Audit::log('signup.started', ['actor' => null]);
         if ($gated && !$taken) self::sendCode();
         self::back();
     }
@@ -184,6 +187,7 @@ final class RegistrationController
             && hash_equals((string)($row['payload']['code'] ?? ''), \App\Core\Crypto::hashToken($s['email'] . ':' . $code))
             && OneTimeToken::claim((int)$row['id'])) {
             $_SESSION['signup'] = ['stage' => 'profile', 'verified' => true, 'token' => null, 'at' => time()] + $s;
+            Audit::log('signup.verified', ['actor' => null]);
             self::back();
         }
         Audit::log('email.code_fail', ['actor' => null, 'meta' => ['signup' => true]]);
@@ -246,6 +250,7 @@ final class RegistrationController
         $invite = $row['payload']['invite'] ?? null;
         $_SESSION['signup'] = ['email' => $email, 'stage' => 'profile', 'token' => null,
             'invite' => is_string($invite) && $invite !== '' ? $invite : null, 'verified' => true, 'at' => time()];
+        Audit::log('signup.verified', ['actor' => null, 'meta' => ['by' => 'link']]);
         self::back();
     }
 

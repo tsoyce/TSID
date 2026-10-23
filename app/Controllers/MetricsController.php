@@ -37,8 +37,8 @@ final class MetricsController
 
         $m[] = ['sso_logins_24h', 'Входы за сутки', 'counter', [
             [['result' => 'success'], (int)DB::val(
-                'SELECT COUNT(*) FROM {audit_log} WHERE event IN (?, ?, ?) AND created_at >= ?',
-                ['login.success', 'login.passkey', 'login.social', $day])],
+                'SELECT COUNT(*) FROM {audit_log} WHERE ' . \App\Core\Stats::loginIn() . ' AND created_at >= ?',
+                array_merge(\App\Core\Stats::LOGIN_EVENTS, [$day]))],
             [['result' => 'fail'], (int)DB::val(
                 'SELECT COUNT(*) FROM {audit_log} WHERE event = ? AND created_at >= ?', ['login.fail', $day])],
         ]];

@@ -106,7 +106,7 @@ final class TokenFlow
         if ($token === '') self::error('invalid_request', 'refresh_token is required');
         [$row, $newToken] = RefreshToken::rotate($token, (int)$client['id']);
         if ($row === null) self::error('invalid_grant', 'Refresh token is invalid, expired or reused');
-        /* v4.97.2: сессия, из которой токен выдан, завершена — выходом, «Завершить
+        /* v5.4: сессия, из которой токен выдан, завершена — выходом, «Завершить
            сеанс» или блокировкой. Тогда и токен мёртв: иначе портал ещё
            тридцать дней обновлял доступ после «Выйти везде». Истёкшая по
            времени сессия токен не гасит — это и есть offline_access. */
@@ -133,7 +133,7 @@ final class TokenFlow
             'access_token' => IdToken::issueAccess($user, $client, $row['scope'], $sid),
             'token_type' => 'Bearer',
             'expires_in' => IdToken::accessTtl(),
-            /* auth_time — время входа, а не обновления (OIDC Core §12.2, v4.97.2):
+            /* auth_time — время входа, а не обновления (OIDC Core §12.2, v5.4):
                иначе портал, проверяющий свежесть входа, считал его только что
                сделанным. */
             'id_token' => IdToken::issue($user, $client, $row['scope'], null, $sid ?? '',

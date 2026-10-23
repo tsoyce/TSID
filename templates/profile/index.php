@@ -110,6 +110,7 @@ if (App\Core\Setting::get('policy.require_gender') === '1' && empty($user['gende
       <?php endforeach; ?>
       </div>
     <?php endif; ?>
+    <div class="bc-footer"><a href="/profile/activity"><?= esc(t('Вся история →')) ?></a></div>
   </div>
 </div>
 

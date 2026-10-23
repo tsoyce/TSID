@@ -1185,7 +1185,7 @@ ok($st === 400, 'токен не выдаётся на origin, не принад
     ['Sec-Fetch-Dest: webidentity', 'Origin: ' . $fedClient['base_url']]);
 ok($st === 400, 'чужой account_id отбивается');
 
-/* v4.97.2: первый вход в портал без экрана согласия FedCM не выдаёт — экран
+/* v5.4: первый вход в портал без экрана согласия FedCM не выдаёт — экран
    есть только у /authorize, туда портал и уходит по отказу. */
 $fedAdminId = (int)\App\Core\DB::val('SELECT id FROM {users} WHERE email = ?', ['admin@test.local']);
 \App\Core\DB::run('UPDATE {user_client_access} SET consented_at = NULL WHERE user_id = ? AND client_id = ?',
@@ -1316,7 +1316,8 @@ http('GET', SSO . '/lang/en');
 ok($st === 200 && str_contains($enAdmin, '<html lang="en">'), 'админка отдаётся на английском');
 ok(str_contains($enAdmin, '>Users</a>') && str_contains($enAdmin, '>Portals</a>')
     && str_contains($enAdmin, '>Organisations</a>'), 'навигация переведена');
-ok(str_contains($enAdmin, 'Failed sign-ins') && str_contains($enAdmin, 'Sign-ins today'),
+/* v4.99: плитки — за выбранный период, «сегодня» ушло из подписи в переключатель. */
+ok(str_contains($enAdmin, 'Failed sign-ins') && str_contains($enAdmin, '>Sign-ins<') && str_contains($enAdmin, '>Today</a>'),
     'плитки дашборда переведены');
 ok(str_contains($enAdmin, '<title>Dashboard'), 'заголовок вкладки переведён');
 

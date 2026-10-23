@@ -52,7 +52,7 @@ final class Invite
         DB::tx(function () use ($invite, $userId) {
             Access::grant($userId, (int)$invite['client_id'], $invite['created_by'] !== null
                 ? (int)$invite['created_by'] : null, 'active');
-            /* v4.97.2: роль — только в области портала и только из тех, что там
+            /* v5.4: роль — только в области портала и только из тех, что там
                можно выдать. Role::assign() выдавал роль без client_id на всю
                систему, и админ портала приглашением делал себя суперадмином.
                Проверка и здесь, а не только при создании: живут инвайты,

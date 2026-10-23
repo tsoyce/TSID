@@ -1432,6 +1432,11 @@ function js_i18n(): string
         'pkName' => t('Как назвать этот ключ?'),
         'pkDefaultName' => t('Мой passkey'),
         'pkFailedShort' => t('Не получилось.'),
+        /* palette.js (v5.0) */
+        'paletteTitle' => t('Поиск по системе'),
+        'paletteHint' => t('Раздел, пользователь, портал или действие…'),
+        'paletteFailed' => t('Не удалось получить результаты'),
+        'paletteNone' => t('Ничего не нашлось'),
     ];
     return '<script nonce="' . esc(csp_nonce()) . '">window.ssoI18n = '
         . json_encode($strings, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) . ';</script>';
@@ -1990,6 +1995,49 @@ function logs_tabs(string $current): string
     $out = '<div class="tabs">';
     foreach ($tabs as $key => [$href, $label]) {
         $out .= '<a' . ($key === $current ? ' class="active"' : '') . ' href="' . esc($href) . '">' . esc($label) . '</a>';
+    }
+    return $out . '</div>';
+}
+
+/**
+ * Разница к прошлому периоду у плитки (v4.99; общий с v5.2). Рост неудач —
+ * плохо, рост входов — хорошо: цвет говорит «хорошо/плохо», а не «вверх/вниз».
+ */
+function kpi_delta(array $pair, bool $upIsGood, string $prevLabel): string
+{
+    $d = App\Core\Stats::delta($pair[0], $pair[1]);
+    if ($d === null) return '';
+    $good = $upIsGood ? $d >= 0 : $d <= 0;
+    return ' · <span class="kpi-delta ' . ($d === 0 ? '' : ($good ? 'is-good' : 'is-bad')) . '">'
+        . ($d > 0 ? '+' : '') . $d . ' %</span> ' . esc($prevLabel);
+}
+
+/**
+ * Переключатель периода ссылками (v4.99; общий с v5.2): адрес можно отправить,
+ * «назад» работает. Один на пульт, аналитику и карточку портала.
+ */
+function period_switch(string $base, int $days): string
+{
+    $out = '<nav class="period-switch" aria-label="' . esc(t('Период')) . '">';
+    foreach (App\Core\Stats::PERIODS as $p) {
+        $out .= '<a href="' . esc($base) . '?p=' . $p . '"' . ($p === $days ? ' aria-current="true"' : '') . '>'
+            . esc($p === 1 ? t('Сегодня') : t(':n дн.', ['n' => $p])) . '</a>';
+    }
+    return $out . '</nav>';
+}
+
+/**
+ * Вкладки «Пульт | Аналитика | Система» и период (v5.1). Период едет
+ * с вкладки на вкладку: смотрел «30 дн.» на пульте — и аналитика за 30.
+ */
+function dash_head(string $current, int $days, string $title): string
+{
+    $tabs = ['pult' => ['/admin', t('Пульт')], 'analytics' => ['/admin/analytics', t('Аналитика')],
+             'system' => ['/admin/analytics/system', t('Система')]];
+    $out = '<div class="page-head"><h1>' . esc($title) . '</h1>' . period_switch($tabs[$current][0], $days) . '</div>'
+        . '<div class="tabs mb-16">';
+    foreach ($tabs as $key => [$href, $label]) {
+        $out .= '<a' . ($key === $current ? ' class="active" aria-current="page"' : '') . ' href="' . $href . '?p=' . $days . '">' . esc($label) . '</a>';
     }
     return $out . '</div>';
 }

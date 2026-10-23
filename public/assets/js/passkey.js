@@ -30,7 +30,12 @@
     Object.keys(fields).forEach(function (k) { fd.append(k, fields[k]); });
     return fetch(url, { method: 'POST', body: fd, credentials: 'same-origin',
       headers: { 'X-Requested-With': 'fetch' } })
-      .then(function (r) { return r.json(); });
+      /* Ответ не JSON — истекшая сессия, страница ошибки (v5.0): говорим
+         «не получилось», а не «Unexpected token <» в разборе. */
+      .then(function (r) {
+        if (!/json/.test(r.headers.get('Content-Type') || '')) throw new Error(L('pkFailedShort', 'Не получилось.'));
+        return r.json();
+      });
   }
   function say(msg, isError) {
     var out = document.getElementById('passkey-status');
